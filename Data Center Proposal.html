@@ -1,0 +1,1673 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TAMS | Ground Data Center Revolution</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Syne:wght@400;500;600;700;800&family=Space+Mono:wght@400;700&family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&display=swap');
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Syne', sans-serif;
+            background: #0a0a0f;
+            overflow: hidden;
+            color: #fff;
+        }
+
+        #canvas {
+            width: 100vw;
+            height: 100vh;
+            display: block;
+            position: fixed;
+            top: 0;
+            left: 0;
+        }
+
+        /* Cinematic Letterbox */
+        .letterbox {
+            position: fixed;
+            left: 0;
+            right: 0;
+            height: 50px;
+            background: #000;
+            z-index: 100;
+            pointer-events: none;
+        }
+
+        .letterbox-top {
+            top: 0;
+        }
+
+        .letterbox-bottom {
+            bottom: 0;
+        }
+
+        /* UI Overlay */
+        .ui-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            pointer-events: none;
+            z-index: 200;
+        }
+
+        /* Header */
+        .header-bar {
+            position: fixed;
+            top: 10px;
+            left: 0;
+            right: 0;
+            height: 40px;
+            background: linear-gradient(90deg, rgba(0, 20, 10, 0.95), rgba(20, 60, 40, 0.8), rgba(0, 20, 10, 0.95));
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 50px;
+            border-bottom: 1px solid rgba(0, 255, 100, 0.3);
+            box-shadow: 0 0 30px rgba(0, 255, 100, 0.1);
+            z-index: 300;
+        }
+
+        .series-badge {
+            font-family: 'Space Mono', monospace;
+            font-size: 10px;
+            letter-spacing: 4px;
+            color: #00ff88;
+            text-transform: uppercase;
+        }
+
+        .tech-badge {
+            font-family: 'Space Mono', monospace;
+            font-size: 9px;
+            color: rgba(255, 255, 255, 0.6);
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .pulse-dot {
+            width: 6px;
+            height: 6px;
+            background: #00ff88;
+            border-radius: 50%;
+            animation: pulse 2s ease-in-out infinite;
+            display: inline-block;
+            margin-right: 5px;
+        }
+
+        @keyframes pulse {
+
+            0%,
+            100% {
+                opacity: 0.4;
+                box-shadow: 0 0 5px #00ff88;
+            }
+
+            50% {
+                opacity: 1;
+                box-shadow: 0 0 15px #00ff88;
+            }
+        }
+
+        /* Chapter Display */
+        .chapter-display {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+            opacity: 0;
+            transition: all 1.5s cubic-bezier(0.16, 1, 0.3, 1);
+            z-index: 250;
+        }
+
+        .chapter-display.visible {
+            opacity: 1;
+        }
+
+        .chapter-number {
+            font-family: 'Space Mono', monospace;
+            font-size: 12px;
+            letter-spacing: 6px;
+            color: #00ff88;
+            margin-bottom: 15px;
+            text-transform: uppercase;
+        }
+
+        .chapter-title {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: clamp(36px, 7vw, 80px);
+            font-weight: 400;
+            line-height: 1.1;
+            text-shadow: 0 0 60px rgba(0, 255, 136, 0.4);
+            background: linear-gradient(180deg, #fff 0%, #00ff88 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        /* Subtitles */
+        .subtitle-container {
+            position: fixed;
+            bottom: 28%;
+            left: 50%;
+            transform: translateX(-50%);
+            text-align: center;
+            max-width: 950px;
+            width: 90%;
+            z-index: 250;
+        }
+
+        .subtitle-text {
+            font-family: 'Inter', sans-serif;
+            font-size: clamp(20px, 2.5vw, 30px);
+            font-weight: 500;
+            line-height: 1.6;
+            color: #ffffff;
+            background: transparent;
+            text-shadow: 0 2px 20px rgba(0, 0, 0, 0.9), 0 0 40px rgba(0, 0, 0, 0.7);
+            padding: 16px 24px;
+            border-radius: 0;
+            border: none;
+            opacity: 0;
+            transform: translateY(15px);
+            transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+            display: inline-block;
+        }
+
+        .subtitle-text.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .highlight {
+            color: #00ff88;
+            font-weight: 600;
+        }
+
+        .highlight-blue {
+            color: #00d4ff;
+            font-weight: 600;
+        }
+
+        .highlight-alert {
+            color: #ff6644;
+            font-weight: 600;
+        }
+
+        .highlight-gold {
+            color: #ffcc00;
+            font-weight: 600;
+        }
+
+        /* Data Panel */
+        .data-panel {
+            position: fixed;
+            top: 80px;
+            right: 30px;
+            width: 300px;
+            background: rgba(5, 15, 10, 0.92);
+            border: 1px solid rgba(0, 255, 100, 0.4);
+            border-radius: 8px;
+            padding: 20px;
+            opacity: 0;
+            transform: translateX(50px);
+            transition: all 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+            z-index: 250;
+            backdrop-filter: blur(10px);
+        }
+
+        .data-panel.visible {
+            opacity: 1;
+            transform: translateX(0);
+        }
+
+        .panel-header {
+            font-family: 'Space Mono', monospace;
+            font-size: 10px;
+            letter-spacing: 3px;
+            color: #00ff88;
+            text-transform: uppercase;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid rgba(0, 255, 100, 0.3);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .panel-header::before {
+            content: '';
+            width: 6px;
+            height: 6px;
+            background: #00ff88;
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+
+        .data-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .data-label {
+            font-family: 'Space Mono', monospace;
+            font-size: 10px;
+            color: rgba(255, 255, 255, 0.5);
+            text-transform: uppercase;
+        }
+
+        .data-value {
+            font-family: 'Syne', sans-serif;
+            font-size: 13px;
+            font-weight: 600;
+            color: #00ff88;
+        }
+
+        /* Equation Panel */
+        .equation-panel {
+            position: fixed;
+            bottom: 22%;
+            left: 30px;
+            background: rgba(5, 15, 10, 0.92);
+            border: 1px solid rgba(0, 255, 100, 0.4);
+            border-radius: 8px;
+            padding: 18px 25px;
+            opacity: 0;
+            transform: translateX(-50px);
+            transition: all 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+            z-index: 250;
+            backdrop-filter: blur(10px);
+        }
+
+        .equation-panel.visible {
+            opacity: 1;
+            transform: translateX(0);
+        }
+
+        .equation-label {
+            font-family: 'Space Mono', monospace;
+            font-size: 9px;
+            color: rgba(0, 255, 100, 0.7);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-bottom: 8px;
+        }
+
+        .equation-text {
+            font-family: 'Space Mono', monospace;
+            font-size: 15px;
+            color: #ffcc00;
+        }
+
+        /* Controls */
+        .footer-bar {
+            position: fixed;
+            bottom: 15px;
+            left: 0;
+            right: 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 50px;
+            z-index: 300;
+        }
+
+        .author-info {
+            font-family: 'Space Mono';
+            font-size: 18px;
+            color: rgba(255, 255, 255, 0.8);
+        }
+
+        .author-info a {
+            color: #00ff88;
+            text-decoration: none;
+        }
+
+        .controls {
+            pointer-events: auto;
+            display: flex;
+            gap: 12px;
+        }
+
+        .control-btn {
+            font-family: 'Space Mono', monospace;
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            background: rgba(0, 255, 100, 0.15);
+            border: 1px solid rgba(0, 255, 100, 0.4);
+            color: #00ff88;
+            padding: 8px 18px;
+            cursor: pointer;
+            transition: all 0.3s;
+            border-radius: 4px;
+        }
+
+        .control-btn:hover {
+            background: rgba(0, 255, 100, 0.3);
+        }
+
+        /* Progress */
+        .progress-container {
+            position: fixed;
+            bottom: 50px;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: rgba(255, 255, 255, 0.1);
+            z-index: 300;
+        }
+
+        .progress-bar {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, #00ff88, #00d4ff, #ffcc00);
+            transition: width 0.3s linear;
+        }
+
+        /* Loading */
+        .loading-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: #050508;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+            transition: opacity 1s;
+        }
+
+        .loading-screen.hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .loading-title {
+            font-family: 'Cormorant Garamond';
+            font-size: 52px;
+            background: linear-gradient(180deg, #fff, #00ff88);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .loading-subtitle {
+            font-family: 'Space Mono';
+            font-size: 11px;
+            color: #00ff88;
+            margin-top: 8px;
+            letter-spacing: 4px;
+        }
+
+        .loading-bar-container {
+            width: 280px;
+            height: 3px;
+            background: rgba(255, 255, 255, 0.1);
+            margin-top: 35px;
+            overflow: hidden;
+            border-radius: 2px;
+        }
+
+        .loading-bar {
+            height: 100%;
+            width: 0%;
+            background: #00ff88;
+            transition: width 0.3s;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="loading-screen" id="loadingScreen">
+        <h1 class="loading-title">TAMS</h1>
+        <p class="loading-subtitle">Thermoacoustic Meta-Structure</p>
+        <div class="loading-bar-container">
+            <div class="loading-bar" id="loadingBar"></div>
+        </div>
+    </div>
+
+    <canvas id="canvas"></canvas>
+
+    <div class="letterbox letterbox-top"></div>
+    <div class="letterbox letterbox-bottom"></div>
+
+    <div class="ui-overlay">
+        <div class="header-bar">
+            <span class="series-badge">Data Center Infrastructure // Proposal</span>
+            <div class="tech-badge">
+                <span>
+                    <div class="pulse-dot"></div> TAMS ACTIVE
+                </span>
+                <span>NOISE: -15 dB</span>
+                <span>POWER: 1-5 W/Unit</span>
+            </div>
+        </div>
+
+        <div class="chapter-display" id="chapterDisplay">
+            <p class="chapter-number" id="chapterNumber">Problem</p>
+            <h1 class="chapter-title" id="chapterTitle">The Noise Crisis</h1>
+        </div>
+
+        <div class="subtitle-container">
+            <div class="subtitle-text" id="subtitleText"></div>
+        </div>
+
+        <div class="data-panel" id="dataPanel">
+            <div class="panel-header">System Metrics</div>
+            <div id="dataPanelContent"></div>
+        </div>
+
+        <div class="equation-panel" id="equationPanel">
+            <p class="equation-label" id="equationLabel">Physics</p>
+            <p class="equation-text" id="equationText"></p>
+        </div>
+
+        <div class="progress-container">
+            <div class="progress-bar" id="progressBar"></div>
+        </div>
+
+        <div class="footer-bar">
+            <div class="author-info">
+                Visualized by <a href="#">Dr. Samarjith Biswas</a> • Patent WO 2025/128348 A1
+            </div>
+        </div>
+    </div>
+
+    <!-- Three.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/EffectComposer.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/RenderPass.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/ShaderPass.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/UnrealBloomPass.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/shaders/CopyShader.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/shaders/LuminosityHighPassShader.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tween.js/18.6.4/tween.umd.js"></script>
+
+    <script>
+        // ============================================
+        // DOCUMENTARY SCRIPT - TAMS SHORT VERSION
+        // ============================================
+        const documentaryScript = [
+            {
+                chapter: "Problem",
+                title: "The Noise Crisis",
+                scene: "datacenter_wide",
+                showData: false,
+                subtitles: [
+                    "Data centers face a <span class='highlight-alert'>hidden crisis</span>.",
+                    "Cooling fans generate <span class='highlight-alert'>extreme noise levels</span>.",
+                    "This acoustic pressure <span class='highlight-alert'>damages hardware</span> and reduces performance.",
+                    "Traditional soundproofing traps heat. We need a better solution."
+                ]
+            },
+            {
+                chapter: "Solution",
+                title: "TAMS Technology",
+                scene: "tams_close",
+                showData: false,
+                subtitles: [
+                    "Introducing <span class='highlight'>TAMS</span> — Thermoacoustic Meta-Structure.",
+                    "A revolutionary <span class='highlight'>Phononic Crystal</span> barrier.",
+                    "Sound waves are <span class='highlight'>physically blocked</span> by the metamaterial structure.",
+                    "But <span class='highlight-blue'>air flows freely</span> — cooling stays at full capacity."
+                ]
+            },
+            {
+                chapter: "Architecture",
+                title: "Unit Cell Design",
+                scene: "unit_cell",
+                showData: false,
+                subtitles: [
+                    "The <span class='highlight'>TAMS Unit Cell</span> — patented technology.",
+                    "A <span class='highlight-blue'>resonator tube</span> with precision-engineered internals.",
+                    "The <span class='highlight'>porous stack</span> creates thermal gradients from sound.",
+                    "Acoustic energy transforms into <span class='highlight-gold'>harvestable heat</span>."
+                ]
+            },
+            {
+                chapter: "Modular Wall",
+                title: "Brick Infrastructure",
+                scene: "brick_wall",
+                showData: false,
+                subtitles: [
+                    "TAMS modules stack like <span class='highlight'>bricks</span> in a wall.",
+                    "Aluminum housing with <span class='highlight'>interlocking design</span>.",
+                    "Friction-lock mounting — <span class='highlight'>no tools required</span>.",
+                    "Cascaded modules provide <span class='highlight-gold'>cumulative sound attenuation</span>."
+                ]
+            },
+            {
+                chapter: "Working Principle",
+                title: "Noise to Power",
+                scene: "working_principle",
+                showData: false,
+                subtitles: [
+                    "Here's how TAMS converts <span class='highlight-alert'>noise into power</span>.",
+                    "Sound creates <span class='highlight-gold'>thermal pumping</span> inside the stack.",
+                    "Temperature gradients drive <span class='highlight-gold'>thermoelectric generation</span>.",
+                    "Clean electricity. From waste noise."
+                ]
+            },
+            {
+                chapter: "Performance",
+                title: "Real Results",
+                scene: "simulation",
+                showData: false,
+                subtitles: [
+                    "<span class='highlight-blue'>Blue arrows</span>: Cooling airflow — unimpeded.",
+                    "<span class='highlight-alert'>Red waves</span>: Noise — blocked.",
+                    "Significant <span class='highlight'>noise reduction</span> with full cooling capacity."
+                ]
+            },
+            {
+                chapter: "Proposal",
+                title: "Data Center Integration",
+                scene: "final_wide",
+                showData: false,
+                subtitles: [
+                    "<span class='highlight'>Cooler</span>. <span class='highlight'>Quieter</span>. <span class='highlight-gold'>More Efficient</span>.",
+                    "TAMS is ready for deployment.",
+                    "Protected by <span class='highlight-blue'>Patent WO 2025/128348 A1</span>.",
+                    "Let's build the future of <span class='highlight'>sustainable infrastructure</span>."
+                ]
+            }
+        ];
+
+        // ============================================
+        // THREE.JS ENGINE
+        // ============================================
+        let scene, camera, renderer, composer, controls;
+        let racks = [], tamsWalls = [], tegElements = [];
+        let noiseWaves = [], airflowArrows = [];
+        let floor, ceiling;
+        let unitCellGroup, brickWallGroup, workingPrincipleGroup;
+        let clock = new THREE.Clock();
+
+        let currentChapter = 0;
+        let currentSubtitle = -1;
+        let isPaused = false;
+        let subtitleTimeout = null;
+
+        function updateLoadingBar(progress) {
+            document.getElementById('loadingBar').style.width = progress + '%';
+        }
+
+        function init() {
+            updateLoadingBar(10);
+
+            // Renderer
+            const canvas = document.getElementById('canvas');
+            renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: false });
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+            renderer.toneMapping = THREE.ACESFilmicToneMapping;
+            renderer.toneMappingExposure = 1.2;
+            renderer.shadowMap.enabled = true;
+            renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+
+            updateLoadingBar(20);
+
+            // Scene
+            scene = new THREE.Scene();
+            scene.background = new THREE.Color(0x0a0a12);
+
+            // Camera
+            camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 0.1, 500);
+            camera.position.set(70, 14, 70);
+            camera.lookAt(0, 4, 0);
+
+            updateLoadingBar(30);
+
+            // Post Processing
+            const renderPass = new THREE.RenderPass(scene, camera);
+            const bloomPass = new THREE.UnrealBloomPass(
+                new THREE.Vector2(window.innerWidth, window.innerHeight),
+                0.8, 0.3, 0.9
+            );
+            bloomPass.threshold = 0.6;
+            bloomPass.strength = 0.35;
+            bloomPass.radius = 0.3;
+
+            composer = new THREE.EffectComposer(renderer);
+            composer.addPass(renderPass);
+            composer.addPass(bloomPass);
+
+            updateLoadingBar(40);
+
+            // Lighting
+            setupLighting();
+            updateLoadingBar(50);
+
+            // Build Scene
+            createDataCenterHall();
+            updateLoadingBar(60);
+            createServerRacks();
+            updateLoadingBar(70);
+            createTAMSWalls();
+            updateLoadingBar(80);
+            createNoiseVisualization();
+            updateLoadingBar(90);
+            createAirflowVisualization();
+            updateLoadingBar(92);
+
+            // Patent-based TAMS architecture visualizations
+            createUnitCell();
+            createBrickWall();
+            createWorkingPrinciple();
+            updateLoadingBar(95);
+
+            // Events
+            window.addEventListener('resize', onResize);
+            document.getElementById('nextBtn')?.addEventListener('click', nextChapter);
+            document.getElementById('prevBtn')?.addEventListener('click', prevChapter);
+            document.getElementById('pauseBtn')?.addEventListener('click', togglePause);
+
+            updateLoadingBar(100);
+
+            setTimeout(() => {
+                document.getElementById('loadingScreen').classList.add('hidden');
+                loadChapter(0);
+            }, 800);
+
+            animate();
+        }
+
+        function setupLighting() {
+            // Ambient - brighter
+            const ambient = new THREE.AmbientLight(0x606080, 0.8);
+            scene.add(ambient);
+
+            // Main Sun-style light
+            const sunLight = new THREE.DirectionalLight(0xffffff, 1.8);
+            sunLight.position.set(30, 50, 30);
+            sunLight.castShadow = true;
+            sunLight.shadow.mapSize.width = 2048;
+            sunLight.shadow.mapSize.height = 2048;
+            sunLight.shadow.camera.near = 1;
+            sunLight.shadow.camera.far = 150;
+            sunLight.shadow.camera.left = -50;
+            sunLight.shadow.camera.right = 50;
+            sunLight.shadow.camera.top = 50;
+            sunLight.shadow.camera.bottom = -50;
+            scene.add(sunLight);
+
+            // Fill light (blue tint for cold aisle)
+            const fillLight = new THREE.DirectionalLight(0x8888ff, 0.6);
+            fillLight.position.set(-20, 30, -10);
+            scene.add(fillLight);
+
+            // Warm accent (server heat)
+            const heatLight = new THREE.PointLight(0xff6633, 1.0, 60);
+            heatLight.position.set(0, 5, 0);
+            scene.add(heatLight);
+        }
+
+        function createDataCenterHall() {
+            // Floor - Raised floor tiles pattern
+            const floorGeo = new THREE.PlaneGeometry(100, 80);
+            const floorCanvas = document.createElement('canvas');
+            floorCanvas.width = 512; floorCanvas.height = 512;
+            const fCtx = floorCanvas.getContext('2d');
+            fCtx.fillStyle = '#1a1a22';
+            fCtx.fillRect(0, 0, 512, 512);
+            // Grid pattern
+            fCtx.strokeStyle = '#2a2a35';
+            fCtx.lineWidth = 2;
+            for (let i = 0; i <= 8; i++) {
+                fCtx.beginPath();
+                fCtx.moveTo(i * 64, 0); fCtx.lineTo(i * 64, 512);
+                fCtx.moveTo(0, i * 64); fCtx.lineTo(512, i * 64);
+                fCtx.stroke();
+            }
+            const floorTex = new THREE.CanvasTexture(floorCanvas);
+            floorTex.wrapS = THREE.RepeatWrapping;
+            floorTex.wrapT = THREE.RepeatWrapping;
+            floorTex.repeat.set(10, 8);
+
+            const floorMat = new THREE.MeshStandardMaterial({
+                map: floorTex,
+                roughness: 0.7,
+                metalness: 0.3
+            });
+            floor = new THREE.Mesh(floorGeo, floorMat);
+            floor.rotation.x = -Math.PI / 2;
+            floor.receiveShadow = true;
+            scene.add(floor);
+
+            // Ceiling
+            const ceilingGeo = new THREE.PlaneGeometry(100, 80);
+            const ceilingMat = new THREE.MeshStandardMaterial({
+                color: 0x1a1a22,
+                roughness: 0.9,
+                metalness: 0.1,
+                side: THREE.DoubleSide
+            });
+            ceiling = new THREE.Mesh(ceilingGeo, ceilingMat);
+            ceiling.rotation.x = Math.PI / 2;
+            ceiling.position.y = 15;
+            scene.add(ceiling);
+
+            // Walls
+            const wallMat = new THREE.MeshStandardMaterial({
+                color: 0x222230,
+                roughness: 0.8,
+                metalness: 0.2
+            });
+
+            const backWall = new THREE.Mesh(new THREE.PlaneGeometry(100, 15), wallMat);
+            backWall.position.set(0, 7.5, -40);
+            scene.add(backWall);
+
+            const frontWall = new THREE.Mesh(new THREE.PlaneGeometry(100, 15), wallMat);
+            frontWall.position.set(0, 7.5, 40);
+            frontWall.rotation.y = Math.PI;
+            scene.add(frontWall);
+        }
+
+        function createServerRacks() {
+            // Create server rack texture (LEDs)
+            const rackCanvas = document.createElement('canvas');
+            rackCanvas.width = 128; rackCanvas.height = 256;
+            const rCtx = rackCanvas.getContext('2d');
+
+            // Dark base
+            rCtx.fillStyle = '#0a0a0f';
+            rCtx.fillRect(0, 0, 128, 256);
+
+            // Server slots
+            for (let y = 0; y < 20; y++) {
+                const slotY = 10 + y * 12;
+                rCtx.fillStyle = '#151520';
+                rCtx.fillRect(5, slotY, 118, 10);
+
+                // LEDs
+                for (let x = 0; x < 4; x++) {
+                    const ledColor = Math.random() > 0.3 ? '#00ff88' : (Math.random() > 0.5 ? '#ffcc00' : '#ff4444');
+                    rCtx.fillStyle = ledColor;
+                    rCtx.beginPath();
+                    rCtx.arc(15 + x * 8, slotY + 5, 2, 0, Math.PI * 2);
+                    rCtx.fill();
+                }
+            }
+
+            const rackTex = new THREE.CanvasTexture(rackCanvas);
+
+            // Rack material (front with LEDs)
+            const rackFrontMat = new THREE.MeshStandardMaterial({
+                map: rackTex,
+                roughness: 0.3,
+                metalness: 0.8,
+                emissiveMap: rackTex,
+                emissive: new THREE.Color(0xffffff),
+                emissiveIntensity: 0.8
+            });
+
+            // Rack body material (sides/back) - brighter
+            const rackBodyMat = new THREE.MeshStandardMaterial({
+                color: 0x333340,
+                roughness: 0.4,
+                metalness: 0.7
+            });
+
+            // Create racks in rows
+            const rackGeo = new THREE.BoxGeometry(2.5, 8, 3);
+
+            for (let row = -2; row <= 2; row++) {
+                for (let col = -5; col <= 5; col++) {
+                    const rack = new THREE.Mesh(rackGeo, [
+                        rackFrontMat, rackFrontMat, // left, right - both show LEDs
+                        rackBodyMat, rackBodyMat, // top, bottom
+                        rackFrontMat, rackFrontMat  // front, back - both have LEDs
+                    ]);
+                    rack.position.set(row * 10, 4, col * 5);
+                    rack.castShadow = true;
+                    rack.receiveShadow = true;
+                    scene.add(rack);
+                    racks.push(rack);
+
+                    // Heat glow under each rack
+                    const heatGlow = new THREE.PointLight(0xff6633, 0.3, 10);
+                    heatGlow.position.set(row * 10, 1, col * 5);
+                    scene.add(heatGlow);
+                }
+            }
+        }
+
+        function createTAMSWalls() {
+            // TAMS Panel Texture (Hexagonal Phononic Crystal)
+            const tamsCanvas = document.createElement('canvas');
+            tamsCanvas.width = 512; tamsCanvas.height = 512;
+            const tCtx = tamsCanvas.getContext('2d');
+
+            // Solid blue-green glass background
+            tCtx.fillStyle = '#004466';
+            tCtx.fillRect(0, 0, 512, 512);
+
+            // Hexagonal holes pattern
+            tCtx.fillStyle = '#000000';
+            const hexR = 12;
+            const hexSep = 28;
+
+            for (let row = 0; row < 20; row++) {
+                for (let col = 0; col < 20; col++) {
+                    let x = col * hexSep + (row % 2 === 1 ? hexSep / 2 : 0);
+                    let y = row * hexSep * 0.866;
+
+                    tCtx.beginPath();
+                    for (let i = 0; i < 6; i++) {
+                        const angle = (Math.PI / 3) * i - Math.PI / 6;
+                        const hx = x + hexR * Math.cos(angle);
+                        const hy = y + hexR * Math.sin(angle);
+                        if (i === 0) tCtx.moveTo(hx, hy);
+                        else tCtx.lineTo(hx, hy);
+                    }
+                    tCtx.closePath();
+                    tCtx.fill();
+                }
+            }
+
+            const tamsTex = new THREE.CanvasTexture(tamsCanvas);
+            tamsTex.wrapS = THREE.RepeatWrapping;
+            tamsTex.wrapT = THREE.RepeatWrapping;
+            tamsTex.repeat.set(3, 3);
+
+            const tamsMat = new THREE.MeshPhysicalMaterial({
+                map: tamsTex,
+                color: 0x00ccaa,
+                metalness: 0.2,
+                roughness: 0.1,
+                transmission: 0.4,
+                transparent: true,
+                thickness: 0.5,
+                clearcoat: 1.0,
+                clearcoatRoughness: 0.1
+            });
+
+            // TEG Material (Orange/Gold Thermoelectric elements)
+            const tegMat = new THREE.MeshStandardMaterial({
+                color: 0xff9900,
+                roughness: 0.3,
+                metalness: 0.9,
+                emissive: 0xff6600,
+                emissiveIntensity: 0.2
+            });
+
+            // Create TAMS walls around each row of racks
+            const wallGeo = new THREE.BoxGeometry(0.3, 7, 55);
+            const tegGeo = new THREE.BoxGeometry(0.35, 0.8, 0.8);
+
+            // Left and Right walls for each row
+            for (let row = -2; row <= 2; row++) {
+                // Left wall
+                const leftWall = new THREE.Mesh(wallGeo, tamsMat);
+                leftWall.position.set(row * 10 - 1.8, 3.5, 0);
+                scene.add(leftWall);
+                tamsWalls.push(leftWall);
+
+                // Right wall
+                const rightWall = new THREE.Mesh(wallGeo, tamsMat);
+                rightWall.position.set(row * 10 + 1.8, 3.5, 0);
+                scene.add(rightWall);
+                tamsWalls.push(rightWall);
+
+                // Add TEGs on walls
+                for (let z = -25; z <= 25; z += 3) {
+                    for (let y = 1; y <= 6; y += 1.5) {
+                        // Left side TEGs
+                        const tegL = new THREE.Mesh(tegGeo, tegMat);
+                        tegL.position.set(row * 10 - 1.95, y, z);
+                        scene.add(tegL);
+                        tegElements.push(tegL);
+
+                        // Right side TEGs
+                        const tegR = new THREE.Mesh(tegGeo, tegMat);
+                        tegR.position.set(row * 10 + 1.95, y, z);
+                        scene.add(tegR);
+                        tegElements.push(tegR);
+                    }
+                }
+            }
+        }
+
+        // ============================================
+        // PATENT-BASED TAMS ARCHITECTURE VISUALIZATIONS
+        // ============================================
+
+        function createUnitCell() {
+            // TAMS Unit Cell - Simplified per user feedback
+            unitCellGroup = new THREE.Group();
+            unitCellGroup.position.set(50, 5, 0);
+            unitCellGroup.visible = false;
+
+            // ========== RESONATOR TUBE (Transparent blue) ==========
+            const tubeGeo = new THREE.CylinderGeometry(2, 2, 12, 32, 1, true);
+            const tubeMat = new THREE.MeshBasicMaterial({
+                color: 0x6699bb,
+                transparent: true,
+                opacity: 0.25,
+                side: THREE.DoubleSide
+            });
+            const tube = new THREE.Mesh(tubeGeo, tubeMat);
+            tube.rotation.z = Math.PI / 2;
+            unitCellGroup.add(tube);
+
+            // Wireframe overlay
+            const wireframeGeo = new THREE.CylinderGeometry(2.05, 2.05, 12, 24, 8, true);
+            const wireframeMat = new THREE.MeshBasicMaterial({ color: 0x4499dd, wireframe: true, transparent: true, opacity: 0.2 });
+            const wireframe = new THREE.Mesh(wireframeGeo, wireframeMat);
+            wireframe.rotation.z = Math.PI / 2;
+            unitCellGroup.add(wireframe);
+
+            // ========== POROUS STACK (Cyan with grooves) ==========
+            const stackGroup = new THREE.Group();
+
+            // Main cylinder
+            const stackGeo = new THREE.CylinderGeometry(1.6, 1.6, 5, 32);
+            const stackMat = new THREE.MeshBasicMaterial({
+                color: 0x224466
+            });
+            const stack = new THREE.Mesh(stackGeo, stackMat);
+            stack.rotation.z = Math.PI / 2;
+            stackGroup.add(stack);
+
+            // Stack is clean - no grooves per user request
+
+            // Copper face plates (ends of stack)
+            const stackFaceMat = new THREE.MeshStandardMaterial({
+                color: 0xb87333, roughness: 0.3, metalness: 0.85,
+                emissive: 0x442211, emissiveIntensity: 0.1
+            });
+            const face1 = new THREE.Mesh(new THREE.CircleGeometry(1.6, 32), stackFaceMat);
+            face1.position.x = -2.5;
+            face1.rotation.y = -Math.PI / 2;
+            stackGroup.add(face1);
+
+            const face2 = new THREE.Mesh(new THREE.CircleGeometry(1.6, 32), stackFaceMat);
+            face2.position.x = 2.5;
+            face2.rotation.y = Math.PI / 2;
+            stackGroup.add(face2);
+
+            // NO copper wires around stack (removed per user request)
+
+            stackGroup.position.set(0, 0, 0);
+            unitCellGroup.add(stackGroup);
+
+            // ========== COLD HEAT EXCHANGER (Blue ring + copper plate) - RIGHT NEXT TO STACK ==========
+            const coldHX = new THREE.Group();
+
+            const coldRingGeo = new THREE.TorusGeometry(1.8, 0.2, 12, 32);
+            const coldRingMat = new THREE.MeshStandardMaterial({ color: 0x2266ff, emissive: 0x112244, emissiveIntensity: 0.1 });
+            const coldRing = new THREE.Mesh(coldRingGeo, coldRingMat);
+            coldRing.rotation.y = Math.PI / 2;
+            coldHX.add(coldRing);
+
+            // Copper plate with holes
+            const copperPlateMat = new THREE.MeshStandardMaterial({
+                color: 0xb87333, roughness: 0.3, metalness: 0.9,
+                emissive: 0x663311, emissiveIntensity: 0.1
+            });
+            const coldPlateGeo = new THREE.CylinderGeometry(1.7, 1.7, 0.15, 32);
+            const coldPlate = new THREE.Mesh(coldPlateGeo, copperPlateMat);
+            coldPlate.rotation.z = Math.PI / 2;
+            coldHX.add(coldPlate);
+
+            // Perforations
+            const holeMat = new THREE.MeshBasicMaterial({ color: 0x050a15 });
+            for (let y = -1.4; y <= 1.4; y += 0.25) {
+                for (let z = -1.4; z <= 1.4; z += 0.25) {
+                    if (Math.sqrt(y * y + z * z) < 1.5) {
+                        const hole = new THREE.Mesh(
+                            new THREE.CylinderGeometry(0.06, 0.06, 0.2, 8), holeMat
+                        );
+                        hole.rotation.z = Math.PI / 2;
+                        hole.position.set(0, y, z);
+                        coldHX.add(hole);
+                    }
+                }
+            }
+
+            coldHX.position.set(-2.6, 0, 0); // Right next to stack
+            unitCellGroup.add(coldHX);
+
+            // ========== HOT HEAT EXCHANGER (Red ring + copper plate) - RIGHT NEXT TO STACK ==========
+            const hotHX = new THREE.Group();
+
+            const hotRingGeo = new THREE.TorusGeometry(1.8, 0.2, 12, 32);
+            const hotRingMat = new THREE.MeshStandardMaterial({ color: 0xff4422, emissive: 0x441111, emissiveIntensity: 0.1 });
+            const hotRing = new THREE.Mesh(hotRingGeo, hotRingMat);
+            hotRing.rotation.y = Math.PI / 2;
+            hotHX.add(hotRing);
+
+            const hotPlateGeo = new THREE.CylinderGeometry(1.7, 1.7, 0.15, 32);
+            const hotPlate = new THREE.Mesh(hotPlateGeo, copperPlateMat);
+            hotPlate.rotation.z = Math.PI / 2;
+            hotHX.add(hotPlate);
+
+            // Perforations
+            for (let y = -1.4; y <= 1.4; y += 0.25) {
+                for (let z = -1.4; z <= 1.4; z += 0.25) {
+                    if (Math.sqrt(y * y + z * z) < 1.5) {
+                        const hole = new THREE.Mesh(
+                            new THREE.CylinderGeometry(0.06, 0.06, 0.2, 8), holeMat
+                        );
+                        hole.rotation.z = Math.PI / 2;
+                        hole.position.set(0, y, z);
+                        hotHX.add(hole);
+                    }
+                }
+            }
+
+            // Output wires DIRECTLY on hot HX (no separate thermopile)
+            const outWireMat = new THREE.MeshStandardMaterial({ color: 0xff3333, roughness: 0.4, metalness: 0.5 });
+            const outWire1 = new THREE.Mesh(new THREE.CylinderGeometry(0.05, 0.05, 2.5, 8), outWireMat);
+            outWire1.position.set(0, 2.0, -0.3);
+            hotHX.add(outWire1);
+
+            const outWire2 = new THREE.Mesh(new THREE.CylinderGeometry(0.05, 0.05, 2.5, 8), outWireMat);
+            outWire2.position.set(0, 2.0, 0.3);
+            hotHX.add(outWire2);
+
+            hotHX.position.set(2.6, 0, 0); // Right next to stack
+            unitCellGroup.add(hotHX);
+
+            // NO THERMOPILE (Yellow thing removed per user request)
+
+            // ========== PERFORATED FACESHEET (Entry) ==========
+            const facesheetGroup = new THREE.Group();
+
+            const faceGeo = new THREE.CylinderGeometry(2.1, 2.1, 0.12, 32);
+            const faceMaterial = new THREE.MeshStandardMaterial({
+                color: 0xb87333, roughness: 0.25, metalness: 0.95,
+                emissive: 0x552211, emissiveIntensity: 0.1
+            });
+            const facesheet = new THREE.Mesh(faceGeo, faceMaterial);
+            facesheet.rotation.z = Math.PI / 2;
+            facesheetGroup.add(facesheet);
+
+            // Perforations
+            for (let y = -1.8; y <= 1.8; y += 0.28) {
+                for (let z = -1.8; z <= 1.8; z += 0.28) {
+                    if (Math.sqrt(y * y + z * z) < 1.9) {
+                        const hole = new THREE.Mesh(
+                            new THREE.CylinderGeometry(0.08, 0.08, 0.2, 8),
+                            new THREE.MeshBasicMaterial({ color: 0x050a15 })
+                        );
+                        hole.rotation.z = Math.PI / 2;
+                        hole.position.set(0, y, z);
+                        facesheetGroup.add(hole);
+                    }
+                }
+            }
+
+            facesheetGroup.position.set(-5.8, 0, 0);
+            unitCellGroup.add(facesheetGroup);
+
+            // ========== END CAP (Simpler, darker) ==========
+            const endCapGeo = new THREE.CylinderGeometry(2, 2, 0.3, 32);
+            const endCapMat = new THREE.MeshStandardMaterial({ color: 0x555555, roughness: 0.5, metalness: 0.3 });
+            const endCap = new THREE.Mesh(endCapGeo, endCapMat);
+            endCap.rotation.z = Math.PI / 2;
+            endCap.position.set(5.8, 0, 0);
+            unitCellGroup.add(endCap);
+
+            // ========== LABELS ==========
+            const title = createTextSprite('TAMS UNIT CELL', 0x00ffaa);
+            title.position.set(0, 3.2, 0);
+            title.scale.set(3.5, 1.4, 1);
+            unitCellGroup.add(title);
+
+            const stackLabel = createTextSprite('POROUS STACK', 0x00ddff);
+            stackLabel.position.set(0, -2.8, 0);
+            stackLabel.scale.set(3, 1.2, 1);
+            unitCellGroup.add(stackLabel);
+
+            scene.add(unitCellGroup);
+        }
+
+        function createBrickWall() {
+            // Modular TAMS wall - brick-like stacking
+            brickWallGroup = new THREE.Group();
+            brickWallGroup.position.set(50, 5, 30);
+            brickWallGroup.visible = false;
+
+            const moduleMat = new THREE.MeshPhysicalMaterial({
+                color: 0x007799,
+                metalness: 0.6,
+                roughness: 0.2,
+                clearcoat: 0.5
+            });
+
+            const tegMat = new THREE.MeshStandardMaterial({
+                color: 0xff9900,
+                metalness: 0.9,
+                roughness: 0.2,
+                emissive: 0xff6600,
+                emissiveIntensity: 0.3
+            });
+
+            // Create brick wall pattern (4 rows x 6 columns)
+            for (let row = 0; row < 4; row++) {
+                for (let col = 0; col < 6; col++) {
+                    const moduleGeo = new THREE.BoxGeometry(1.5, 1.2, 0.5);
+                    const module = new THREE.Mesh(moduleGeo, moduleMat.clone());
+
+                    // Brick offset pattern
+                    const xOffset = (row % 2 === 1) ? 0.75 : 0;
+                    module.position.set(col * 1.6 + xOffset - 4, row * 1.3 - 1.5, 0);
+                    brickWallGroup.add(module);
+
+                    // TEG strips on each module
+                    const tegGeo = new THREE.BoxGeometry(1.3, 0.15, 0.52);
+                    const teg = new THREE.Mesh(tegGeo, tegMat.clone());
+                    teg.position.copy(module.position);
+                    teg.position.z += 0.02;
+                    brickWallGroup.add(teg);
+
+                    // Dovetail connectors (visual indication)
+                    if (col < 5) {
+                        const connGeo = new THREE.BoxGeometry(0.08, 0.3, 0.15);
+                        const connMat = new THREE.MeshStandardMaterial({ color: 0x888888, metalness: 0.9 });
+                        const conn = new THREE.Mesh(connGeo, connMat);
+                        conn.position.set(module.position.x + 0.8, module.position.y, module.position.z + 0.25);
+                        brickWallGroup.add(conn);
+                    }
+                }
+            }
+
+            // Frame around the wall
+            const frameMat = new THREE.MeshStandardMaterial({ color: 0x444455, metalness: 0.8, roughness: 0.3 });
+            const frameTop = new THREE.Mesh(new THREE.BoxGeometry(11, 0.2, 0.6), frameMat);
+            frameTop.position.set(0, 3.5, 0);
+            brickWallGroup.add(frameTop);
+            const frameBottom = new THREE.Mesh(new THREE.BoxGeometry(11, 0.2, 0.6), frameMat);
+            frameBottom.position.set(0, -2.5, 0);
+            brickWallGroup.add(frameBottom);
+
+            // Wall label
+            const wallLabel = createTextSprite('MODULAR TAMS WALL', 0x00ff88);
+            wallLabel.position.set(0, 4.5, 0);
+            wallLabel.scale.set(4, 2, 1);
+            brickWallGroup.add(wallLabel);
+
+            scene.add(brickWallGroup);
+        }
+
+        function createWorkingPrinciple() {
+            // Interactive working principle visualization
+            workingPrincipleGroup = new THREE.Group();
+            workingPrincipleGroup.position.set(50, 5, 60);
+            workingPrincipleGroup.visible = false;
+
+            // Large resonator tube (cross-section view, reduced brightness)
+            const tubeGeo = new THREE.CylinderGeometry(2, 2, 8, 32, 1, true);
+            const tubeMat = new THREE.MeshStandardMaterial({
+                color: 0x334455,
+                metalness: 0.3,
+                roughness: 0.7,
+                transparent: true,
+                opacity: 0.35,
+                side: THREE.DoubleSide
+            });
+            const tube = new THREE.Mesh(tubeGeo, tubeMat);
+            workingPrincipleGroup.add(tube);
+
+            // Porous stack inside (reduced brightness)
+            const porousGeo = new THREE.CylinderGeometry(1.6, 1.6, 3, 32);
+            const porousMat = new THREE.MeshStandardMaterial({
+                color: 0x997744,
+                roughness: 0.95,
+                metalness: 0.05,
+                transparent: true,
+                opacity: 0.7
+            });
+            const porous = new THREE.Mesh(porousGeo, porousMat);
+            porous.position.y = -1;
+            workingPrincipleGroup.add(porous);
+
+            // Sound wave arrows entering (animated later)
+            const arrowMat = new THREE.MeshBasicMaterial({ color: 0xff4444 });
+            for (let i = 0; i < 5; i++) {
+                const arrowGeo = new THREE.ConeGeometry(0.3, 0.8, 8);
+                const arrow = new THREE.Mesh(arrowGeo, arrowMat.clone());
+                arrow.position.set(0, 5 + i * 0.5, 0);
+                arrow.rotation.x = Math.PI;
+                arrow.userData.waveArrow = true;
+                arrow.userData.baseY = 5 + i * 0.5;
+                workingPrincipleGroup.add(arrow);
+            }
+
+            // Temperature gradient visualization (hot=red, cold=blue)
+            const hotZoneGeo = new THREE.CylinderGeometry(1.65, 1.65, 1, 32);
+            const hotZoneMat = new THREE.MeshBasicMaterial({
+                color: 0xff3300,
+                transparent: true,
+                opacity: 0.4
+            });
+            const hotZone = new THREE.Mesh(hotZoneGeo, hotZoneMat);
+            hotZone.position.y = -0.2;
+            workingPrincipleGroup.add(hotZone);
+
+            const coldZoneGeo = new THREE.CylinderGeometry(1.65, 1.65, 1, 32);
+            const coldZoneMat = new THREE.MeshBasicMaterial({
+                color: 0x0066ff,
+                transparent: true,
+                opacity: 0.4
+            });
+            const coldZone = new THREE.Mesh(coldZoneGeo, coldZoneMat);
+            coldZone.position.y = -1.8;
+            workingPrincipleGroup.add(coldZone);
+
+            // Energy output arrows (gold)
+            const energyMat = new THREE.MeshBasicMaterial({ color: 0xffcc00 });
+            for (let a = 0; a < 4; a++) {
+                const arrowGeo = new THREE.ConeGeometry(0.2, 0.5, 8);
+                const arrow = new THREE.Mesh(arrowGeo, energyMat);
+                const angle = (a / 4) * Math.PI * 2;
+                arrow.position.set(2.5 * Math.cos(angle), -1, 2.5 * Math.sin(angle));
+                arrow.rotation.z = -angle - Math.PI / 2;
+                arrow.userData.energyArrow = true;
+                workingPrincipleGroup.add(arrow);
+            }
+
+            // Labels
+            const soundLabel = createTextSprite('SOUND INPUT', 0xff4444);
+            soundLabel.position.set(0, 6.5, 0);
+            soundLabel.scale.set(2.5, 1.2, 1);
+            workingPrincipleGroup.add(soundLabel);
+
+            const heatLabel = createTextSprite('ΔT = 25°C', 0xffcc00);
+            heatLabel.position.set(3, -1, 0);
+            heatLabel.scale.set(2, 1, 1);
+            workingPrincipleGroup.add(heatLabel);
+
+            const powerLabel = createTextSprite('5-10W OUTPUT', 0x00ff88);
+            powerLabel.position.set(0, -4.5, 0);
+            powerLabel.scale.set(2.5, 1.2, 1);
+            workingPrincipleGroup.add(powerLabel);
+
+            scene.add(workingPrincipleGroup);
+        }
+
+        function createTextSprite(text, color) {
+            const canvas = document.createElement('canvas');
+            canvas.width = 512;
+            canvas.height = 64;
+            const ctx = canvas.getContext('2d');
+            // NO background - transparent
+            ctx.clearRect(0, 0, 512, 64);
+            ctx.font = 'bold 24px Inter, Syne, sans-serif';
+            ctx.fillStyle = '#' + color.toString(16).padStart(6, '0');
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText(text, 256, 32);
+
+            const texture = new THREE.CanvasTexture(canvas);
+            const material = new THREE.SpriteMaterial({ map: texture, transparent: true });
+            return new THREE.Sprite(material);
+        }
+
+        function createNoiseVisualization() {
+            // Red expanding rings to represent noise waves
+            const ringGeo = new THREE.RingGeometry(0.5, 0.7, 32);
+            const ringMat = new THREE.MeshBasicMaterial({
+                color: 0xff3333,
+                transparent: true,
+                opacity: 0,
+                side: THREE.DoubleSide
+            });
+
+            for (let i = 0; i < 30; i++) {
+                const ring = new THREE.Mesh(ringGeo, ringMat.clone());
+                ring.position.set(
+                    (Math.random() - 0.5) * 40,
+                    3 + Math.random() * 4,
+                    (Math.random() - 0.5) * 50
+                );
+                ring.userData = {
+                    scale: 0.1,
+                    maxScale: 3 + Math.random() * 2,
+                    speed: 0.02 + Math.random() * 0.02,
+                    active: false,
+                    originalX: ring.position.x
+                };
+                scene.add(ring);
+                noiseWaves.push(ring);
+            }
+        }
+
+        function createAirflowVisualization() {
+            // Blue arrows/lines representing airflow
+            const arrowMat = new THREE.MeshBasicMaterial({
+                color: 0x00aaff,
+                transparent: true,
+                opacity: 0.7
+            });
+
+            // Simple cone arrows
+            const coneGeo = new THREE.ConeGeometry(0.15, 0.5, 8);
+
+            for (let i = 0; i < 100; i++) {
+                const arrow = new THREE.Mesh(coneGeo, arrowMat.clone());
+                arrow.rotation.x = Math.PI / 2; // Point forward in Z
+                arrow.position.set(
+                    (Math.random() - 0.5) * 40,
+                    0.5 + Math.random() * 6,
+                    -30 + Math.random() * 5
+                );
+                arrow.userData = {
+                    speed: 0.08 + Math.random() * 0.04,
+                    startZ: arrow.position.z
+                };
+                scene.add(arrow);
+                airflowArrows.push(arrow);
+            }
+        }
+
+        function animateCamera(sceneName) {
+            let pos, look;
+            let duration = 2500; // Default quick transition
+            let startPos = null; // For slow zoom effect
+
+            switch (sceneName) {
+                case 'datacenter_wide':
+                    // Start far away and slowly zoom in over the chapter
+                    startPos = { x: 70, y: 14, z: 70 }; // Starting position (far)
+                    pos = { x: 35, y: 8, z: 35 }; // End position (close)
+                    look = { x: 0, y: 4, z: 0 };
+                    duration = 50000; // 50 seconds - ultra slow cinematic zoom
+                    break;
+                case 'tams_close':
+                    // Slow zoom into TAMS panels
+                    startPos = { x: 35, y: 12, z: 35 };
+                    pos = { x: 18, y: 7, z: 18 };
+                    look = { x: 0, y: 4, z: 0 };
+                    duration = 40000;
+                    break;
+                case 'unit_cell':
+                    // Slow approach to unit cell
+                    startPos = { x: 60, y: 8, z: 12 };
+                    pos = { x: 54, y: 6, z: 6 };
+                    look = { x: 50, y: 5, z: 0 };
+                    duration = 45000;
+                    break;
+                case 'brick_wall':
+                    // Slow pan across brick wall
+                    startPos = { x: 58, y: 7, z: 38 };
+                    pos = { x: 52, y: 5, z: 34 };
+                    look = { x: 50, y: 5, z: 30 };
+                    duration = 45000;
+                    break;
+                case 'working_principle':
+                    // Slow zoom into working principle
+                    startPos = { x: 62, y: 10, z: 72 };
+                    pos = { x: 55, y: 7, z: 65 };
+                    look = { x: 50, y: 5, z: 60 };
+                    duration = 45000;
+                    break;
+                case 'simulation':
+                    // Slow push-in during simulation observation
+                    startPos = { x: 5, y: 14, z: 30 };
+                    pos = { x: -5, y: 10, z: 18 };
+                    look = { x: 0, y: 4, z: 0 };
+                    duration = 36000;
+                    break;
+                case 'teg_detail':
+                    // Slow orbit around TEG element
+                    startPos = { x: 0, y: 6, z: 10 };
+                    pos = { x: -8, y: 4, z: 3 };
+                    look = { x: -10, y: 4, z: 0 };
+                    duration = 36000;
+                    break;
+                case 'facility_wide':
+                    // Slow zoom OUT to reveal scale
+                    startPos = { x: 20, y: 8, z: 20 };
+                    pos = { x: 35, y: 14, z: 35 };
+                    look = { x: 0, y: 4, z: 0 };
+                    duration = 40000;
+                    break;
+                case 'final_wide':
+                    // Slow pull-back for dramatic ending
+                    startPos = { x: 20, y: 8, z: 20 };
+                    pos = { x: 40, y: 12, z: 40 };
+                    look = { x: 0, y: 4, z: 0 };
+                    duration = 30000;
+                    break;
+                default:
+                    pos = { x: 22, y: 10, z: 22 };
+                    look = { x: 0, y: 4, z: 0 };
+            }
+
+            // If slow zoom effect, set camera to start position first
+            if (startPos) {
+                camera.position.set(startPos.x, startPos.y, startPos.z);
+            }
+
+            new TWEEN.Tween(camera.position)
+                .to(pos, duration)
+                .easing(TWEEN.Easing.Quadratic.Out) // Smooth easing for cinematic feel
+                .start();
+
+            window.camLook = look;
+
+            // Toggle visibility of patent architecture visualizations
+            if (unitCellGroup) unitCellGroup.visible = (sceneName === 'unit_cell');
+            if (brickWallGroup) brickWallGroup.visible = (sceneName === 'brick_wall');
+            if (workingPrincipleGroup) workingPrincipleGroup.visible = (sceneName === 'working_principle');
+        }
+
+        function loadChapter(index) {
+            if (index < 0 || index >= documentaryScript.length) return;
+
+            currentChapter = index;
+            currentSubtitle = -1;
+            const ch = documentaryScript[index];
+
+            // Update progress
+            const progress = ((index + 1) / documentaryScript.length) * 100;
+            document.getElementById('progressBar').style.width = progress + '%';
+
+            // Show chapter title
+            document.getElementById('chapterNumber').textContent = ch.chapter;
+            document.getElementById('chapterTitle').textContent = ch.title;
+            const cd = document.getElementById('chapterDisplay');
+            cd.classList.add('visible');
+
+            setTimeout(() => {
+                cd.classList.remove('visible');
+                advanceSubtitle();
+            }, 2500);
+
+            // Data Panel
+            const dp = document.getElementById('dataPanel');
+            if (ch.showData && ch.data) {
+                let html = '';
+                ch.data.forEach(d => {
+                    html += `<div class="data-row"><span class="data-label">${d.label}</span><span class="data-value">${d.value}</span></div>`;
+                });
+                document.getElementById('dataPanelContent').innerHTML = html;
+                dp.classList.add('visible');
+            } else {
+                dp.classList.remove('visible');
+            }
+
+            // Equation Panel
+            const eq = document.getElementById('equationPanel');
+            if (ch.showEquation && ch.equation) {
+                document.getElementById('equationLabel').textContent = ch.equation.label;
+                document.getElementById('equationText').textContent = ch.equation.text;
+                eq.classList.add('visible');
+            } else {
+                eq.classList.remove('visible');
+            }
+
+            animateCamera(ch.scene);
+        }
+
+        function advanceSubtitle() {
+            if (isPaused) return;
+
+            currentSubtitle++;
+            const ch = documentaryScript[currentChapter];
+
+            if (currentSubtitle < ch.subtitles.length) {
+                const el = document.getElementById('subtitleText');
+                el.innerHTML = ch.subtitles[currentSubtitle];
+                el.classList.add('visible');
+
+                const words = el.textContent.split(' ').length;
+                const duration = Math.max(3000, 2000 + words * 180);
+
+                subtitleTimeout = setTimeout(() => {
+                    el.classList.remove('visible');
+                    setTimeout(advanceSubtitle, 500);
+                }, duration);
+            } else {
+                if (currentChapter < documentaryScript.length - 1) {
+                    setTimeout(() => loadChapter(currentChapter + 1), 1500);
+                }
+            }
+        }
+
+        function nextChapter() {
+            clearTimeout(subtitleTimeout);
+            document.getElementById('subtitleText').classList.remove('visible');
+            if (currentChapter < documentaryScript.length - 1) loadChapter(currentChapter + 1);
+        }
+
+        function prevChapter() {
+            clearTimeout(subtitleTimeout);
+            document.getElementById('subtitleText').classList.remove('visible');
+            if (currentChapter > 0) loadChapter(currentChapter - 1);
+        }
+
+        function togglePause() {
+            isPaused = !isPaused;
+            document.getElementById('pauseBtn').textContent = isPaused ? 'PLAY' : 'PAUSE';
+            if (!isPaused) advanceSubtitle();
+        }
+
+        function onResize() {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            composer.setSize(window.innerWidth, window.innerHeight);
+        }
+
+        function animate() {
+            requestAnimationFrame(animate);
+            TWEEN.update();
+            const t = clock.getElapsedTime();
+
+            // Camera LookAt
+            if (window.camLook) {
+                camera.lookAt(window.camLook.x, window.camLook.y, window.camLook.z);
+            }
+
+            // Animate Noise Waves
+            const currentScene = documentaryScript[currentChapter].scene;
+            const showNoise = (currentScene === 'datacenter_wide' || currentScene === 'simulation');
+
+            noiseWaves.forEach(wave => {
+                if (!wave.userData.active && Math.random() > 0.97 && showNoise) {
+                    wave.userData.active = true;
+                    wave.userData.scale = 0.1;
+                    wave.material.opacity = 0.9;
+                }
+
+                if (wave.userData.active) {
+                    wave.userData.scale += wave.userData.speed;
+                    wave.scale.set(wave.userData.scale, wave.userData.scale, 1);
+                    wave.material.opacity -= 0.015;
+
+                    // If simulation scene, make waves disappear faster (blocked by TAMS)
+                    if (currentScene === 'simulation') {
+                        wave.material.opacity -= 0.02;
+                    }
+
+                    if (wave.material.opacity <= 0) {
+                        wave.userData.active = false;
+                        wave.userData.scale = 0.1;
+                    }
+                }
+            });
+
+            // Animate Airflow Arrows
+            const showAirflow = (currentScene === 'simulation' || currentScene === 'tams_close');
+            airflowArrows.forEach(arrow => {
+                arrow.material.opacity = showAirflow ? 0.7 : 0.1;
+
+                if (showAirflow) {
+                    arrow.position.z += arrow.userData.speed;
+                    if (arrow.position.z > 30) {
+                        arrow.position.z = -30;
+                    }
+                }
+            });
+
+            // Animate TEGs (pulsing during harvest chapter)
+            const showTEGPulse = (currentScene === 'teg_detail' || currentScene === 'facility_wide');
+            tegElements.forEach((teg, i) => {
+                if (showTEGPulse) {
+                    const pulseOffset = i * 0.1;
+                    teg.material.emissiveIntensity = 0.2 + 0.3 * Math.sin(t * 4 + pulseOffset);
+                } else {
+                    teg.material.emissiveIntensity = 0.1;
+                }
+            });
+
+            // Animate Patent Visualizations
+            // Unit Cell - slow rotation
+            if (unitCellGroup && unitCellGroup.visible) {
+                unitCellGroup.rotation.y = Math.sin(t * 0.3) * 0.5;
+            }
+
+            // Brick Wall - subtle breathing animation
+            if (brickWallGroup && brickWallGroup.visible) {
+                brickWallGroup.children.forEach((child, i) => {
+                    if (child.material && child.material.emissiveIntensity !== undefined) {
+                        child.material.emissiveIntensity = 0.3 + 0.2 * Math.sin(t * 3 + i * 0.2);
+                    }
+                });
+            }
+
+            // Working Principle - animate sound waves entering
+            if (workingPrincipleGroup && workingPrincipleGroup.visible) {
+                workingPrincipleGroup.children.forEach(child => {
+                    if (child.userData.waveArrow) {
+                        // Pulsing downward motion
+                        const offset = child.userData.baseY;
+                        child.position.y = offset - ((t * 2) % 3);
+                        child.material.opacity = 0.8 + 0.2 * Math.sin(t * 5);
+                    }
+                    if (child.userData.energyArrow) {
+                        // Radial pulsing
+                        child.scale.setScalar(1 + 0.2 * Math.sin(t * 4));
+                    }
+                });
+                // Slow rotation
+                workingPrincipleGroup.rotation.y = t * 0.2;
+            }
+
+            composer.render();
+        }
+
+        init();
+    </script>
+</body>
+
+</html>

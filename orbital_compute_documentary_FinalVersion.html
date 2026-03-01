@@ -1,0 +1,2555 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ORBITAL COMPUTE | A 3D Documentary</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Syne:wght@400;500;600;700;800&family=Space+Mono:wght@400;700&family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&display=swap');
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Syne', sans-serif;
+            background: #000;
+            overflow: hidden;
+            color: #fff;
+        }
+
+        #canvas {
+            width: 100vw;
+            height: 100vh;
+            display: block;
+            position: fixed;
+            top: 0;
+            left: 0;
+        }
+
+        /* Cinematic Letterbox */
+        .letterbox {
+            position: fixed;
+            left: 0;
+            right: 0;
+            height: 50px;
+            background: #000;
+            z-index: 100;
+            pointer-events: none;
+        }
+
+        .letterbox-top {
+            top: 0;
+        }
+
+        .letterbox-bottom {
+            bottom: 0;
+        }
+
+        /* UI Overlay */
+        .ui-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            pointer-events: none;
+            z-index: 200;
+        }
+
+        /* Header */
+        .header-bar {
+            position: fixed;
+            top: 20px;
+            left: 0;
+            right: 0;
+            height: 50px;
+            background: linear-gradient(90deg,
+                    rgba(0, 20, 40, 0.95) 0%,
+                    rgba(0, 60, 120, 0.8) 30%,
+                    rgba(0, 100, 180, 0.6) 50%,
+                    rgba(0, 60, 120, 0.8) 70%,
+                    rgba(0, 20, 40, 0.95) 100%);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 50px;
+            border-top: 1px solid rgba(0, 150, 255, 0.3);
+            border-bottom: 1px solid rgba(0, 150, 255, 0.3);
+            box-shadow: 0 0 30px rgba(0, 150, 255, 0.2);
+            z-index: 300;
+        }
+
+        .series-badge {
+            font-family: 'Space Mono', monospace;
+            font-size: 10px;
+            letter-spacing: 4px;
+            color: #00d4ff;
+            text-transform: uppercase;
+        }
+
+        .tech-badge {
+            font-family: 'Space Mono', monospace;
+            font-size: 9px;
+            color: rgba(255, 255, 255, 0.5);
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .tech-badge span {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .pulse-dot {
+            width: 6px;
+            height: 6px;
+            background: #00ff88;
+            border-radius: 50%;
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+
+            0%,
+            100% {
+                opacity: 0.4;
+                box-shadow: 0 0 5px #00ff88;
+            }
+
+            50% {
+                opacity: 1;
+                box-shadow: 0 0 15px #00ff88;
+            }
+        }
+
+        /* Chapter Display */
+        .chapter-display {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+            opacity: 0;
+            transition: all 1.5s cubic-bezier(0.16, 1, 0.3, 1);
+            z-index: 250;
+        }
+
+        .chapter-display.visible {
+            opacity: 1;
+        }
+
+        .chapter-number {
+            font-family: 'Space Mono', monospace;
+            font-size: 14px;
+            letter-spacing: 8px;
+            color: #00d4ff;
+            margin-bottom: 20px;
+            text-transform: uppercase;
+        }
+
+        .chapter-title {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: clamp(40px, 8vw, 90px);
+            font-weight: 400;
+            line-height: 1.1;
+            text-shadow: 0 0 60px rgba(0, 212, 255, 0.5);
+            background: linear-gradient(180deg, #fff 0%, #00d4ff 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        /* Subtitle Container */
+        .subtitle-container {
+            position: fixed;
+            bottom: 28%;
+            left: 50%;
+            transform: translateX(-50%);
+            text-align: center;
+            max-width: 950px;
+            width: 90%;
+            z-index: 250;
+        }
+
+        .subtitle-text {
+            font-family: 'Inter', sans-serif;
+            font-size: clamp(20px, 2.5vw, 30px);
+            font-weight: 500;
+            line-height: 1.6;
+            color: #ffffff;
+            background: transparent;
+            text-shadow: 0 2px 20px rgba(0, 0, 0, 0.9), 0 0 40px rgba(0, 0, 0, 0.7);
+            padding: 16px 24px;
+            border-radius: 0;
+            border: none;
+            opacity: 0;
+            transform: translateY(20px);
+            transition: all 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .subtitle-text.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .highlight {
+            color: #00d4ff;
+            font-weight: 600;
+        }
+
+        .highlight-gold {
+            color: #ffd700;
+            font-weight: 600;
+        }
+
+        .highlight-green {
+            color: #00ff88;
+            font-weight: 600;
+        }
+
+        /* Data Overlay Panel */
+        .data-panel {
+            position: fixed;
+            top: 100px;
+            right: 40px;
+            width: 320px;
+            background: rgba(0, 10, 20, 0.9);
+            border: 1px solid rgba(0, 150, 255, 0.3);
+            border-radius: 8px;
+            padding: 25px;
+            opacity: 0;
+            transform: translateX(50px);
+            transition: all 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+            z-index: 250;
+            backdrop-filter: blur(10px);
+        }
+
+        .data-panel.visible {
+            opacity: 1;
+            transform: translateX(0);
+        }
+
+        .panel-header {
+            font-family: 'Space Mono', monospace;
+            font-size: 10px;
+            letter-spacing: 3px;
+            color: #00d4ff;
+            text-transform: uppercase;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid rgba(0, 150, 255, 0.3);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .panel-header::before {
+            content: '';
+            width: 8px;
+            height: 8px;
+            background: #00ff88;
+            border-radius: 50%;
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        .data-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .data-label {
+            font-family: 'Space Mono', monospace;
+            font-size: 10px;
+            color: rgba(255, 255, 255, 0.5);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .data-value {
+            font-family: 'Syne', sans-serif;
+            font-size: 14px;
+            font-weight: 600;
+            color: #00d4ff;
+        }
+
+        /* Equation Overlay */
+        .equation-panel {
+            position: fixed;
+            bottom: 8%;
+            left: 40px;
+            background: rgba(0, 10, 20, 0.9);
+            border: 1px solid rgba(168, 85, 247, 0.4);
+            border-radius: 8px;
+            padding: 20px 30px;
+            opacity: 0;
+            transform: translateX(-50px);
+            transition: all 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+            z-index: 250;
+            backdrop-filter: blur(10px);
+        }
+
+        .equation-panel.visible {
+            opacity: 1;
+            transform: translateX(0);
+        }
+
+        .equation-label {
+            font-family: 'Space Mono', monospace;
+            font-size: 9px;
+            color: rgba(168, 85, 247, 0.8);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-bottom: 10px;
+        }
+
+        .equation-text {
+            font-family: 'Space Mono', monospace;
+            font-size: 16px;
+            color: #ffd700;
+        }
+
+        /* Progress Bar */
+        .progress-container {
+            position: fixed;
+            bottom: 50px;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: rgba(255, 255, 255, 0.1);
+            z-index: 300;
+        }
+
+        .progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, #00d4ff, #a855f7, #ffd700);
+            width: 0%;
+            transition: width 0.3s linear;
+        }
+
+        /* Footer */
+        .footer-bar {
+            position: fixed;
+            bottom: 20px;
+            left: 0;
+            right: 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 50px;
+            z-index: 300;
+        }
+
+        .author-info {
+            font-family: 'Space Mono', monospace;
+            font-size: 18px;
+            color: rgba(255, 255, 255, 0.8);
+        }
+
+        .author-info a {
+            color: #00d4ff;
+            text-decoration: none;
+        }
+
+        .controls {
+            display: flex;
+            gap: 15px;
+            pointer-events: auto;
+        }
+
+        .control-btn {
+            font-family: 'Space Mono', monospace;
+            font-size: 10px;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            background: rgba(0, 150, 255, 0.2);
+            border: 1px solid rgba(0, 150, 255, 0.4);
+            color: #00d4ff;
+            padding: 10px 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border-radius: 4px;
+        }
+
+        .control-btn:hover {
+            background: rgba(0, 150, 255, 0.4);
+            box-shadow: 0 0 20px rgba(0, 150, 255, 0.3);
+        }
+
+        /* Thermal Overlay */
+        .thermal-view {
+            position: fixed;
+            top: 100px;
+            left: 40px;
+            width: 280px;
+            background: rgba(0, 0, 0, 0.9);
+            border: 1px solid #ff4400;
+            opacity: 0;
+            transform: scale(0.9);
+            transition: all 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+            z-index: 250;
+        }
+
+        .thermal-view.visible {
+            opacity: 1;
+            transform: scale(1);
+        }
+
+        .thermal-header {
+            background: linear-gradient(90deg, #ff4400, #ff6600);
+            padding: 8px 15px;
+            font-family: 'Space Mono', monospace;
+            font-size: 9px;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+        }
+
+        .thermal-body {
+            padding: 15px;
+        }
+
+        .thermal-bar {
+            height: 20px;
+            background: linear-gradient(90deg, #0000ff, #00ffff, #00ff00, #ffff00, #ff8800, #ff0000);
+            border-radius: 2px;
+            margin-bottom: 10px;
+        }
+
+        .thermal-labels {
+            display: flex;
+            justify-content: space-between;
+            font-family: 'Space Mono', monospace;
+            font-size: 9px;
+            color: rgba(255, 255, 255, 0.6);
+        }
+
+        .thermal-stats {
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        /* Loading Screen */
+        .loading-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: #000;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+            transition: opacity 1s ease;
+        }
+
+        .loading-screen.hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .loading-title {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 48px;
+            margin-bottom: 40px;
+            background: linear-gradient(180deg, #fff 0%, #00d4ff 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .loading-bar-container {
+            width: 300px;
+            height: 4px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 2px;
+            overflow: hidden;
+        }
+
+        .loading-bar {
+            height: 100%;
+            background: linear-gradient(90deg, #00d4ff, #a855f7);
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+
+        .loading-text {
+            font-family: 'Space Mono', monospace;
+            font-size: 10px;
+            color: rgba(255, 255, 255, 0.5);
+            margin-top: 20px;
+            letter-spacing: 3px;
+        }
+
+        /* Footer Bar Styles */
+        .footer-bar {
+            position: fixed;
+            bottom: 15px;
+            left: 30px;
+            right: 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 200;
+            pointer-events: auto;
+        }
+
+        .author-info,
+        .website-info {
+            font-family: 'Space Mono', monospace;
+            font-size: 15px;
+            letter-spacing: 1px;
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        .author-info a,
+        .website-info a {
+            color: #00d4ff;
+            text-decoration: none;
+            transition: color 0.3s;
+        }
+
+        .author-info a:hover,
+        .website-info a:hover {
+            color: #00ff88;
+        }
+
+        /* End Credits Screen */
+        .end-credits {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: radial-gradient(ellipse at center, #0a1020 0%, #000508 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 8000;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 2s ease;
+        }
+
+        .end-credits.visible {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .credits-content {
+            text-align: center;
+            max-width: 600px;
+        }
+
+        .credits-title {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 56px;
+            font-weight: 300;
+            letter-spacing: 12px;
+            background: linear-gradient(180deg, #ffffff 0%, #00d4ff 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 15px;
+        }
+
+        .credits-subtitle {
+            font-family: 'Space Mono', monospace;
+            font-size: 13px;
+            letter-spacing: 4px;
+            color: rgba(255, 255, 255, 0.6);
+            text-transform: uppercase;
+        }
+
+        .credits-divider {
+            width: 60px;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, #00d4ff, transparent);
+            margin: 40px auto;
+        }
+
+        .credits-section {
+            margin: 30px 0;
+        }
+
+        .credits-label {
+            font-family: 'Space Mono', monospace;
+            font-size: 10px;
+            letter-spacing: 3px;
+            color: #00d4ff;
+            text-transform: uppercase;
+            margin-bottom: 8px;
+        }
+
+        .credits-name {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 26px;
+            font-weight: 400;
+            color: #ffffff;
+        }
+
+        .credits-website a {
+            font-family: 'Space Mono', monospace;
+            font-size: 14px;
+            letter-spacing: 2px;
+            color: #00ff88;
+            text-decoration: none;
+            transition: all 0.3s;
+        }
+
+        .credits-website a:hover {
+            color: #00d4ff;
+            text-shadow: 0 0 20px rgba(0, 212, 255, 0.5);
+        }
+
+        .credits-copyright {
+            font-family: 'Space Mono', monospace;
+            font-size: 10px;
+            letter-spacing: 2px;
+            color: rgba(255, 255, 255, 0.4);
+            margin-top: 50px;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Loading Screen -->
+    <div class="loading-screen" id="loadingScreen">
+        <h1 class="loading-title">ORBITAL COMPUTE</h1>
+        <div class="loading-bar-container">
+            <div class="loading-bar" id="loadingBar"></div>
+        </div>
+        <p class="loading-text">INITIALIZING 3D ENVIRONMENT</p>
+    </div>
+
+    <!-- Three.js Canvas -->
+    <canvas id="canvas"></canvas>
+
+    <!-- Cinematic Letterbox -->
+    <div class="letterbox letterbox-top"></div>
+    <div class="letterbox letterbox-bottom"></div>
+
+    <!-- UI Overlay -->
+    <div class="ui-overlay">
+        <!-- Header -->
+        <div class="header-bar">
+            <span class="series-badge">ORBITAL COMPUTE</span>
+            <div class="tech-badge">
+                <span>
+                    <div class="pulse-dot"></div> LIVE SIMULATION
+                </span>
+                <span>SSO: 650KM</span>
+                <span>INC: 98.0°</span>
+            </div>
+        </div>
+
+        <!-- Chapter Display -->
+        <div class="chapter-display" id="chapterDisplay">
+            <p class="chapter-number" id="chapterNumber">Chapter One</p>
+            <h1 class="chapter-title" id="chapterTitle">Orbital Dynamics</h1>
+        </div>
+
+        <!-- Subtitle -->
+        <div class="subtitle-container">
+            <div class="subtitle-text" id="subtitleText"></div>
+        </div>
+
+        <!-- Data Panel -->
+        <div class="data-panel" id="dataPanel">
+            <div class="panel-header">Technical Parameters</div>
+            <div id="dataPanelContent"></div>
+        </div>
+
+        <!-- Equation Panel -->
+        <div class="equation-panel" id="equationPanel">
+            <p class="equation-label" id="equationLabel">Stefan-Boltzmann Law</p>
+            <p class="equation-text" id="equationText">P = εσT⁴</p>
+        </div>
+
+        <!-- Thermal View -->
+        <div class="thermal-view" id="thermalView">
+            <div class="thermal-header">Thermal Analysis // Real-Time</div>
+            <div class="thermal-body">
+                <div class="thermal-bar"></div>
+                <div class="thermal-labels">
+                    <span>-270°C</span>
+                    <span>Deep Space</span>
+                    <span>+120°C</span>
+                </div>
+                <div class="thermal-stats">
+                    <div class="data-row">
+                        <span class="data-label">Radiator Temp</span>
+                        <span class="data-value">20°C</span>
+                    </div>
+                    <div class="data-row">
+                        <span class="data-label">Heat Rejection</span>
+                        <span class="data-value">633 W/m²</span>
+                    </div>
+                    <div class="data-row">
+                        <span class="data-label">Emissivity (ε)</span>
+                        <span class="data-value">0.92</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="footer-bar">
+            <div class="author-info">
+                Visualization by <a href="https://samarjithbiswas.com" target="_blank">Dr. Samarjith
+                    Biswas</a>
+            </div>
+            <div class="website-info">
+                <a href="https://samarjithbiswas.com" target="_blank">samarjithbiswas.com</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- End Credits Screen -->
+    <div class="end-credits" id="endCredits">
+        <div class="credits-content">
+            <div class="credits-title">ORBITAL COMPUTE</div>
+            <div class="credits-subtitle">Space-Based Data Center Infrastructure</div>
+
+            <div class="credits-divider"></div>
+
+            <div class="credits-section">
+                <div class="credits-label">Visualization</div>
+                <div class="credits-name">Dr. Samarjith Biswas</div>
+            </div>
+
+            <div class="credits-section">
+                <div class="credits-label">Based on Research From</div>
+                <div class="credits-name">Google DeepMind • MIT Media Lab</div>
+            </div>
+
+            <div class="credits-section">
+                <div class="credits-label">3D Simulation</div>
+                <div class="credits-name">Three.js WebGL Engine</div>
+            </div>
+
+            <div class="credits-divider"></div>
+
+            <div class="credits-website">
+                <a href="https://samarjithbiswas.com" target="_blank">samarjithbiswas.com</a>
+            </div>
+
+            <div class="credits-copyright">© 2024 Dr. Samarjith Biswas. All Rights Reserved.</div>
+        </div>
+    </div>
+
+    <!-- Progress Bar -->
+    <div class="progress-container">
+        <div class="progress-bar" id="progressBar"></div>
+    </div>
+
+    <!-- Three.js + Dependencies -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/EffectComposer.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/RenderPass.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/ShaderPass.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/UnrealBloomPass.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/shaders/CopyShader.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/shaders/LuminosityHighPassShader.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tween.js/18.6.4/tween.umd.js"></script>
+
+    <script>
+        // ============================================
+        // DOCUMENTARY SCRIPT - All chapters and scenes
+        // ============================================
+        const documentaryScript = [
+            {
+                chapter: "Prologue",
+                title: "The Energy Crisis",
+                scene: "wide_earth",
+                showDataPanel: false,
+                showEquation: false,
+                showThermal: false,
+                dataContent: null,
+                subtitles: [
+                    "By 2028, data centers will consume <span class='highlight'>12% of U.S. electricity</span>.",
+                    "AI training clusters demand power measured in <span class='highlight-gold'>gigawatts</span>.",
+                    "The grid cannot scale fast enough. A new frontier awaits.",
+                    "Welcome to <span class='highlight'>Orbital Compute</span>."
+                ]
+            },
+            {
+                chapter: "Chapter One",
+                title: "Sun-Synchronous Orbit",
+                scene: "orbit_view",
+                showDataPanel: true,
+                showEquation: false,
+                showThermal: false,
+                dataContent: [
+                    { label: "Altitude", value: "650 km" },
+                    { label: "Inclination", value: "98.0°" },
+                    { label: "Orbital Period", value: "97.8 min" },
+                    { label: "Velocity", value: "7.5 km/s" },
+                    { label: "Sun Illumination", value: ">95%" }
+                ],
+                subtitles: [
+                    "At <span class='highlight'>650 kilometers</span> above Earth's surface...",
+                    "A dawn-dusk sun-synchronous orbit rides the <span class='highlight-gold'>terminator</span>.",
+                    "The boundary between day and night, perpetually in sunlight.",
+                    "Earth's equatorial bulge causes the orbital plane to <span class='highlight'>precess</span>...",
+                    "Exactly <span class='highlight'>0.9856°/day</span> — matching Earth's revolution around the Sun.",
+                    "This is the only low-Earth orbit with <span class='highlight-green'>continuous solar exposure</span>."
+                ]
+            },
+            {
+                chapter: "Chapter Two",
+                title: "Orbital Mechanics",
+                scene: "earth_close",
+                showDataPanel: true,
+                showEquation: true,
+                showThermal: false,
+                equation: { label: "J₂ Precession Rate", text: "Ω̇ = -3/2 × J₂ × (Rₑ/a)² × n × cos(i)" },
+                dataContent: [
+                    { label: "J₂ Coefficient", value: "1.08263×10⁻³" },
+                    { label: "Earth Radius", value: "6,371 km" },
+                    { label: "Semi-Major Axis", value: "7,021 km" },
+                    { label: "Precession", value: "0.9856°/day" }
+                ],
+                subtitles: [
+                    "The <span class='highlight'>J₂ perturbation</span> from Earth's oblateness...",
+                    "Creates a predictable nodal regression of the orbital plane.",
+                    "At 650 km with <span class='highlight-gold'>98° inclination</span>...",
+                    "The precession rate precisely matches Earth's yearly orbit.",
+                    "A satellite maintains constant orientation to the Sun — <span class='highlight-green'>year-round</span>."
+                ]
+            },
+            {
+                chapter: "Chapter Three",
+                title: "Solar Power Generation",
+                scene: "solar_array",
+                showDataPanel: true,
+                showEquation: false,
+                showThermal: false,
+                dataContent: [
+                    { label: "Cell Type", value: "GaInP/InGaAs/Ge" },
+                    { label: "Efficiency (BOL)", value: "30-32%" },
+                    { label: "Solar Irradiance", value: "1,366 W/m²" },
+                    { label: "Capacity Factor", value: ">95%" },
+                    { label: "vs. Earth Surface", value: "+37% power" }
+                ],
+                subtitles: [
+                    "<span class='highlight'>Triple-junction gallium arsenide</span> solar cells...",
+                    "Capture energy across multiple wavelengths of the solar spectrum.",
+                    "In space: <span class='highlight-gold'>1,366 W/m²</span> of unfiltered solar irradiance.",
+                    "No atmosphere. No weather. No day-night cycle losses.",
+                    "Capacity factor exceeds <span class='highlight-green'>95%</span> — versus 24% on Earth.",
+                    "A 5 GW array spans approximately <span class='highlight'>4 km × 4 km</span>."
+                ]
+            },
+            {
+                chapter: "Chapter Four",
+                title: "The Coldest Heat Sink",
+                scene: "radiator_view",
+                showDataPanel: false,
+                showEquation: true,
+                showThermal: true,
+                equation: { label: "Stefan-Boltzmann Law", text: "P = ε × σ × T⁴ = 0.92 × 5.67×10⁻⁸ × 293⁴" },
+                dataContent: null,
+                subtitles: [
+                    "In the vacuum of space, heat can only escape through <span class='highlight'>radiation</span>.",
+                    "The cosmic microwave background: <span class='highlight-gold'>2.7 Kelvin</span>.",
+                    "The ultimate cold sink — colder than anything achievable on Earth.",
+                    "White ceramic radiators with <span class='highlight'>0.92 emissivity</span>...",
+                    "Reject <span class='highlight-green'>633 W/m²</span> of waste heat into the void.",
+                    "No water. No chillers. Pure <span class='highlight'>radiative cooling</span>."
+                ]
+            },
+            {
+                chapter: "Chapter Five",
+                title: "Thermal Engineering",
+                scene: "thermal_detail",
+                showDataPanel: true,
+                showEquation: true,
+                showThermal: true,
+                equation: { label: "Net Radiative Balance", text: "Pₙₑₜ = 770.48 - 122.94 - 14.46 = 633 W/m²" },
+                dataContent: [
+                    { label: "Emission (20°C)", value: "770.48 W/m²" },
+                    { label: "Solar Absorbed", value: "-122.94 W/m²" },
+                    { label: "Earth IR/Albedo", value: "-14.46 W/m²" },
+                    { label: "Net Rejection", value: "633.08 W/m²" },
+                    { label: "Coating", value: "Z-93 Ceramic" }
+                ],
+                subtitles: [
+                    "The <span class='highlight'>Stefan-Boltzmann law</span> governs all radiative transfer.",
+                    "Heat emission scales with temperature to the <span class='highlight-gold'>fourth power</span>.",
+                    "At 20°C, both sides of a radiator emit <span class='highlight'>770 W/m²</span>.",
+                    "Subtract solar absorption: <span class='highlight-gold'>122.94 W/m²</span>.",
+                    "Subtract Earth's albedo and IR: <span class='highlight'>14.46 W/m²</span>.",
+                    "Net rejection: <span class='highlight-green'>633.08 W/m²</span> — verified calculation."
+                ]
+            },
+            {
+                chapter: "Chapter Six",
+                title: "Space-Qualified Hardware",
+                scene: "satellite_close",
+                showDataPanel: true,
+                showEquation: false,
+                showThermal: false,
+                dataContent: [
+                    { label: "Radiation Dose", value: "~15 krad/year" },
+                    { label: "Shielding Mass", value: "1 kg per kW" },
+                    { label: "TPU Test Result", value: "No damage" },
+                    { label: "Test Duration", value: "5 yr equivalent" },
+                    { label: "Sensitive Component", value: "HBM" }
+                ],
+                subtitles: [
+                    "Cosmic rays and solar protons threaten electronic systems.",
+                    "At LEO altitudes, the radiation environment is <span class='highlight'>manageable</span>.",
+                    "Google tested TPUs in a <span class='highlight-gold'>67 MeV proton beam</span>...",
+                    "Simulating five years of orbital exposure.",
+                    "Result: <span class='highlight-green'>No critical damage observed</span>.",
+                    "High-bandwidth memory showed minor sensitivity — acceptable for inference."
+                ]
+            },
+            {
+                chapter: "Chapter Seven",
+                title: "The Launch Revolution",
+                scene: "constellation",
+                showDataPanel: true,
+                showEquation: false,
+                showThermal: false,
+                dataContent: [
+                    { label: "Shuttle (1981)", value: "$54,500/kg" },
+                    { label: "Falcon 9 (2020)", value: "$2,720/kg" },
+                    { label: "Falcon Heavy", value: "$1,400/kg" },
+                    { label: "Starship (proj.)", value: "<$100/kg" },
+                    { label: "2025 F9 Launches", value: "163+" }
+                ],
+                subtitles: [
+                    "The Space Shuttle: <span class='highlight-gold'>$54,500 per kilogram</span> to LEO.",
+                    "SpaceX Falcon 9: <span class='highlight'>$2,720 per kilogram</span>.",
+                    "A <span class='highlight-green'>20× reduction</span> in launch cost.",
+                    "Starship promises to drop below <span class='highlight'>$100/kg</span>.",
+                    "At this price point, launch costs become <span class='highlight-gold'>secondary</span>.",
+                    "163 Falcon launches in 2025 alone. The bottleneck has broken."
+                ]
+            },
+            {
+                chapter: "Chapter Eight",
+                title: "Economic Analysis",
+                scene: "orbit_high",
+                showDataPanel: true,
+                showEquation: false,
+                showThermal: false,
+                dataContent: [
+                    { label: "Terrestrial Energy", value: "$140M" },
+                    { label: "Orbital Launch", value: "$5M" },
+                    { label: "Solar Array", value: "$2M" },
+                    { label: "Shielding", value: "$1.2M" },
+                    { label: "Total Orbital", value: "$8.2M" }
+                ],
+                subtitles: [
+                    "A 40 MW data center on Earth: <span class='highlight-gold'>$140 million</span> in electricity over 10 years.",
+                    "The same capacity in orbit: <span class='highlight'>$8.2 million</span> total.",
+                    "Launch: $5M. Solar array: $2M. Shielding: $1.2M.",
+                    "A <span class='highlight-green'>20× cost advantage</span> for space-based operations.",
+                    "Energy cost equivalent: <span class='highlight'>$0.002/kWh</span>.",
+                    "Versus $0.04/kWh on Earth. The economics have shifted."
+                ]
+            },
+            {
+                chapter: "Chapter Nine",
+                title: "The Race to Orbit",
+                scene: "wide_constellation",
+                showDataPanel: false,
+                showEquation: false,
+                showThermal: false,
+                dataContent: null,
+                subtitles: [
+                    "<span class='highlight'>Starcloud</span>: First dedicated orbital data center company.",
+                    "<span class='highlight-gold'>Google Project Suncatcher</span>: 81-satellite TPU constellation.",
+                    "<span class='highlight'>Thales ASCEND</span>: European 1 GW roadmap by 2050.",
+                    "Jeff Bezos predicts gigawatt clusters in <span class='highlight-green'>10-20 years</span>.",
+                    "The infrastructure race has begun."
+                ]
+            },
+            {
+                chapter: "Epilogue",
+                title: "The Inevitable Migration",
+                scene: "final_wide",
+                showDataPanel: false,
+                showEquation: false,
+                showThermal: false,
+                dataContent: null,
+                subtitles: [
+                    "The Sun emits <span class='highlight-gold'>100 trillion times</span> more power than humanity produces.",
+                    "Limitless energy. The coldest heat sink. Infinite scalability.",
+                    "The physics works. The economics are favorable.",
+                    "The question is no longer <span class='highlight'>if</span>...",
+                    "But <span class='highlight-green'>when</span>.",
+                    "This is the future of compute."
+                ]
+            }
+        ];
+
+        // ============================================
+        // THREE.JS ENGINE
+        // ============================================
+        let scene, camera, renderer, composer;
+        let earth, atmosphere, atmosphere2, satellites = [], solarArrays = [], radiators = [];
+        let dataCenter, stars, phononicCrystal;
+        let clock = new THREE.Clock();
+
+        let currentChapter = 0;
+        let currentSubtitle = -1;
+        let isPaused = false;
+        let subtitleTimeout = null;
+
+        // Loading progress
+        let loadProgress = 0;
+
+        function updateLoadingBar(progress) {
+            loadProgress = progress;
+            document.getElementById('loadingBar').style.width = progress + '%';
+        }
+
+        function init() {
+            updateLoadingBar(10);
+
+            // Setup renderer
+            const canvas = document.getElementById('canvas');
+            renderer = new THREE.WebGLRenderer({
+                canvas,
+                antialias: true,
+                alpha: false,
+                powerPreference: "high-performance"
+            });
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+            renderer.toneMapping = THREE.ACESFilmicToneMapping;
+            renderer.toneMappingExposure = 1.0;
+            renderer.shadowMap.enabled = true;
+            renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+
+            updateLoadingBar(20);
+
+            // Scene
+            scene = new THREE.Scene();
+            scene.background = new THREE.Color(0x000510);
+
+            // Camera
+            camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 3000);
+            // Start from OUTSIDE - see both Earth (radius 40) and satellite (y=52 orbit) together
+            camera.position.set(70, 60, 100);  // Professional wide shot showing both
+
+            updateLoadingBar(30);
+
+            // Post-processing
+            const renderPass = new THREE.RenderPass(scene, camera);
+            const bloomPass = new THREE.UnrealBloomPass(
+                new THREE.Vector2(window.innerWidth, window.innerHeight),
+                1.2, 0.4, 0.85
+            );
+            bloomPass.threshold = 0.8;
+            bloomPass.strength = 0.25;
+            bloomPass.radius = 0.3;
+
+            composer = new THREE.EffectComposer(renderer);
+            composer.addPass(renderPass);
+            composer.addPass(bloomPass);
+
+            updateLoadingBar(40);
+
+            // Build scene
+            setupLighting();
+            updateLoadingBar(50);
+            createEarth();
+            updateLoadingBar(60);
+            createStarfield();
+            updateLoadingBar(70);
+            createOrbitalDataCenter();
+            updateLoadingBar(80);
+            createSatelliteConstellation();
+            updateLoadingBar(90);
+            createPhononicCrystal();
+            updateLoadingBar(95);
+
+            // Event listeners
+            window.addEventListener('resize', onResize);
+
+            updateLoadingBar(100);
+
+            // Hide loading screen
+            setTimeout(() => {
+                document.getElementById('loadingScreen').classList.add('hidden');
+                startDocumentary();
+            }, 500);
+
+            animate();
+        }
+
+        function setupLighting() {
+            // Sun light (key) - reduced to prevent overexposure
+            const sunLight = new THREE.DirectionalLight(0xffffff, 1.0);
+            sunLight.position.set(200, 80, 100);
+            sunLight.castShadow = true;
+            sunLight.shadow.mapSize.width = 2048;
+            sunLight.shadow.mapSize.height = 2048;
+            scene.add(sunLight);
+
+            // Create visible Sun sphere at light position
+            const sunGeo = new THREE.SphereGeometry(15, 32, 32);
+            const sunMat = new THREE.MeshBasicMaterial({
+                color: 0xffffee,
+                emissive: 0xffffaa
+            });
+            const sunMesh = new THREE.Mesh(sunGeo, sunMat);
+            sunMesh.position.set(200, 80, 100);
+            scene.add(sunMesh);
+            window.sunMesh = sunMesh;
+
+            // Sun glow (corona effect)
+            const coronaGeo = new THREE.SphereGeometry(20, 32, 32);
+            const coronaMat = new THREE.MeshBasicMaterial({
+                color: 0xffcc00,
+                transparent: true,
+                opacity: 0.3,
+                side: THREE.BackSide
+            });
+            const corona = new THREE.Mesh(coronaGeo, coronaMat);
+            corona.position.copy(sunMesh.position);
+            scene.add(corona);
+
+            // Earth fill (blue from below) - subtle
+            const earthFill = new THREE.DirectionalLight(0x4488ff, 0.5);
+            earthFill.position.set(0, -60, 30);
+            scene.add(earthFill);
+
+            // Rim light (cyan) - reduced
+            const rimLight = new THREE.SpotLight(0x00ffff, 1.2);
+            rimLight.position.set(-120, 30, -60);
+            rimLight.lookAt(0, 0, 0);
+            scene.add(rimLight);
+
+            // Ambient - darker
+            const ambient = new THREE.AmbientLight(0x0a1520, 0.35);
+            scene.add(ambient);
+        }
+
+        function createEarth() {
+            const earthRadius = 40;
+
+            // Load NASA Blue Marble Earth texture
+            const textureLoader = new THREE.TextureLoader();
+            const earthTexture = textureLoader.load('https://unpkg.com/three-globe/example/img/earth-blue-marble.jpg');
+            const bumpTexture = textureLoader.load('https://unpkg.com/three-globe/example/img/earth-topology.png');
+
+            // Earth sphere with realistic texture
+            const earthGeo = new THREE.SphereGeometry(earthRadius, 128, 128);
+            const earthMat = new THREE.MeshPhongMaterial({
+                map: earthTexture,
+                bumpMap: bumpTexture,
+                bumpScale: 0.5,
+                specular: 0x333333,
+                shininess: 5
+            });
+            earth = new THREE.Mesh(earthGeo, earthMat);
+            earth.receiveShadow = true;
+            scene.add(earth);
+
+            // Very subtle atmosphere glow - BackSide sphere only, no rings
+            const atmoGlow = new THREE.SphereGeometry(earthRadius * 1.05, 32, 32);
+            const atmoGlowMat = new THREE.MeshBasicMaterial({
+                color: 0x4488ff,
+                transparent: true,
+                opacity: 0.08,
+                side: THREE.BackSide
+            });
+            atmosphere = new THREE.Mesh(atmoGlow, atmoGlowMat);
+            scene.add(atmosphere);
+
+            // Earth latitude/longitude grid lines (denser for realism)
+            const gridLineMat = new THREE.LineBasicMaterial({
+                color: 0x1a4a8a,  // Dark blue
+                transparent: true,
+                opacity: 0.35
+            });
+
+            // Latitude circles at 15° intervals (denser grid)
+            const latitudes = [0, 15, 30, 45, 60, 75, -15, -30, -45, -60, -75];
+            latitudes.forEach(lat => {
+                const latRad = lat * (Math.PI / 180);
+                const radius = earthRadius * Math.cos(latRad) * 1.003;
+                const height = earthRadius * Math.sin(latRad) * 1.003;
+                const latGeo = new THREE.BufferGeometry().setFromPoints(
+                    new Array(65).fill(0).map((_, i) => {
+                        const angle = (i / 64) * Math.PI * 2;
+                        return new THREE.Vector3(
+                            Math.cos(angle) * radius,
+                            height,
+                            Math.sin(angle) * radius
+                        );
+                    })
+                );
+                const latLine = new THREE.Line(latGeo, gridLineMat);
+                scene.add(latLine);
+            });
+
+            // Longitude lines at 15° intervals (denser grid)
+            for (let lon = 0; lon < 360; lon += 15) {
+                const lonRad = lon * (Math.PI / 180);
+                const lonGeo = new THREE.BufferGeometry().setFromPoints(
+                    new Array(65).fill(0).map((_, i) => {
+                        const latAngle = ((i / 64) * Math.PI) - (Math.PI / 2);
+                        return new THREE.Vector3(
+                            Math.cos(latAngle) * Math.cos(lonRad) * earthRadius * 1.003,
+                            Math.sin(latAngle) * earthRadius * 1.003,
+                            Math.cos(latAngle) * Math.sin(lonRad) * earthRadius * 1.003
+                        );
+                    })
+                );
+                const lonLine = new THREE.Line(lonGeo, gridLineMat);
+                scene.add(lonLine);
+            }
+        }
+
+        function createStarfield() {
+            const starGeo = new THREE.BufferGeometry();
+            const starPositions = [];
+            const starColors = [];
+
+            for (let i = 0; i < 8000; i++) {
+                const x = (Math.random() - 0.5) * 2000;
+                const y = (Math.random() - 0.5) * 2000;
+                const z = (Math.random() - 0.5) * 2000;
+                starPositions.push(x, y, z);
+
+                // Varied star colors
+                const colorChoice = Math.random();
+                if (colorChoice < 0.7) {
+                    starColors.push(1, 1, 1); // White
+                } else if (colorChoice < 0.85) {
+                    starColors.push(0.8, 0.9, 1); // Blue-white
+                } else {
+                    starColors.push(1, 0.95, 0.8); // Yellow-white
+                }
+            }
+
+            starGeo.setAttribute('position', new THREE.Float32BufferAttribute(starPositions, 3));
+            starGeo.setAttribute('color', new THREE.Float32BufferAttribute(starColors, 3));
+
+            const starMat = new THREE.PointsMaterial({
+                size: 1.2,
+                vertexColors: true,
+                transparent: true,
+                opacity: 0.9,
+                sizeAttenuation: true
+            });
+
+            stars = new THREE.Points(starGeo, starMat);
+            scene.add(stars);
+        }
+
+        function createOrbitalDataCenter() {
+            dataCenter = new THREE.Group();
+
+            // === MATERIALS (weathered realistic spacecraft textures) ===
+            const bodyMat = new THREE.MeshStandardMaterial({
+                color: 0x9aa5b0, metalness: 0.6, roughness: 0.45,
+                emissive: 0x111111, emissiveIntensity: 0.02
+            });
+            const grayMat = new THREE.MeshStandardMaterial({
+                color: 0x7a858f, metalness: 0.65, roughness: 0.4
+            });
+            const darkMat = new THREE.MeshStandardMaterial({
+                color: 0x3a4550, metalness: 0.55, roughness: 0.5
+            });
+            // Compute module material (dark aluminum like server equipment)
+            const computeMat = new THREE.MeshStandardMaterial({
+                color: 0x4a5560, metalness: 0.7, roughness: 0.35
+            });
+            // Gold MLI blanket material for thermal wrapping
+            const goldMat = new THREE.MeshStandardMaterial({
+                color: 0xb08820, metalness: 0.6, roughness: 0.4
+            });
+            const frameMat = new THREE.MeshStandardMaterial({
+                color: 0x5a6570, metalness: 0.7, roughness: 0.35
+            });
+            const boltMat = new THREE.MeshStandardMaterial({
+                color: 0x555555, metalness: 0.9, roughness: 0.2
+            });
+            const screwMat = new THREE.MeshStandardMaterial({
+                color: 0x444444, metalness: 0.85, roughness: 0.25
+            });
+
+            // === MULTI-SEGMENT CYLINDRICAL BODY with beveled edges ===
+            // Forward module (command section) - with bevel rings
+            const forwardGeo = new THREE.CylinderGeometry(2.5, 2.5, 4, 32);
+            const forward = new THREE.Mesh(forwardGeo, bodyMat);
+            forward.rotation.x = Math.PI / 2;
+            forward.position.z = -5;
+            dataCenter.add(forward);
+
+            // Bevel ring on forward section
+            const bevelRingGeo = new THREE.TorusGeometry(2.55, 0.08, 8, 32);
+            const bevelRing1 = new THREE.Mesh(bevelRingGeo, frameMat);
+            bevelRing1.position.z = -3;
+            dataCenter.add(bevelRing1);
+            const bevelRing1b = new THREE.Mesh(bevelRingGeo, frameMat);
+            bevelRing1b.position.z = -7;
+            dataCenter.add(bevelRing1b);
+
+            // === DOCKING PORT (at front, like reference images) ===
+            // Outer guide ring
+            const dockOuterGeo = new THREE.TorusGeometry(2.2, 0.12, 8, 32);
+            const dockOuter = new THREE.Mesh(dockOuterGeo, grayMat);
+            dockOuter.position.z = -7.1;
+            dataCenter.add(dockOuter);
+
+            // Middle alignment ring
+            const dockMidGeo = new THREE.TorusGeometry(1.6, 0.1, 8, 24);
+            const dockMid = new THREE.Mesh(dockMidGeo, darkMat);
+            dockMid.position.z = -7.15;
+            dataCenter.add(dockMid);
+
+            // Inner hatch ring
+            const dockInnerGeo = new THREE.TorusGeometry(1.0, 0.08, 8, 24);
+            const dockInner = new THREE.Mesh(dockInnerGeo, frameMat);
+            dockInner.position.z = -7.2;
+            dataCenter.add(dockInner);
+
+            // Docking hatch (circular cap)
+            const hatchGeo = new THREE.CircleGeometry(0.9, 24);
+            const hatchMat = new THREE.MeshStandardMaterial({ color: 0x3a4555, metalness: 0.5, roughness: 0.6 });
+            const hatch = new THREE.Mesh(hatchGeo, hatchMat);
+            hatch.position.z = -7.22;
+            dataCenter.add(hatch);
+
+            // Docking guide handles (4 around port)
+            const handleMat = new THREE.MeshStandardMaterial({ color: 0x888888, metalness: 0.7, roughness: 0.3 });
+            for (let h = 0; h < 4; h++) {
+                const hAng = (h / 4) * Math.PI * 2;
+                const handleGeo = new THREE.CylinderGeometry(0.06, 0.06, 0.8, 8);
+                const handle = new THREE.Mesh(handleGeo, handleMat);
+                handle.position.set(Math.cos(hAng) * 2.4, Math.sin(hAng) * 2.4, -7.0);
+                handle.rotation.x = Math.PI / 2;
+                dataCenter.add(handle);
+            }
+
+            // Alignment sensors/lights around docking port (6 units)
+            const sensorEmissive = new THREE.MeshBasicMaterial({ color: 0xffffff });
+            for (let s = 0; s < 6; s++) {
+                const sAng = (s / 6) * Math.PI * 2 + Math.PI / 6;
+                const sensorGeo = new THREE.CylinderGeometry(0.08, 0.08, 0.15, 8);
+                const sensor = new THREE.Mesh(sensorGeo, sensorEmissive);
+                sensor.position.set(Math.cos(sAng) * 1.8, Math.sin(sAng) * 1.8, -7.15);
+                dataCenter.add(sensor);
+            }
+
+            // Navigation lights (red/green for port/starboard)
+            const redLightMat = new THREE.MeshBasicMaterial({ color: 0xff0000 });
+            const greenLightMat = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
+            const navLightGeo = new THREE.SphereGeometry(0.12, 8, 8);
+            const redNav = new THREE.Mesh(navLightGeo, redLightMat);
+            redNav.position.set(-2.7, 0, -5);  // Port side (left)
+            dataCenter.add(redNav);
+            const greenNav = new THREE.Mesh(navLightGeo, greenLightMat);
+            greenNav.position.set(2.7, 0, -5);  // Starboard side (right)
+            dataCenter.add(greenNav);
+
+            // Center module (main compute core) - with bolt ring
+            const centerGeo = new THREE.CylinderGeometry(3, 3, 8, 32);
+            const center = new THREE.Mesh(centerGeo, bodyMat);
+            center.rotation.x = Math.PI / 2;
+            dataCenter.add(center);
+
+            // Bolt rings at center module joints
+            const boltRingGeo = new THREE.TorusGeometry(3.05, 0.1, 8, 32);
+            const boltRing1 = new THREE.Mesh(boltRingGeo, grayMat);
+            boltRing1.position.z = -4;
+            dataCenter.add(boltRing1);
+            const boltRing2 = new THREE.Mesh(boltRingGeo, grayMat);
+            boltRing2.position.z = 4;
+            dataCenter.add(boltRing2);
+
+            // Individual bolts around the rings
+            for (let ring of [-4, 4]) {
+                for (let b = 0; b < 16; b++) {
+                    const boltAng = (b / 16) * Math.PI * 2;
+                    const boltGeo = new THREE.CylinderGeometry(0.06, 0.06, 0.15, 6);
+                    const bolt = new THREE.Mesh(boltGeo, boltMat);
+                    bolt.position.set(Math.cos(boltAng) * 3.1, Math.sin(boltAng) * 3.1, ring);
+                    bolt.rotation.x = Math.PI / 2;
+                    dataCenter.add(bolt);
+                }
+            }
+
+            // Aft module (power/propulsion) - tapered with seam line
+            const aftGeo = new THREE.CylinderGeometry(2.8, 2.2, 5, 32);
+            const aft = new THREE.Mesh(aftGeo, grayMat);
+            aft.rotation.x = Math.PI / 2;
+            aft.position.z = 6.5;
+            dataCenter.add(aft);
+
+            // Seam rings on aft section
+            const seamRingGeo = new THREE.TorusGeometry(2.5, 0.06, 6, 32);
+            const seamRing1 = new THREE.Mesh(seamRingGeo, darkMat);
+            seamRing1.position.z = 5.5;
+            dataCenter.add(seamRing1);
+            const seamRing2 = new THREE.Mesh(seamRingGeo.clone(), darkMat);
+            seamRing2.position.z = 7.5;
+            dataCenter.add(seamRing2);
+
+            // === LONGITUDINAL PANEL SEAM LINES (like reference images) ===
+            const seamLineMat = new THREE.LineBasicMaterial({ color: 0x333340 });
+            for (let ll = 0; ll < 12; ll++) {
+                const llAng = (ll / 12) * Math.PI * 2;
+                const seamLineGeo = new THREE.BufferGeometry().setFromPoints([
+                    new THREE.Vector3(Math.cos(llAng) * 3.02, Math.sin(llAng) * 3.02, -4),
+                    new THREE.Vector3(Math.cos(llAng) * 3.02, Math.sin(llAng) * 3.02, 4)
+                ]);
+                dataCenter.add(new THREE.Line(seamLineGeo, seamLineMat));
+            }
+
+            // === EQUIPMENT BOXES on body (sensors, electronics, attitude control) ===
+            const eqBoxMat = new THREE.MeshStandardMaterial({ color: 0x444455, metalness: 0.6, roughness: 0.5 });
+            const surfaceEqPositions = [
+                { x: 2.8, y: 1.2, z: -2, w: 0.6, h: 0.4, d: 0.8 },
+                { x: -2.6, y: 1.5, z: 1, w: 0.5, h: 0.35, d: 0.6 },
+                { x: 0, y: 2.9, z: 2, w: 0.8, h: 0.3, d: 0.5 },
+                { x: 1.8, y: -2.2, z: 0, w: 0.55, h: 0.4, d: 0.65 },
+                { x: -1.5, y: -2.5, z: -1.5, w: 0.5, h: 0.35, d: 0.5 }
+            ];
+            surfaceEqPositions.forEach(eq => {
+                const eqGeo = new THREE.BoxGeometry(eq.w, eq.h, eq.d);
+                const eqBox = new THREE.Mesh(eqGeo, eqBoxMat);
+                eqBox.position.set(eq.x, eq.y, eq.z);
+                // Point box outward from center
+                eqBox.lookAt(eq.x * 2, eq.y * 2, eq.z);
+                dataCenter.add(eqBox);
+            });
+
+            // === CABLE HARNESS RUNS (thin tubes along body) ===
+            const cableMat = new THREE.MeshStandardMaterial({ color: 0x222233, metalness: 0.3, roughness: 0.7 });
+            for (let c = 0; c < 4; c++) {
+                const cAng = (c / 4) * Math.PI * 2 + Math.PI / 8;
+                const cableGeo = new THREE.CylinderGeometry(0.04, 0.04, 12, 6);
+                const cable = new THREE.Mesh(cableGeo, cableMat);
+                cable.position.set(Math.cos(cAng) * 2.7, Math.sin(cAng) * 2.7, -1);
+                dataCenter.add(cable);
+            }
+
+            // === SURFACE DETAIL PANELS with screws on each segment ===
+            const segments = [
+                { mesh: forward, radius: 2.55, zOff: -5 },
+                { mesh: center, radius: 3.05, zOff: 0 },
+                { mesh: aft, radius: 2.55, zOff: 6.5 }
+            ];
+            segments.forEach(seg => {
+                for (let p = 0; p < 8; p++) {
+                    const ang = (p / 8) * Math.PI * 2 + 0.2;
+                    const panelGeo = new THREE.BoxGeometry(1.4, 0.06, 1.1);
+                    const panel = new THREE.Mesh(panelGeo, darkMat);
+                    panel.position.set(Math.cos(ang) * seg.radius, Math.sin(ang) * seg.radius, seg.zOff);
+                    panel.rotation.z = ang;
+                    dataCenter.add(panel);
+
+                    // Corner screws on each panel
+                    for (let sx of [-0.5, 0.5]) {
+                        for (let sz of [-0.4, 0.4]) {
+                            const screwGeo = new THREE.CylinderGeometry(0.03, 0.03, 0.08, 6);
+                            const screw = new THREE.Mesh(screwGeo, screwMat);
+                            const screwX = Math.cos(ang) * (seg.radius + 0.04) + sx * Math.sin(ang) * 0.3;
+                            const screwY = Math.sin(ang) * (seg.radius + 0.04) - sx * Math.cos(ang) * 0.3;
+                            screw.position.set(screwX, screwY, seg.zOff + sz);
+                            screw.rotation.x = Math.PI / 2;
+                            dataCenter.add(screw);
+                        }
+                    }
+                }
+            });
+
+            // === EXPOSED EQUIPMENT BOXES with gold MLI ===
+            const eqPositions = [[2.5, 1.5, -3], [-2.5, 1.5, -3], [2.5, -1.5, 2], [-2.5, -1.5, 2]];
+            eqPositions.forEach(pos => {
+                const boxGeo = new THREE.BoxGeometry(1.2, 0.8, 1);
+                const box = new THREE.Mesh(boxGeo, grayMat);
+                box.position.set(...pos);
+                dataCenter.add(box);
+                // Gold MLI blanket on equipment
+                const mli = new THREE.Mesh(new THREE.BoxGeometry(1.22, 0.82, 0.1), goldMat);
+                mli.position.set(pos[0], pos[1], pos[2] + 0.5);
+                dataCenter.add(mli);
+            });
+
+            // Compute modules (positioned around center) with realistic hardware
+
+            for (let i = 0; i < 6; i++) {
+                const angle = (i / 6) * Math.PI * 2;
+                const moduleGeo = new THREE.BoxGeometry(2, 1.5, 3);
+                const module = new THREE.Mesh(moduleGeo, computeMat);  // Dark aluminum server modules
+                const modX = Math.cos(angle) * 5;
+                const modY = Math.sin(angle) * 5;
+                module.position.set(modX, modY, 0);
+                module.lookAt(0, 0, 0);
+                module.castShadow = true;
+                dataCenter.add(module);
+
+                // Edge rails (chamfer/fillet simulation on all 12 edges)
+                const railMat = new THREE.MeshStandardMaterial({ color: 0x3a4045, metalness: 0.9, roughness: 0.15 });
+                // Vertical edge rails (4 corners)
+                const railGeoV = new THREE.CylinderGeometry(0.05, 0.05, 3.05, 8);
+                for (let rx of [-0.98, 0.98]) {
+                    for (let ry of [-0.73, 0.73]) {
+                        const rail = new THREE.Mesh(railGeoV, railMat);
+                        rail.position.set(rx, ry, 0);
+                        module.add(rail);
+                    }
+                }
+                // Horizontal edge rails (top/bottom edges along Z)
+                const railGeoH = new THREE.CylinderGeometry(0.04, 0.04, 2.05, 8);
+                for (let ry of [-0.75, 0.75]) {
+                    for (let rz of [-1.48, 1.48]) {
+                        const rail = new THREE.Mesh(railGeoH, railMat);
+                        rail.position.set(0, ry, rz);
+                        rail.rotation.z = Math.PI / 2;
+                        module.add(rail);
+                    }
+                }
+                // Front/back edge rails (along X)
+                const railGeoF = new THREE.CylinderGeometry(0.04, 0.04, 1.55, 8);
+                for (let rx of [-0.98, 0.98]) {
+                    for (let rz of [-1.48, 1.48]) {
+                        const rail = new THREE.Mesh(railGeoF, railMat);
+                        rail.position.set(rx, 0, rz);
+                        module.add(rail);
+                    }
+                }
+
+                // Face screws on all sides (more realistic)
+                for (let bx of [-0.7, 0, 0.7]) {
+                    for (let by of [-0.5, 0.5]) {
+                        for (let bz of [-1.48, 1.48]) {
+                            const screwGeo = new THREE.CylinderGeometry(0.035, 0.035, 0.08, 6);
+                            const screw = new THREE.Mesh(screwGeo, screwMat);
+                            screw.position.set(bx, by, bz);
+                            module.add(screw);
+                        }
+                    }
+                }
+                // Side panel screws
+                for (let bz of [-1.2, 0, 1.2]) {
+                    for (let by of [-0.5, 0.5]) {
+                        const screwGeo = new THREE.CylinderGeometry(0.035, 0.035, 0.08, 6);
+                        const screw = new THREE.Mesh(screwGeo, screwMat);
+                        screw.position.set(0.99, by, bz);
+                        screw.rotation.z = Math.PI / 2;
+                        module.add(screw);
+                    }
+                }
+
+                // Connecting struts from hub to module (THICKER for visibility)
+                const strutMat = new THREE.MeshStandardMaterial({
+                    color: 0x555566,
+                    metalness: 0.8,
+                    roughness: 0.3
+                });
+                // Primary strut (thick main connection)
+                const strutLength = 2.5;
+                const strutGeo = new THREE.CylinderGeometry(0.25, 0.25, strutLength, 12);
+                const strut = new THREE.Mesh(strutGeo, strutMat);
+                strut.position.set(Math.cos(angle) * 3.75, Math.sin(angle) * 3.75, 0);
+                strut.rotation.z = angle + Math.PI / 2;
+                dataCenter.add(strut);
+
+                // Secondary parallel strut (for structural realism)
+                const strut2Geo = new THREE.CylinderGeometry(0.15, 0.15, strutLength, 8);
+                const strut2 = new THREE.Mesh(strut2Geo, strutMat);
+                strut2.position.set(Math.cos(angle) * 3.75, Math.sin(angle) * 3.75, 0.8);
+                strut2.rotation.z = angle + Math.PI / 2;
+                dataCenter.add(strut2);
+                const strut3 = new THREE.Mesh(strut2Geo.clone(), strutMat);
+                strut3.position.set(Math.cos(angle) * 3.75, Math.sin(angle) * 3.75, -0.8);
+                strut3.rotation.z = angle + Math.PI / 2;
+                dataCenter.add(strut3);
+
+                // Hex nuts at strut-to-module connection
+                const nutGeo = new THREE.CylinderGeometry(0.18, 0.18, 0.12, 6);
+                const nut1 = new THREE.Mesh(nutGeo, boltMat);
+                nut1.position.set(Math.cos(angle) * 2.6, Math.sin(angle) * 2.6, 0);
+                nut1.rotation.z = angle;
+                dataCenter.add(nut1);
+                const nut2 = new THREE.Mesh(nutGeo, boltMat);
+                nut2.position.set(Math.cos(angle) * 4.9, Math.sin(angle) * 4.9, 0);
+                nut2.rotation.z = angle;
+                dataCenter.add(nut2);
+
+                // Add MLI stripes to each module (multi-layer insulation)
+                const stripeMat = new THREE.MeshBasicMaterial({ color: 0xaa8800 });
+                for (let s = -1; s <= 1; s += 0.5) {
+                    const stripeGeo = new THREE.BoxGeometry(2.01, 0.1, 0.08);
+                    const stripe = new THREE.Mesh(stripeGeo, stripeMat);
+                    stripe.position.set(0, s * 0.5, 1.51);
+                    module.add(stripe);
+                }
+
+                // Panel rivets on module faces
+                for (let rz of [-1.2, 0, 1.2]) {
+                    for (let ry of [-0.5, 0.5]) {
+                        const rivetGeo = new THREE.SphereGeometry(0.03, 6, 4);
+                        const rivet = new THREE.Mesh(rivetGeo, screwMat);
+                        rivet.position.set(1.01, ry, rz);
+                        module.add(rivet);
+                    }
+                }
+            }
+
+            // Truss structure (main backbone)
+            const trussMat = new THREE.LineBasicMaterial({ color: 0x888888, linewidth: 2 });
+            const trussSegments = [
+                // Main longitudinal beams
+                [[-8, 0, 4], [8, 0, 4]],
+                [[-8, 0, -4], [8, 0, -4]],
+                // Cross braces (X pattern)
+                [[-8, 0, 4], [-4, 0, -4]],
+                [[-8, 0, -4], [-4, 0, 4]],
+                [[-4, 0, 4], [0, 0, -4]],
+                [[-4, 0, -4], [0, 0, 4]],
+                [[0, 0, 4], [4, 0, -4]],
+                [[0, 0, -4], [4, 0, 4]],
+                [[4, 0, 4], [8, 0, -4]],
+                [[4, 0, -4], [8, 0, 4]]
+            ];
+            trussSegments.forEach(seg => {
+                const geo = new THREE.BufferGeometry().setFromPoints([
+                    new THREE.Vector3(...seg[0]),
+                    new THREE.Vector3(...seg[1])
+                ]);
+                const line = new THREE.Line(geo, trussMat);
+                dataCenter.add(line);
+            });
+
+            // Docking port (at front)
+            const dockGeo = new THREE.CylinderGeometry(1.2, 1.5, 1, 16);
+            const dockMat = new THREE.MeshStandardMaterial({
+                color: 0x666666,
+                metalness: 0.9,
+                roughness: 0.4
+            });
+            const dockPort = new THREE.Mesh(dockGeo, dockMat);
+            dockPort.position.set(0, 0, -5);
+            dockPort.rotation.x = Math.PI / 2;
+            dataCenter.add(dockPort);
+
+            // Docking ring
+            const ringGeo = new THREE.TorusGeometry(1.3, 0.15, 8, 24);
+            const ringMat = new THREE.MeshStandardMaterial({ color: 0x444444, metalness: 0.8 });
+            const dockRing = new THREE.Mesh(ringGeo, ringMat);
+            dockRing.position.set(0, 0, -5.5);
+            dataCenter.add(dockRing);
+
+            // RCS thrusters (4 corners)
+            const rcsMat = new THREE.MeshStandardMaterial({
+                color: 0x333333,
+                metalness: 0.7,
+                roughness: 0.5
+            });
+            const rcsPositions = [
+                [6, 4, 3], [6, -4, 3], [-6, 4, 3], [-6, -4, 3]
+            ];
+            rcsPositions.forEach(pos => {
+                const rcsGeo = new THREE.ConeGeometry(0.3, 0.6, 8);
+                const rcs = new THREE.Mesh(rcsGeo, rcsMat);
+                rcs.position.set(...pos);
+                rcs.rotation.x = Math.PI;
+                dataCenter.add(rcs);
+
+                // RCS nozzle glow (subtle)
+                const glowGeo = new THREE.SphereGeometry(0.2, 8, 8);
+                const glowMat = new THREE.MeshBasicMaterial({
+                    color: 0xff6600,
+                    transparent: true,
+                    opacity: 0.3
+                });
+                const glow = new THREE.Mesh(glowGeo, glowMat);
+                glow.position.set(pos[0], pos[1], pos[2] + 0.4);
+                dataCenter.add(glow);
+            });
+
+            // Status lights (blinking in animation)
+            const lightMat = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
+            const light1 = new THREE.Mesh(new THREE.SphereGeometry(0.15), lightMat);
+            light1.position.set(3.5, 0, 4.1);
+            dataCenter.add(light1);
+            window.statusLight1 = light1;
+
+            const lightMat2 = new THREE.MeshBasicMaterial({ color: 0xff0000 });
+            const light2 = new THREE.Mesh(new THREE.SphereGeometry(0.15), lightMat2);
+            light2.position.set(-3.5, 0, 4.1);
+            dataCenter.add(light2);
+            window.statusLight2 = light2;
+
+
+            // === ARTICULATED SOLAR ARRAY BOOMS (like reference images) ===
+            const solarMat = new THREE.MeshStandardMaterial({
+                color: 0x1a2244,
+                metalness: 0.5,
+                roughness: 0.3,
+                emissive: 0x0a1122,
+                emissiveIntensity: 0.1
+            });
+            for (let side of [-1, 1]) {
+                // Boom arm (gimbal mechanism)
+                const boomGeo = new THREE.CylinderGeometry(0.25, 0.25, 4, 8);
+                const boom = new THREE.Mesh(boomGeo, new THREE.MeshStandardMaterial({ color: 0x555555, metalness: 0.8 }));
+                boom.position.set(side * 5, 0, 0);
+                boom.rotation.z = Math.PI / 2;
+                dataCenter.add(boom);
+
+                // Gimbal housing
+                const gimbalGeo = new THREE.CylinderGeometry(0.6, 0.6, 1, 16);
+                const gimbal = new THREE.Mesh(gimbalGeo, new THREE.MeshStandardMaterial({ color: 0x888888, metalness: 0.7 }));
+                gimbal.position.set(side * 3.5, 0, 0);
+                gimbal.rotation.z = Math.PI / 2;
+                dataCenter.add(gimbal);
+
+                // Solar array wing (4 segmented panels)
+                const wing = new THREE.Group();
+                for (let seg = 0; seg < 4; seg++) {
+                    const panelGroup = new THREE.Group();
+                    // Panel frame
+                    const frameGeo = new THREE.BoxGeometry(5.5, 0.12, 2.8);
+                    const frameMat = new THREE.MeshStandardMaterial({ color: 0x555555, metalness: 0.8, roughness: 0.2 });
+                    const frame = new THREE.Mesh(frameGeo, frameMat);
+                    panelGroup.add(frame);
+                    // Solar cells
+                    const cellGeo = new THREE.BoxGeometry(5.2, 0.03, 2.5);
+                    const cells = new THREE.Mesh(cellGeo, solarMat);
+                    cells.position.y = 0.07;
+                    panelGroup.add(cells);
+                    // Grid lines on cells
+                    const gridMat = new THREE.LineBasicMaterial({ color: 0x3355aa, transparent: true, opacity: 0.6 });
+                    for (let g = -2.5; g <= 2.5; g += 1) {
+                        const vLine = new THREE.BufferGeometry().setFromPoints([
+                            new THREE.Vector3(g, 0.1, -1.2),
+                            new THREE.Vector3(g, 0.1, 1.2)
+                        ]);
+                        panelGroup.add(new THREE.Line(vLine, gridMat));
+                    }
+                    for (let h = -1; h <= 1; h += 0.5) {
+                        const hLine = new THREE.BufferGeometry().setFromPoints([
+                            new THREE.Vector3(-2.6, 0.1, h),
+                            new THREE.Vector3(2.6, 0.1, h)
+                        ]);
+                        panelGroup.add(new THREE.Line(hLine, gridMat));
+                    }
+                    panelGroup.position.set(side * (8 + seg * 5.8), 0, 0);
+                    wing.add(panelGroup);
+                }
+                dataCenter.add(wing);
+                solarArrays.push(wing);
+            }
+
+            // === RADIATOR PANELS with realistic details (based on reference images) ===
+            const radiatorMat = new THREE.MeshStandardMaterial({
+                color: 0xf5f5f0,  // White/off-white radiator surface
+                metalness: 0.1,
+                roughness: 0.85,
+                emissive: 0x222222,
+                emissiveIntensity: 0.03
+            });
+
+            // Gold MLI edge material
+            const mliEdgeMat = new THREE.MeshStandardMaterial({
+                color: 0xccaa22,
+                metalness: 0.8,
+                roughness: 0.3
+            });
+
+            // Mounting hub material (silver aluminum)
+            const hubMat = new THREE.MeshStandardMaterial({
+                color: 0xaaaaaa,
+                metalness: 0.9,
+                roughness: 0.2
+            });
+
+            // Create detailed radiator function (ISS-style segmented panels)
+            function createDetailedRadiator(yPos) {
+                const radGroup = new THREE.Group();
+
+                // Structural frame material (dark gray aluminum)
+                const frameMat = new THREE.MeshStandardMaterial({
+                    color: 0x555566,
+                    metalness: 0.8,
+                    roughness: 0.3
+                });
+
+                // Bolt material
+                const boltMaterial = new THREE.MeshStandardMaterial({
+                    color: 0x333344,
+                    metalness: 0.9,
+                    roughness: 0.2
+                });
+
+                // === GRID OF SEGMENTED WHITE PANELS (like ISS radiators) ===
+                const panelRows = 4;
+                const panelCols = 5;
+                const panelWidth = 1.8;
+                const panelLength = 3.8;
+                const panelGap = 0.15;
+
+                for (let row = 0; row < panelRows; row++) {
+                    for (let col = 0; col < panelCols; col++) {
+                        // Individual panel
+                        const panelGeo = new THREE.BoxGeometry(panelWidth, 0.06, panelLength);
+                        const panel = new THREE.Mesh(panelGeo, radiatorMat);
+                        const xPos = (col - (panelCols - 1) / 2) * (panelWidth + panelGap);
+                        const zPos = (row - (panelRows - 1) / 2) * (panelLength + panelGap);
+                        panel.position.set(xPos, 0.04, zPos);
+                        radGroup.add(panel);
+
+                        // Panel edge trim (subtle darker line)
+                        const edgeMat = new THREE.LineBasicMaterial({ color: 0xcccccc });
+                        const edgeGeo = new THREE.BufferGeometry().setFromPoints([
+                            new THREE.Vector3(xPos - panelWidth / 2, 0.08, zPos - panelLength / 2),
+                            new THREE.Vector3(xPos + panelWidth / 2, 0.08, zPos - panelLength / 2),
+                            new THREE.Vector3(xPos + panelWidth / 2, 0.08, zPos + panelLength / 2),
+                            new THREE.Vector3(xPos - panelWidth / 2, 0.08, zPos + panelLength / 2),
+                            new THREE.Vector3(xPos - panelWidth / 2, 0.08, zPos - panelLength / 2)
+                        ]);
+                        radGroup.add(new THREE.Line(edgeGeo, edgeMat));
+                    }
+                }
+
+                // === STRUCTURAL FRAME (visible grid behind panels) ===
+                // Longitudinal beams (along Z axis)
+                for (let x = -4; x <= 4; x += 2) {
+                    const beamGeo = new THREE.BoxGeometry(0.12, 0.08, 18);
+                    const beam = new THREE.Mesh(beamGeo, frameMat);
+                    beam.position.set(x, -0.02, 0);
+                    radGroup.add(beam);
+                }
+
+                // Cross beams (along X axis)
+                for (let z = -8; z <= 8; z += 4) {
+                    const crossGeo = new THREE.BoxGeometry(8.5, 0.08, 0.12);
+                    const cross = new THREE.Mesh(crossGeo, frameMat);
+                    cross.position.set(0, -0.02, z);
+                    radGroup.add(cross);
+                }
+
+                // === BOLTS AT GRID INTERSECTIONS ===
+                for (let x = -4; x <= 4; x += 2) {
+                    for (let z = -8; z <= 8; z += 4) {
+                        // Main bolt
+                        const boltGeo = new THREE.CylinderGeometry(0.08, 0.08, 0.12, 6);
+                        const bolt = new THREE.Mesh(boltGeo, boltMaterial);
+                        bolt.position.set(x, 0.1, z);
+                        bolt.rotation.x = Math.PI / 2;
+                        radGroup.add(bolt);
+
+                        // Washer ring
+                        const washerGeo = new THREE.TorusGeometry(0.12, 0.03, 6, 6);
+                        const washer = new THREE.Mesh(washerGeo, hubMat);
+                        washer.position.set(x, 0.08, z);
+                        washer.rotation.x = Math.PI / 2;
+                        radGroup.add(washer);
+                    }
+                }
+
+                // === GOLD MLI EDGE TRIM (like ISS radiators) ===
+                const mliTrimGeo = new THREE.BoxGeometry(9, 0.1, 0.2);
+                const mliTrimFront = new THREE.Mesh(mliTrimGeo, mliEdgeMat);
+                mliTrimFront.position.set(0, 0, -9);
+                radGroup.add(mliTrimFront);
+                const mliTrimBack = new THREE.Mesh(mliTrimGeo, mliEdgeMat);
+                mliTrimBack.position.set(0, 0, 9);
+                radGroup.add(mliTrimBack);
+
+                const mliSideGeo = new THREE.BoxGeometry(0.2, 0.1, 18.4);
+                const mliLeft = new THREE.Mesh(mliSideGeo, mliEdgeMat);
+                mliLeft.position.set(-4.4, 0, 0);
+                radGroup.add(mliLeft);
+                const mliRight = new THREE.Mesh(mliSideGeo, mliEdgeMat);
+                mliRight.position.set(4.4, 0, 0);
+                radGroup.add(mliRight);
+
+                // === CENTER MOUNTING HUB (where panel connects to spacecraft) ===
+                const hubGeo = new THREE.CylinderGeometry(0.6, 0.6, 0.3, 8);
+                const centerHub = new THREE.Mesh(hubGeo, hubMat);
+                centerHub.position.set(0, -0.1, 0);
+                centerHub.rotation.x = Math.PI / 2;
+                radGroup.add(centerHub);
+
+                radGroup.position.set(0, yPos, 0);
+                radGroup.rotation.x = Math.PI / 2;
+                return radGroup;
+            }
+
+            // Create two radiator panels
+            const radiator1 = createDetailedRadiator(6);
+            dataCenter.add(radiator1);
+            radiators.push(radiator1);
+
+            const radiator2 = createDetailedRadiator(-6);
+            dataCenter.add(radiator2);
+            radiators.push(radiator2);
+
+            // Communication dish with support arm (properly connected)
+            // Support arm from body to dish - DISH POINTS TOWARD EARTH for downlink
+            const dishArmGeo = new THREE.CylinderGeometry(0.1, 0.1, 3, 8);
+            const dishArmMat = new THREE.MeshStandardMaterial({ color: 0x666666, metalness: 0.8 });
+            const dishArm = new THREE.Mesh(dishArmGeo, dishArmMat);
+            dishArm.position.set(0, -3.5, 0);  // Arm points DOWNWARD toward Earth
+            dataCenter.add(dishArm);
+
+            // Mounting bracket at arm end
+            const mountGeo = new THREE.BoxGeometry(0.4, 0.4, 0.3);
+            const mount = new THREE.Mesh(mountGeo, dishArmMat);
+            mount.position.set(0, -5.2, 0);  // Below the data center
+            dataCenter.add(mount);
+
+            // Parabolic dish (POINTING TOWARD EARTH for ground station downlink)
+            const dishGeo = new THREE.ConeGeometry(2.0, 0.6, 32, 1, true);  // LARGER dish
+            const dishMat = new THREE.MeshStandardMaterial({
+                color: 0x888899,
+                metalness: 0.85,
+                roughness: 0.25,
+                side: THREE.DoubleSide
+            });
+            const dish1 = new THREE.Mesh(dishGeo, dishMat);
+            dish1.position.set(0, -5.5, 0);  // Below data center, pointing to Earth
+            dish1.rotation.x = Math.PI / 2;  // Face downward
+            dataCenter.add(dish1);
+            window.mainDish = dish1;
+
+            // Glow ring around dish to show it's the Earth downlink
+            const dishGlowGeo = new THREE.TorusGeometry(2.0, 0.1, 8, 32);
+            const dishGlowMat = new THREE.MeshBasicMaterial({
+                color: 0x44ff88,
+                transparent: true,
+                opacity: 0.6
+            });
+            const dishGlow = new THREE.Mesh(dishGlowGeo, dishGlowMat);
+            dishGlow.position.set(0, -5.5, 0);
+            dataCenter.add(dishGlow);
+
+            // ===== LASER OPTICAL DOWNLINK TO EARTH GROUND STATION =====
+            // This represents optical/RF data transmission to Earth
+            // Direction: Data Center (y=60) -> Earth surface (y~40 = Earth radius)
+            const earthDownlinkGeo = new THREE.CylinderGeometry(0.25, 0.12, 55, 8);  // LARGER beam
+            const earthDownlinkMat = new THREE.MeshBasicMaterial({
+                color: 0x44ff88,  // Brighter green for visibility
+                transparent: true,
+                opacity: 0.55  // More visible
+            });
+            const earthDownlink = new THREE.Mesh(earthDownlinkGeo, earthDownlinkMat);
+            earthDownlink.position.set(0, -33, 0);  // Points from dish toward Earth
+            dataCenter.add(earthDownlink);
+            window.earthDownlink = earthDownlink;
+
+            // ===== INTER-SATELLITE OPTICAL LINK (OISL) =====
+            // Secondary dish for relay satellite communication (points sideways)
+            const oislDishGeo = new THREE.ConeGeometry(0.8, 0.3, 24, 1, true);
+            const oislDish = new THREE.Mesh(oislDishGeo, dishMat);
+            oislDish.position.set(0, 0, 8);  // On front of data center
+            oislDish.rotation.x = -Math.PI / 2;
+            dataCenter.add(oislDish);
+
+            // OISL beam (cyan) - for satellite-to-satellite laser comms
+            const oislBeamGeo = new THREE.CylinderGeometry(0.08, 0.08, 30, 8);
+            const oislBeamMat = new THREE.MeshBasicMaterial({
+                color: 0x00ffff,  // Cyan for inter-satellite link
+                transparent: true,
+                opacity: 0.3
+            });
+            const oislBeam = new THREE.Mesh(oislBeamGeo, oislBeamMat);
+            oislBeam.position.set(0, 0, 23);
+            oislBeam.rotation.x = Math.PI / 2;
+            dataCenter.add(oislBeam);
+            window.oislBeam = oislBeam;
+
+            // Position data center in orbit (slightly higher to avoid satellite collision)
+            dataCenter.position.set(0, 60, 0);
+            // dataCenter.visible = false;  // REMOVED - now always visible
+            scene.add(dataCenter);
+        }
+
+        function createSatelliteConstellation() {
+            const satCount = 12;  // Reduced for visual clarity (calculations reference 40+)
+            const orbitRadius = 52;
+
+            const satMat = new THREE.MeshStandardMaterial({
+                color: 0xddaa00,
+                metalness: 0.9,
+                roughness: 0.2
+            });
+
+            const panelMat = new THREE.MeshStandardMaterial({
+                color: 0x3344aa,
+                metalness: 0.6,
+                roughness: 0.2
+            });
+
+            for (let i = 0; i < satCount; i++) {
+                const sat = new THREE.Group();
+
+                // === CYLINDRICAL MAIN BODY (like reference) ===
+                const bodyGeo = new THREE.CylinderGeometry(0.8, 0.8, 2.5, 16);
+                const bodyMat = new THREE.MeshStandardMaterial({
+                    color: 0xaabbcc,  // Lighter for better visibility
+                    metalness: 0.65,
+                    roughness: 0.35
+                });
+                const body = new THREE.Mesh(bodyGeo, bodyMat);
+                body.rotation.x = Math.PI / 2;
+                body.castShadow = true;
+                sat.add(body);
+
+                // Bolt/screw material for small satellites
+                const satBoltMat = new THREE.MeshStandardMaterial({ color: 0x444444, metalness: 0.9, roughness: 0.2 });
+
+                // Cap rings at body ends (fillet simulation)
+                const capRingGeo = new THREE.TorusGeometry(0.82, 0.04, 6, 16);
+                const capRing1 = new THREE.Mesh(capRingGeo, satBoltMat);
+                capRing1.position.z = 1.25;
+                sat.add(capRing1);
+                const capRing2 = new THREE.Mesh(capRingGeo.clone(), satBoltMat);
+                capRing2.position.z = -1.25;
+                sat.add(capRing2);
+
+                // Bolts around cap rings (8 per ring)
+                for (let ring of [1.25, -1.25]) {
+                    for (let b = 0; b < 8; b++) {
+                        const bAng = (b / 8) * Math.PI * 2;
+                        const boltGeo = new THREE.CylinderGeometry(0.03, 0.03, 0.08, 6);
+                        const bolt = new THREE.Mesh(boltGeo, satBoltMat);
+                        bolt.position.set(Math.cos(bAng) * 0.85, Math.sin(bAng) * 0.85, ring);
+                        sat.add(bolt);
+                    }
+                }
+
+                // Body panels (dark sections like reference)
+                const panelSectionMat = new THREE.MeshStandardMaterial({
+                    color: 0x2a3a5a,
+                    metalness: 0.5,
+                    roughness: 0.4
+                });
+                for (let p = 0; p < 4; p++) {
+                    const panelGeo = new THREE.BoxGeometry(0.6, 0.02, 0.8);
+                    const panel = new THREE.Mesh(panelGeo, panelSectionMat);
+                    const pAngle = (p / 4) * Math.PI * 2;
+                    panel.position.set(Math.cos(pAngle) * 0.82, Math.sin(pAngle) * 0.82, 0);
+                    panel.rotation.z = pAngle;
+                    sat.add(panel);
+
+                    // Corner screws on each panel (4 per panel)
+                    for (let sx of [-0.25, 0.25]) {
+                        for (let sz of [-0.35, 0.35]) {
+                            const screwGeo = new THREE.CylinderGeometry(0.02, 0.02, 0.05, 6);
+                            const screw = new THREE.Mesh(screwGeo, satBoltMat);
+                            screw.position.set(sx, 0.03, sz);
+                            panel.add(screw);
+                        }
+                    }
+                }
+
+                // === LARGE PARABOLIC DISH ANTENNA ===
+                const dishGeo = new THREE.SphereGeometry(1.2, 32, 16, 0, Math.PI * 2, 0, Math.PI / 2);
+                const dishMat = new THREE.MeshStandardMaterial({
+                    color: 0xdddddd,
+                    metalness: 0.9,
+                    roughness: 0.1,
+                    side: THREE.DoubleSide
+                });
+                const dish = new THREE.Mesh(dishGeo, dishMat);
+                dish.position.set(0, 0, 1.8);
+                dish.rotation.x = -Math.PI / 2;
+                sat.add(dish);
+
+                // Dish feed horn (center)
+                const feedGeo = new THREE.CylinderGeometry(0.08, 0.15, 0.6, 8);
+                const feedMat = new THREE.MeshStandardMaterial({ color: 0x888888, metalness: 0.8 });
+                const feedHorn = new THREE.Mesh(feedGeo, feedMat);
+                feedHorn.position.set(0, 0, 2.3);
+                feedHorn.rotation.x = Math.PI / 2;
+                sat.add(feedHorn);
+
+                // Dish support struts (4 diagonal)
+                const strutMat = new THREE.LineBasicMaterial({ color: 0x666666 });
+                const strutPositions = [[0.8, 0], [0, 0.8], [-0.8, 0], [0, -0.8]];
+                strutPositions.forEach(pos => {
+                    const strutGeo = new THREE.BufferGeometry().setFromPoints([
+                        new THREE.Vector3(pos[0] * 0.5, pos[1] * 0.5, 1.5),
+                        new THREE.Vector3(0, 0, 2.3)
+                    ]);
+                    const strut = new THREE.Line(strutGeo, strutMat);
+                    sat.add(strut);
+                });
+
+                // === SEGMENTED SOLAR ARRAYS (like reference) ===
+                const solarCellMat = new THREE.MeshStandardMaterial({
+                    color: 0x1a2a5a,
+                    metalness: 0.4,
+                    roughness: 0.3,
+                    emissive: 0x0a1020,
+                    emissiveIntensity: 0.1
+                });
+                const frameMat = new THREE.MeshStandardMaterial({
+                    color: 0x888888,
+                    metalness: 0.8,
+                    roughness: 0.2
+                });
+
+                // Create segmented solar array (3 panels per wing)
+                for (let side = -1; side <= 1; side += 2) {
+                    // Main arm/strut
+                    const armGeo = new THREE.BoxGeometry(0.1, 0.05, 6);
+                    const arm = new THREE.Mesh(armGeo, frameMat);
+                    arm.position.set(side * 4.5, 0, 0);
+                    arm.rotation.z = Math.PI / 2;
+                    sat.add(arm);
+
+                    // 3 panel segments per wing
+                    for (let seg = 0; seg < 3; seg++) {
+                        const segPanel = new THREE.Group();
+
+                        // Panel frame
+                        const frameGeo = new THREE.BoxGeometry(2.4, 0.08, 1.6);
+                        const frame = new THREE.Mesh(frameGeo, frameMat);
+                        segPanel.add(frame);
+
+                        // Solar cells on panel
+                        const cellGeo = new THREE.BoxGeometry(2.2, 0.02, 1.4);
+                        const cells = new THREE.Mesh(cellGeo, solarCellMat);
+                        cells.position.y = 0.05;
+                        segPanel.add(cells);
+
+                        // Grid lines on cells
+                        const gridMat = new THREE.LineBasicMaterial({ color: 0x3344aa, transparent: true, opacity: 0.7 });
+                        // Vertical
+                        for (let g = -1; g <= 1; g += 0.5) {
+                            const lg = new THREE.BufferGeometry().setFromPoints([
+                                new THREE.Vector3(g, 0.07, -0.7),
+                                new THREE.Vector3(g, 0.07, 0.7)
+                            ]);
+                            segPanel.add(new THREE.Line(lg, gridMat));
+                        }
+                        // Horizontal
+                        for (let h = -0.6; h <= 0.6; h += 0.3) {
+                            const lh = new THREE.BufferGeometry().setFromPoints([
+                                new THREE.Vector3(-1.1, 0.07, h),
+                                new THREE.Vector3(1.1, 0.07, h)
+                            ]);
+                            segPanel.add(new THREE.Line(lh, gridMat));
+                        }
+
+                        segPanel.position.set(side * (2.5 + seg * 2.5), 0, 0);
+                        sat.add(segPanel);
+                    }
+                }
+
+                // === OMNI ANTENNAS ===
+                const omniMat = new THREE.MeshStandardMaterial({ color: 0xaaaaaa, metalness: 0.9 });
+                // Top antenna
+                const omni1Geo = new THREE.CylinderGeometry(0.02, 0.02, 1, 6);
+                const omni1 = new THREE.Mesh(omni1Geo, omniMat);
+                omni1.position.set(0.6, 0.5, 0.5);
+                sat.add(omni1);
+                // Side antenna
+                const omni2 = new THREE.Mesh(omni1Geo, omniMat);
+                omni2.position.set(-0.6, -0.5, -0.5);
+                omni2.rotation.x = Math.PI / 4;
+                sat.add(omni2);
+
+                // === THRUSTER MODULES ===
+                const thrusterMat = new THREE.MeshStandardMaterial({
+                    color: 0x444444,
+                    metalness: 0.7,
+                    roughness: 0.4
+                });
+                const thrusterGeo = new THREE.CylinderGeometry(0.12, 0.18, 0.25, 8);
+                const thrusterPos = [[0.6, 0, -1.5], [-0.6, 0, -1.5], [0, 0.6, -1.5], [0, -0.6, -1.5]];
+                thrusterPos.forEach(pos => {
+                    const thruster = new THREE.Mesh(thrusterGeo, thrusterMat);
+                    thruster.position.set(...pos);
+                    thruster.rotation.x = Math.PI / 2;
+                    sat.add(thruster);
+                });
+
+                // === GOLD MLI BLANKET ===
+                const mliMat = new THREE.MeshBasicMaterial({ color: 0xddaa22 });
+                const mliGeo = new THREE.RingGeometry(0.75, 0.82, 16);
+                const mli = new THREE.Mesh(mliGeo, mliMat);
+                mli.position.z = -1.25;
+                sat.add(mli);
+
+                // Position in orbit
+                const angle = (i / satCount) * Math.PI * 2;
+                sat.position.set(
+                    Math.cos(angle) * orbitRadius,
+                    0,
+                    Math.sin(angle) * orbitRadius
+                );
+                sat.lookAt(0, 0, 0);
+                sat.rotateX(-Math.PI / 2);
+
+                satellites.push(sat);
+                scene.add(sat);
+            }
+
+            // Orbit ring visualization
+            const orbitGeo = new THREE.RingGeometry(orbitRadius - 0.1, orbitRadius + 0.1, 128);
+            const orbitMat = new THREE.MeshBasicMaterial({
+                color: 0x00ffff,
+                transparent: true,
+                opacity: 0.15,
+                side: THREE.DoubleSide
+            });
+            const orbitRing = new THREE.Mesh(orbitGeo, orbitMat);
+            orbitRing.rotation.x = Math.PI / 2;
+            scene.add(orbitRing);
+
+            // Inclined orbit (98°) - includes BOTH small satellites AND data center
+            const inclinedGroup = new THREE.Group();
+            satellites.forEach(sat => {
+                scene.remove(sat);
+                inclinedGroup.add(sat);
+            });
+
+            // Data center stays FIXED at polar position (y=60) - not orbiting
+            // This is scientifically valid: SSO orbits pass over polar regions
+            // Keeping it fixed provides better visual clarity for the documentary
+            // (The data center was already added to scene in createOrbitalDataCenter)
+
+            inclinedGroup.rotation.z = (90 - 8) * (Math.PI / 180); // 98° inclination
+            scene.add(inclinedGroup);
+
+            // Store reference for animation
+            window.satGroup = inclinedGroup;
+        }
+
+        function createPhononicCrystal() {
+            // Simplified - just a placeholder, not visually displayed
+            // Phononic crystal is discussed in narration but simplified visually
+            phononicCrystal = new THREE.Group();
+            // Not adding to scene - removed confusing checkered pattern
+        }
+
+        function animateToScene(sceneName) {
+            let targetPos, targetLook, duration = 3000;
+
+            switch (sceneName) {
+                case 'wide_earth':
+                    // CHAPTER 1: Wide shot showing BOTH data center AND Earth together
+                    targetPos = { x: 70, y: 60, z: 90 };   // See satellite + Earth
+                    targetLook = { x: 0, y: 25, z: 0 };    // Look between satellite and Earth
+                    break;
+                case 'orbit_view':
+                    // CHAPTER 2: Slow zoom toward satellite, Earth in background
+                    targetPos = { x: 40, y: 55, z: 60 };
+                    targetLook = { x: 0, y: 40, z: 0 };
+                    break;
+                case 'earth_close':
+                    // CHAPTER 3: Closer to satellite, Earth visible below
+                    targetPos = { x: 25, y: 55, z: 40 };
+                    targetLook = { x: 0, y: 45, z: 0 };
+                    break;
+                case 'solar_array':
+                    // Data center solar array - zoomed out to show full satellite
+                    targetPos = { x: -25, y: 65, z: 35 };
+                    targetLook = { x: 0, y: 60, z: 0 };
+                    break;
+                case 'radiator_view':
+                    // Radiator detail - full satellite visible
+                    targetPos = { x: 20, y: 68, z: 30 };
+                    targetLook = { x: 0, y: 60, z: 0 };
+                    break;
+                case 'phononic_detail':
+                    // Technical detail - still shows full satellite
+                    targetPos = { x: 15, y: 65, z: 28 };
+                    targetLook = { x: 0, y: 60, z: 0 };
+                    break;
+                case 'thermal_detail':
+                    // Thermal systems - full view
+                    targetPos = { x: 18, y: 68, z: 32 };
+                    targetLook = { x: 0, y: 60, z: 0 };
+                    break;
+                case 'satellite_close':
+                    // Close-up on small satellites
+                    targetPos = { x: 35, y: 45, z: 45 };
+                    targetLook = { x: 25, y: 40, z: 25 };
+                    break;
+                case 'constellation':
+                    // Top-down view of constellation + data center
+                    targetPos = { x: 5, y: 100, z: 10 };
+                    targetLook = { x: 0, y: 45, z: 0 };
+                    break;
+                case 'orbit_high':
+                    // High angle showing orbit
+                    targetPos = { x: -10, y: 70, z: 25 };
+                    targetLook = { x: 0, y: 50, z: 0 };
+                    break;
+                case 'wide_constellation':
+                    // Wide view of full constellation
+                    targetPos = { x: 15, y: 80, z: 20 };
+                    targetLook = { x: 0, y: 50, z: 0 };
+                    break;
+                case 'final_wide':
+                    // Final cinematic wide shot
+                    targetPos = { x: 60, y: 65, z: 80 };
+                    targetLook = { x: 0, y: 30, z: 0 };
+                    break;
+                default:
+                    targetPos = { x: 80, y: 60, z: 100 };
+                    targetLook = { x: 0, y: 0, z: 0 };
+            }
+
+            new TWEEN.Tween(camera.position)
+                .to(targetPos, duration)
+                .easing(TWEEN.Easing.Cubic.InOut)
+                .start();
+
+            // Animate lookAt via dummy
+            const currentLook = new THREE.Vector3();
+            camera.getWorldDirection(currentLook);
+
+            window.cameraTarget = targetLook;
+        }
+
+        function startDocumentary() {
+            loadChapter(0);
+        }
+
+        function loadChapter(index) {
+            if (index < 0 || index >= documentaryScript.length) return;
+
+            currentChapter = index;
+            currentSubtitle = -1;
+
+            const chapter = documentaryScript[index];
+
+            // Update progress
+            const progress = ((index + 1) / documentaryScript.length) * 100;
+            document.getElementById('progressBar').style.width = progress + '%';
+
+            // Show chapter title
+            const chapterDisplay = document.getElementById('chapterDisplay');
+            document.getElementById('chapterNumber').textContent = chapter.chapter;
+            document.getElementById('chapterTitle').textContent = chapter.title;
+            chapterDisplay.classList.add('visible');
+
+            setTimeout(() => {
+                chapterDisplay.classList.remove('visible');
+                advanceSubtitle();
+            }, 3000);
+
+            // Animate camera
+            animateToScene(chapter.scene);
+
+            // Data center is now ALWAYS visible (removed chapter 1 hiding)
+            // if (dataCenter) {
+            //     dataCenter.visible = (index >= 1);
+            // }
+
+            // Control small satellites visibility (hidden in chapters 3-6 when zoomed into data center)
+            if (window.satGroup) {
+                // Chapters are 0-indexed: hide in 2,3,4,5 (chapters 3,4,5,6)
+                window.satGroup.visible = (index < 2 || index > 5);
+            }
+
+            // Update overlays
+            updateOverlays(chapter);
+        }
+
+        function updateOverlays(chapter) {
+            // Data panel
+            const dataPanel = document.getElementById('dataPanel');
+            if (chapter.showDataPanel && chapter.dataContent) {
+                let html = '';
+                chapter.dataContent.forEach(item => {
+                    html += `<div class="data-row">
+                        <span class="data-label">${item.label}</span>
+                        <span class="data-value">${item.value}</span>
+                    </div>`;
+                });
+                document.getElementById('dataPanelContent').innerHTML = html;
+                dataPanel.classList.add('visible');
+            } else {
+                dataPanel.classList.remove('visible');
+            }
+
+            // Equation panel
+            const equationPanel = document.getElementById('equationPanel');
+            if (chapter.showEquation && chapter.equation) {
+                document.getElementById('equationLabel').textContent = chapter.equation.label;
+                document.getElementById('equationText').textContent = chapter.equation.text;
+                equationPanel.classList.add('visible');
+            } else {
+                equationPanel.classList.remove('visible');
+            }
+
+            // Thermal view
+            const thermalView = document.getElementById('thermalView');
+            if (chapter.showThermal) {
+                thermalView.classList.add('visible');
+            } else {
+                thermalView.classList.remove('visible');
+            }
+        }
+
+        function advanceSubtitle() {
+            if (isPaused) return;
+
+            currentSubtitle++;
+            const chapter = documentaryScript[currentChapter];
+
+            if (currentSubtitle < chapter.subtitles.length) {
+                const subtitleEl = document.getElementById('subtitleText');
+                subtitleEl.innerHTML = chapter.subtitles[currentSubtitle];
+                subtitleEl.classList.add('visible');
+
+                // Calculate display time based on text length
+                const words = subtitleEl.textContent.split(' ').length;
+                const displayTime = Math.max(3000, 2000 + words * 200);
+
+                subtitleTimeout = setTimeout(() => {
+                    subtitleEl.classList.remove('visible');
+                    setTimeout(advanceSubtitle, 600);
+                }, displayTime);
+            } else {
+                // Move to next chapter
+                if (currentChapter < documentaryScript.length - 1) {
+                    setTimeout(() => loadChapter(currentChapter + 1), 1500);
+                } else {
+                    // Documentary finished - show end credits
+                    setTimeout(showEndCredits, 2000);
+                }
+            }
+        }
+
+        function showEndCredits() {
+            // Hide subtitles and fade out UI
+            document.getElementById('subtitleText').classList.remove('visible');
+            document.querySelector('.ui-overlay').style.opacity = '0';
+            document.querySelector('.ui-overlay').style.transition = 'opacity 2s ease';
+
+            // Show end credits screen
+            setTimeout(() => {
+                document.getElementById('endCredits').classList.add('visible');
+            }, 1000);
+        }
+
+        function nextChapter() {
+            clearTimeout(subtitleTimeout);
+            document.getElementById('subtitleText').classList.remove('visible');
+            if (currentChapter < documentaryScript.length - 1) {
+                loadChapter(currentChapter + 1);
+            }
+        }
+
+        function prevChapter() {
+            clearTimeout(subtitleTimeout);
+            document.getElementById('subtitleText').classList.remove('visible');
+            if (currentChapter > 0) {
+                loadChapter(currentChapter - 1);
+            }
+        }
+
+        function togglePause() {
+            isPaused = !isPaused;
+            document.getElementById('pauseBtn').textContent = isPaused ? 'PLAY' : 'PAUSE';
+            if (!isPaused) {
+                advanceSubtitle();
+            }
+        }
+
+        function animate() {
+            requestAnimationFrame(animate);
+
+            TWEEN.update();
+
+            const time = clock.getElapsedTime();
+
+            // Rotate Earth
+            if (earth) {
+                earth.rotation.y = time * 0.03;
+            }
+
+            // Rotate satellite constellation
+            if (window.satGroup) {
+                window.satGroup.rotation.y -= 0.001;
+            }
+
+            // Rotate data center slowly
+            if (dataCenter) {
+                dataCenter.rotation.y = time * 0.05;
+
+                // Solar array sun tracking (simplified)
+                solarArrays.forEach(array => {
+                    array.rotation.y = Math.sin(time * 0.1) * 0.1;
+                });
+
+                // Radiator heat glow pulse (only if radiator has material - Groups don't)
+                radiators.forEach((radiator, i) => {
+                    if (radiator.material) {
+                        const pulse = 0.05 + Math.sin(time * 1.5 + i) * 0.03;
+                        radiator.material.emissiveIntensity = pulse;
+                    }
+                });
+            }
+
+            // Data transmission beam pulsing effect
+            if (window.dataBeam) {
+                const beamPulse = 0.2 + Math.sin(time * 4) * 0.2;
+                window.dataBeam.material.opacity = beamPulse;
+                // Slight beam scale breathing
+                window.dataBeam.scale.x = 1 + Math.sin(time * 3) * 0.1;
+                window.dataBeam.scale.z = 1 + Math.sin(time * 3) * 0.1;
+            }
+
+            // Blinking status lights (alternating green/red pattern)
+            if (window.statusLight1 && window.statusLight2) {
+                const blink1 = Math.sin(time * 3) > 0;
+                const blink2 = Math.sin(time * 3 + Math.PI) > 0;
+                window.statusLight1.visible = blink1;
+                window.statusLight2.visible = blink2;
+            }
+
+            // Animate Phononic Crystal (pulsating check)
+            if (phononicCrystal) {
+                // Subtle breathing effect to visualize "active" state
+                const scale = 1 + Math.sin(time * 2) * 0.005;
+                phononicCrystal.scale.set(scale, scale, scale);
+            }
+
+            // Camera look target
+            if (window.cameraTarget) {
+                camera.lookAt(window.cameraTarget.x, window.cameraTarget.y, window.cameraTarget.z);
+            }
+
+            // Stars slow rotation
+            if (stars) {
+                stars.rotation.y = time * 0.002;
+            }
+
+            composer.render();
+        }
+
+        function onResize() {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            composer.setSize(window.innerWidth, window.innerHeight);
+        }
+
+        // Initialize
+        init();
+    </script>
+</body>
+
+</html>
