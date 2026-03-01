@@ -2,20 +2,20 @@
    VARIABLES & RESET
    ============================== */
 :root {
-  --bg-primary: #0a0a0f;
-  --bg-secondary: #111118;
-  --bg-card: #16161f;
-  --bg-card-hover: #1c1c28;
-  --text-primary: #f0f0f5;
-  --text-secondary: #9999aa;
-  --text-muted: #666677;
-  --accent: #6c63ff;
-  --accent-light: #8b83ff;
-  --accent-glow: rgba(108, 99, 255, 0.25);
-  --accent2: #00d4aa;
-  --accent2-glow: rgba(0, 212, 170, 0.2);
-  --border: rgba(255, 255, 255, 0.06);
-  --border-light: rgba(255, 255, 255, 0.1);
+  --bg-primary: #ffffff;
+  --bg-secondary: #f5f5f8;
+  --bg-card: #ffffff;
+  --bg-card-hover: #f0f0f5;
+  --text-primary: #1a1a2e;
+  --text-secondary: #555566;
+  --text-muted: #888899;
+  --accent: #5a50e6;
+  --accent-light: #6c63ff;
+  --accent-glow: rgba(90, 80, 230, 0.2);
+  --accent2: #00b894;
+  --accent2-glow: rgba(0, 184, 148, 0.15);
+  --border: rgba(0, 0, 0, 0.08);
+  --border-light: rgba(0, 0, 0, 0.12);
   --radius: 12px;
   --radius-lg: 20px;
   --font: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
@@ -68,7 +68,7 @@ img {
 }
 
 .navbar.scrolled {
-  background: rgba(10, 10, 15, 0.85);
+  background: rgba(255, 255, 255, 0.85);
   backdrop-filter: blur(20px);
   border-bottom: 1px solid var(--border);
   padding: 0.7rem 0;
@@ -112,7 +112,7 @@ img {
 .nav-links a:hover,
 .nav-links a.active {
   color: var(--text-primary);
-  background: rgba(255, 255, 255, 0.05);
+  background: rgba(0, 0, 0, 0.05);
 }
 
 .nav-toggle {
@@ -159,8 +159,8 @@ img {
   position: absolute;
   inset: 0;
   background:
-    radial-gradient(ellipse 80% 60% at 50% 40%, rgba(108, 99, 255, 0.08), transparent),
-    radial-gradient(ellipse 60% 80% at 80% 60%, rgba(0, 212, 170, 0.05), transparent);
+    radial-gradient(ellipse 80% 60% at 50% 40%, rgba(90, 80, 230, 0.06), transparent),
+    radial-gradient(ellipse 60% 80% at 80% 60%, rgba(0, 184, 148, 0.04), transparent);
   z-index: 1;
 }
 
@@ -174,12 +174,12 @@ img {
 .hero-badge {
   display: inline-block;
   padding: 0.4rem 1.2rem;
-  background: rgba(108, 99, 255, 0.1);
-  border: 1px solid rgba(108, 99, 255, 0.2);
+  background: rgba(90, 80, 230, 0.08);
+  border: 1px solid rgba(90, 80, 230, 0.18);
   border-radius: 50px;
   font-size: 0.8rem;
   font-weight: 500;
-  color: var(--accent-light);
+  color: var(--accent);
   letter-spacing: 0.03em;
   margin-bottom: 2rem;
 }
@@ -297,7 +297,7 @@ img {
 }
 
 .btn-outline:hover {
-  background: rgba(255, 255, 255, 0.05);
+  background: rgba(0, 0, 0, 0.04);
   border-color: var(--accent);
 }
 
@@ -437,7 +437,7 @@ img {
 }
 
 .highlight-card {
-  background: var(--bg-card);
+  background: var(--bg-secondary);
   border: 1px solid var(--border);
   border-radius: var(--radius);
   padding: 1.75rem;
@@ -449,7 +449,7 @@ img {
   border-color: var(--accent);
   background: var(--bg-card-hover);
   transform: translateY(-4px);
-  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.1);
 }
 
 .highlight-icon {
@@ -503,7 +503,7 @@ img {
 .research-card:hover {
   border-color: var(--accent);
   transform: translateY(-6px);
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.1);
 }
 
 .research-card:hover::before {
@@ -553,7 +553,7 @@ img {
 }
 
 .skill-category:hover {
-  border-color: rgba(108, 99, 255, 0.3);
+  border-color: rgba(90, 80, 230, 0.25);
 }
 
 .skill-cat-title {
@@ -579,8 +579,8 @@ img {
 
 .skill-tag {
   padding: 0.4rem 0.9rem;
-  background: rgba(108, 99, 255, 0.08);
-  border: 1px solid rgba(108, 99, 255, 0.15);
+  background: rgba(90, 80, 230, 0.06);
+  border: 1px solid rgba(90, 80, 230, 0.12);
   border-radius: 50px;
   font-size: 0.8rem;
   color: var(--text-secondary);
@@ -588,9 +588,9 @@ img {
 }
 
 .skill-tag:hover {
-  background: rgba(108, 99, 255, 0.15);
-  color: var(--accent-light);
-  border-color: rgba(108, 99, 255, 0.3);
+  background: rgba(90, 80, 230, 0.12);
+  color: var(--accent);
+  border-color: rgba(90, 80, 230, 0.25);
 }
 
 /* ==============================
@@ -647,7 +647,7 @@ img {
 }
 
 .timeline-item:hover .timeline-content {
-  border-color: rgba(108, 99, 255, 0.3);
+  border-color: rgba(90, 80, 230, 0.25);
   transform: translateX(8px);
 }
 
@@ -751,7 +751,7 @@ img {
 }
 
 .pub-item:hover {
-  border-color: rgba(108, 99, 255, 0.3);
+  border-color: rgba(90, 80, 230, 0.25);
   transform: translateX(4px);
 }
 
@@ -766,10 +766,10 @@ img {
   margin-top: 0.15rem;
 }
 
-.pub-type.journal { background: rgba(108, 99, 255, 0.15); color: var(--accent-light); }
-.pub-type.patent { background: rgba(0, 212, 170, 0.15); color: var(--accent2); }
-.pub-type.conference { background: rgba(255, 170, 50, 0.15); color: #ffaa32; }
-.pub-type.thesis { background: rgba(255, 100, 100, 0.15); color: #ff8888; }
+.pub-type.journal { background: rgba(90, 80, 230, 0.1); color: var(--accent); }
+.pub-type.patent { background: rgba(0, 184, 148, 0.1); color: var(--accent2); }
+.pub-type.conference { background: rgba(230, 150, 30, 0.1); color: #8a5a00; }
+.pub-type.thesis { background: rgba(220, 80, 80, 0.1); color: #a03030; }
 
 .pub-details h4 {
   font-size: 0.95rem;
@@ -824,7 +824,7 @@ img {
 .edu-card:hover {
   border-color: var(--accent);
   transform: translateY(-6px);
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.1);
 }
 
 .edu-card:hover::after {
@@ -889,7 +889,7 @@ img {
 }
 
 .award-item:hover {
-  border-color: rgba(108, 99, 255, 0.3);
+  border-color: rgba(90, 80, 230, 0.25);
 }
 
 .award-icon {
@@ -972,9 +972,9 @@ img {
 }
 
 .social-link:hover {
-  color: var(--accent-light);
+  color: var(--accent);
   border-color: var(--accent);
-  background: rgba(108, 99, 255, 0.1);
+  background: rgba(90, 80, 230, 0.08);
   transform: translateY(-3px);
 }
 
@@ -993,7 +993,7 @@ img {
 .form-group textarea {
   width: 100%;
   padding: 1.1rem 1.25rem 0.7rem;
-  background: var(--bg-card);
+  background: var(--bg-secondary);
   border: 1px solid var(--border);
   border-radius: var(--radius);
   color: var(--text-primary);
@@ -1035,14 +1035,14 @@ img {
   top: 0.6rem;
   transform: none;
   font-size: 0.7rem;
-  color: var(--accent-light);
+  color: var(--accent);
 }
 
 .form-group textarea:focus ~ label,
 .form-group textarea:not(:placeholder-shown) ~ label {
   top: 0.4rem;
   font-size: 0.7rem;
-  color: var(--accent-light);
+  color: var(--accent);
 }
 
 /* ==============================
@@ -1135,7 +1135,7 @@ img {
     left: 0;
     right: 0;
     flex-direction: column;
-    background: rgba(10, 10, 15, 0.95);
+    background: rgba(255, 255, 255, 0.95);
     backdrop-filter: blur(20px);
     padding: 1rem;
     border-bottom: 1px solid var(--border);
