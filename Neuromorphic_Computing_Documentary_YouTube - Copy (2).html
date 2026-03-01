@@ -1,0 +1,2473 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Neuromorphic Computing — Brain-Inspired Silicon</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=DM+Sans:wght@300;400;500;600;700&family=IBM+Plex+Mono:wght@300;400;500;600&display=swap');
+        *{margin:0;padding:0;box-sizing:border-box}
+        body{font-family:'DM Sans',sans-serif;background:linear-gradient(160deg,#030408 0%,#060a14 30%,#080e1c 60%,#050810 100%);overflow:hidden;color:#e8e6e3}
+        #canvas{width:100vw;height:100vh;display:block;position:fixed;top:0;left:0}
+        /* Cinematic vignette overlay */
+        .vignette-overlay{position:fixed;top:0;left:0;width:100vw;height:100vh;pointer-events:none;z-index:250;
+            background:radial-gradient(ellipse at center,transparent 55%,rgba(0,0,0,0.25) 75%,rgba(0,0,0,0.55) 100%);}
+        /* Subtle chromatic aberration feel via color-shifted shadow */
+        .film-grain{position:fixed;top:0;left:0;width:100vw;height:100vh;pointer-events:none;z-index:260;opacity:0.04;
+            mix-blend-mode:overlay;
+            background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");}
+        .letterbox-top,.letterbox-bottom{position:fixed;left:0;right:0;height:42px;background:rgba(6,8,16,0.92);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);z-index:400}
+        .letterbox-top{top:0;border-bottom:1px solid rgba(255,255,255,0.06)}
+        .letterbox-bottom{bottom:0;border-top:1px solid rgba(255,255,255,0.06)}
+        .ui-overlay{position:fixed;top:0;left:0;right:0;bottom:0;pointer-events:none;z-index:300}
+        .header-bar{position:absolute;top:40px;left:40px;display:flex;align-items:center;gap:15px;z-index:100}
+        .cinematic-script-overlay{position:fixed;bottom:80px;left:50%;transform:translateX(-50%);width:80%;max-width:900px;text-align:center;z-index:500;pointer-events:none;opacity:1;transition:opacity 0.8s ease}
+        .script-text{font-family:'DM Sans',sans-serif;font-size:1.8em;color:#fff;font-weight:500;line-height:1.4;text-shadow:0 2px 12px rgba(0,0,0,0.7),0 0 40px rgba(0,0,0,0.4);opacity:0;transform:translateY(20px);transition:all 0.8s cubic-bezier(0.16,1,0.3,1)}
+        .script-text.active{opacity:1;transform:translateY(0)}
+        .script-text strong{color:#00e5ff;font-weight:700;text-shadow:0 0 10px rgba(0,229,255,0.5),0 1px 3px rgba(0,0,0,0.6)}
+        .script-sub{font-family:'IBM Plex Mono',monospace;font-size:0.7em;text-transform:uppercase;letter-spacing:4px;color:#00e5ff;margin-bottom:15px;opacity:1;font-weight:700;text-shadow:0 0 8px rgba(0,229,255,0.4)}
+        .network-logo{font-family:'Cormorant Garamond',serif;font-weight:700;font-size:0.9em;letter-spacing:6px;text-transform:uppercase;color:#fff;text-shadow:0 1px 4px rgba(0,0,0,0.5)}
+        .live-dot{width:8px;height:8px;background:#00e5ff;border-radius:50%;box-shadow:0 0 12px rgba(0,229,255,0.8);animation:livePulse 2s ease-in-out infinite}
+        @keyframes livePulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:0.3;transform:scale(1.3)}}
+        .title-section{position:absolute;top:100px;left:42px;max-width:440px;background:transparent;padding:0;border-left:4px solid #00e5ff;padding-left:24px;transition:opacity 1s ease}
+        .series-tag{font-family:'IBM Plex Mono',monospace;font-size:0.6em;font-weight:700;letter-spacing:4px;text-transform:uppercase;color:#060810;background:#00e5ff;display:inline-block;padding:4px 10px;margin-bottom:18px}
+        .main-title{font-family:'Cormorant Garamond',serif;font-size:clamp(2.2em,4vw,3.5em);font-weight:600;color:#fff;line-height:0.95;margin-bottom:12px;letter-spacing:-0.04em;text-shadow:0 2px 8px rgba(0,0,0,0.4)}
+        .main-subtitle{font-size:0.88em;font-weight:500;color:#d0cfc8;line-height:1.6;margin-bottom:22px;max-width:380px}
+        .year-badge{display:inline-flex;align-items:center;gap:10px;border-bottom:2px solid rgba(255,255,255,0.2);padding:0 0 4px 0;font-family:'IBM Plex Mono',monospace;font-size:0.75em;color:#b0b0b0}
+        .year-badge span{color:#00e5ff;font-weight:700}
+        .equation-panel{position:absolute;top:100px;right:42px;border-right:4px solid #00e5ff;padding-right:24px;max-width:400px;background:transparent;text-align:right;transition:opacity 1s ease}
+        .eq-label{font-family:'IBM Plex Mono',monospace;font-size:0.55em;font-weight:700;letter-spacing:4px;text-transform:uppercase;color:#9a9a9a;margin-bottom:12px}
+        .eq-math{font-family:'IBM Plex Mono',monospace;font-size:0.85em;color:#fff;line-height:1.8;font-weight:600;text-shadow:0 1px 4px rgba(0,0,0,0.3)}
+        .footer-bar{position:fixed;bottom:0;left:0;right:0;height:60px;background:rgba(6,8,14,0.95);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border-top:1px solid rgba(255,255,255,0.06);display:flex;align-items:center;justify-content:space-between;padding:0 42px;z-index:500}
+        .footer-left{display:flex;align-items:center;gap:20px}
+        .footer-icon{width:26px;height:26px;background:#00e5ff;display:flex;align-items:center;justify-content:center;font-family:'Cormorant Garamond',serif;font-weight:700;font-size:0.9em;color:#060810}
+        .footer-url{font-family:'IBM Plex Mono',monospace;font-size:0.72em;font-weight:700;color:#fff;letter-spacing:1.5px}
+        .footer-right{text-align:right;display:flex;flex-direction:column;justify-content:center;gap:2px}
+        .footer-name{font-size:0.75em;font-weight:700;color:#fff;margin-bottom:-2px}
+        .footer-cred{font-family:'IBM Plex Mono',monospace;font-size:0.52em;color:#00e5ff;font-weight:700;text-transform:uppercase;letter-spacing:1.8px;opacity:0.9}
+        .intro-card-overlay{position:fixed;top:0;left:0;width:100vw;height:100vh;background:transparent;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;padding-bottom:12vh;opacity:1;transition:opacity 0.4s cubic-bezier(0.4,0,0.2,1);z-index:2000;text-align:center;overflow:hidden}
+        .intro-card-overlay.fade-out{opacity:0;pointer-events:none}
+        .intro-card-overlay.fade-out .intro-title{transform:scale(1.05);opacity:0}
+        .intro-card-overlay.fade-out .intro-pre-title{transform:translateY(-20px);opacity:0}
+        .intro-card-overlay.fade-out .intro-accent-line{transform:scaleX(0)}
+        .intro-pre-title{font-family:'IBM Plex Mono',monospace;font-size:0.75em;font-weight:600;letter-spacing:6px;text-transform:uppercase;color:#b0b0b0;opacity:0;transform:translateY(10px);animation:introFadeUp 0.35s cubic-bezier(0.16,1,0.3,1) 0.05s forwards;transition:all 0.3s ease}
+        .intro-title{font-family:'Cormorant Garamond',serif;font-size:clamp(3.5em,10vw,8em);font-weight:600;color:#fff;margin:10px 0 0 0;letter-spacing:-4px;line-height:0.85;opacity:0;transform:translateY(25px);animation:introTitleReveal 0.4s cubic-bezier(0.16,1,0.3,1) 0.15s forwards;transition:all 0.3s ease}
+        .intro-title span{display:inline-block}
+        .intro-accent-line{width:60px;height:4px;background:#00e5ff;margin-top:20px;transform:scaleX(0);animation:introLineExpand 0.3s cubic-bezier(0.16,1,0.3,1) 0.35s forwards;transition:transform 0.25s ease}
+        @keyframes introFadeUp{to{opacity:1;transform:translateY(0)}}
+        @keyframes introTitleReveal{to{opacity:1;transform:translateY(0)}}
+        @keyframes introLineExpand{to{transform:scaleX(1)}}
+        .end-card-overlay{position:fixed;top:0;left:0;width:100vw;height:100vh;background:transparent;display:flex;flex-direction:column;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity 1s ease-in-out;z-index:1000;text-align:center}
+        .end-card-overlay.active{opacity:1;pointer-events:auto}
+        .credits-title{font-family:'Cormorant Garamond',serif;font-size:4em;font-weight:400;color:#fff;margin-bottom:20px}
+        .credits-subtitle{font-family:'IBM Plex Mono',monospace;font-size:0.8em;letter-spacing:5px;text-transform:uppercase;color:#444;margin-bottom:40px}
+        .credits-name{font-family:'Cormorant Garamond',serif;font-size:2.5em;font-weight:600;color:#fff;margin-bottom:10px}
+        .credits-link{font-family:'IBM Plex Mono',monospace;font-size:0.7em;margin-top:30px;color:#999;text-decoration:none;border-bottom:1px solid rgba(0,0,0,0.1);transition:all 0.3s}
+        .credits-link:hover{color:#fff;border-bottom-color:#00e5ff}
+    </style>
+</head>
+<body>
+    <canvas id="canvas"></canvas>
+    <div class="vignette-overlay"></div>
+    <div class="film-grain"></div>
+    <div class="letterbox-top"></div>
+    <div class="letterbox-bottom"></div>
+    <div class="ui-overlay">
+        <div class="header-bar"><div class="live-dot"></div><div class="network-logo">Neuromorphic Computing</div></div>
+        <div class="title-section">
+            <div class="series-tag">Brain-Inspired Silicon</div>
+            <div class="main-title" id="archTitle">Neuromorphic Computing</div>
+            <div class="main-subtitle" id="archSubtitle">Computing architectures that mimic the brain's spiking neural networks.</div>
+            <div class="year-badge">Pioneered <span id="archYear">1980s</span></div>
+        </div>
+        <div class="equation-panel">
+            <div class="eq-label" id="eqLabel">LIF Neuron Dynamics</div>
+            <div class="eq-math" id="eqMath">τ<sub>m</sub> dV/dt = −(V − E<sub>L</sub>) + R·I(t)</div>
+        </div>
+        <div class="cinematic-script-overlay">
+            <div class="script-sub" id="scriptSub">PHASE I: THE BIOLOGICAL NEURON</div>
+            <div class="script-text" id="scriptText">The brain computes with spikes.</div>
+        </div>
+    </div>
+    <div class="intro-card-overlay" id="introCardOverlay">
+        <div class="intro-pre-title">Brain-Inspired Silicon</div>
+        <div class="intro-title"><span>Neuromorphic</span></div>
+        <div class="intro-accent-line"></div>
+    </div>
+    <div class="end-card-overlay" id="endCardOverlay">
+        <div class="credits-title">Thank You</div>
+        <div class="credits-subtitle">Neuromorphic Computing</div>
+        <div class="credits-name">Samarjith Biswas</div>
+        <p style="font-size:0.9em;max-width:500px;color:#666;font-style:italic;">"Where silicon learns to think in spikes."</p>
+        <a href="https://samarjithbiswas.com" class="credits-link">www.SamarjithBiswas.com</a>
+        <div style="margin-top:40px;font-family:'IBM Plex Mono';font-size:0.6em;color:#aaa;">© 2026</div>
+    </div>
+    <div class="footer-bar">
+        <div class="footer-left"><div class="footer-icon">S</div><div class="footer-url">SamarjithBiswas.com</div></div>
+        <div class="footer-right"><div class="footer-name">Samarjith Biswas</div><div class="footer-cred">Neuromorphic Systems · AI-Driven Optimization</div></div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script>
+    const PI=Math.PI,TAU=2*PI;
+
+    // ═══════════════════════════════════════════
+    // MATERIAL SYSTEMS — Biological vs Silicon
+    // ═══════════════════════════════════════════
+    let envMap;
+
+    function createEnvMap(){
+        const c=document.createElement('canvas');c.width=2048;c.height=1024;
+        const ctx=c.getContext('2d');
+        // Ultra-dark warm environment — surgical operating theater lighting
+        const g=ctx.createLinearGradient(0,0,0,1024);
+        g.addColorStop(0,'#040306');g.addColorStop(0.1,'#0a070c');g.addColorStop(0.25,'#120e16');
+        g.addColorStop(0.4,'#0e0a12');g.addColorStop(0.55,'#0a080e');
+        g.addColorStop(0.7,'#080608');g.addColorStop(1,'#030204');
+        ctx.fillStyle=g;ctx.fillRect(0,0,2048,1024);
+        // Main overhead surgical softbox — warm, focused
+        const softbox=ctx.createRadialGradient(1024,80,5,1024,80,450);
+        softbox.addColorStop(0,'rgba(255,235,210,0.40)');softbox.addColorStop(0.15,'rgba(220,190,150,0.22)');
+        softbox.addColorStop(0.35,'rgba(180,150,120,0.10)');softbox.addColorStop(0.6,'rgba(120,90,70,0.04)');
+        softbox.addColorStop(1,'rgba(0,0,0,0)');
+        ctx.fillStyle=softbox;ctx.fillRect(0,0,2048,512);
+        // Secondary softbox — slightly cooler, offset
+        const soft2=ctx.createRadialGradient(600,120,3,600,120,320);
+        soft2.addColorStop(0,'rgba(200,210,230,0.15)');soft2.addColorStop(0.3,'rgba(160,170,190,0.06)');
+        soft2.addColorStop(1,'rgba(0,0,0,0)');
+        ctx.fillStyle=soft2;ctx.fillRect(300,0,600,400);
+        // Warm fill from left (golden reflector panel)
+        const leftFill=ctx.createRadialGradient(100,400,8,100,400,350);
+        leftFill.addColorStop(0,'rgba(200,150,90,0.22)');leftFill.addColorStop(0.3,'rgba(160,120,70,0.10)');
+        leftFill.addColorStop(0.6,'rgba(120,80,50,0.04)');leftFill.addColorStop(1,'rgba(0,0,0,0)');
+        ctx.fillStyle=leftFill;ctx.fillRect(0,200,500,500);
+        // Cool rim from right (surgical blue kicker)
+        const rightKick=ctx.createRadialGradient(1920,420,5,1920,420,300);
+        rightKick.addColorStop(0,'rgba(80,120,180,0.20)');rightKick.addColorStop(0.3,'rgba(60,90,140,0.08)');
+        rightKick.addColorStop(1,'rgba(0,0,0,0)');
+        ctx.fillStyle=rightKick;ctx.fillRect(1500,200,548,500);
+        // Specular hotspots for metals (sharp, small)
+        ctx.fillStyle='rgba(240,230,220,0.35)';ctx.fillRect(960,24,128,3);
+        ctx.fillStyle='rgba(220,210,200,0.18)';ctx.fillRect(930,18,188,8);
+        ctx.fillStyle='rgba(200,195,190,0.10)';ctx.fillRect(900,12,248,14);
+        // Floor bounce (warm, organic)
+        const floorG=ctx.createLinearGradient(0,800,0,1024);
+        floorG.addColorStop(0,'rgba(0,0,0,0)');floorG.addColorStop(0.5,'rgba(45,30,20,0.10)');
+        floorG.addColorStop(1,'rgba(60,35,22,0.15)');
+        ctx.fillStyle=floorG;ctx.fillRect(0,750,2048,274);
+        // Subtle noise grain for realism
+        for(let i=0;i<3000;i++){
+            const nx=Math.random()*2048,ny=Math.random()*1024;
+            const a=Math.random()*0.03;
+            ctx.fillStyle=`rgba(${120+Math.random()*80},${100+Math.random()*60},${80+Math.random()*40},${a})`;
+            ctx.fillRect(nx,ny,1,1);
+        }
+        const tex=new THREE.CanvasTexture(c);
+        tex.mapping=THREE.EquirectangularReflectionMapping;
+        return tex;
+    }
+
+    // BIOLOGICAL TISSUE — wet, bloody organic tissue with subsurface scattering sim
+    function bioMat(color, opts={}){
+        const baseCol=new THREE.Color(color);
+        // Subsurface scattering approximation: emissive tinted toward deep blood
+        const sssCol=baseCol.clone().lerp(new THREE.Color(0x881108),0.45);
+        const emCol=opts.emissive?new THREE.Color(opts.emissive):sssCol;
+        return new THREE.MeshStandardMaterial({
+            color:color,
+            roughness:opts.rough!==undefined?opts.rough:0.68,
+            metalness:opts.metal!==undefined?opts.metal:0.02, // tiny metalness = wet surface sheen
+            envMap:envMap,
+            envMapIntensity:opts.envI||0.08, // slight env reflection = moisture
+            emissive:emCol,
+            emissiveIntensity:opts.eI||0.28,
+            transparent:opts.transparent||false,
+            opacity:opts.opacity!==undefined?opts.opacity:1.0,
+            side:opts.side||THREE.FrontSide
+        });
+    }
+
+    // WET TISSUE — extra-juicy biological material with visible moisture
+    function wetBioMat(color, opts={}){
+        const baseCol=new THREE.Color(color);
+        const sssCol=baseCol.clone().lerp(new THREE.Color(0x991510),0.4);
+        return new THREE.MeshStandardMaterial({
+            color:color,
+            roughness:opts.rough!==undefined?opts.rough:0.45,
+            metalness:0.06, // wet surface sheen
+            envMap:envMap,
+            envMapIntensity:0.10, // visible moisture reflection
+            emissive:sssCol,
+            emissiveIntensity:opts.eI||0.26,
+            transparent:opts.transparent||false,
+            opacity:opts.opacity!==undefined?opts.opacity:1.0,
+            side:opts.side||THREE.FrontSide
+        });
+    }
+
+    // MEMBRANE — translucent cell membrane with lipid bilayer look
+    function membraneMat(color, opts={}){
+        return new THREE.MeshStandardMaterial({
+            color:color,
+            roughness:opts.rough||0.50,
+            metalness:0.04, // slight wet lipid shine
+            envMap:envMap,
+            envMapIntensity:0.06,
+            emissive:opts.emissive||color,
+            emissiveIntensity:opts.eI||0.18,
+            transparent:true,
+            opacity:opts.opacity||0.6
+        });
+    }
+
+    // SILICON / CIRCUIT — polished metal + ceramic (physically accurate)
+    function chipMat(color, opts={}){
+        return new THREE.MeshPhysicalMaterial({
+            color:color,
+            roughness:opts.rough!==undefined?opts.rough:0.06,
+            metalness:opts.metal!==undefined?opts.metal:0.97,
+            envMap:envMap,
+            envMapIntensity:opts.envI||4.0,
+            clearcoat:opts.clearcoat!==undefined?opts.clearcoat:1.0,
+            clearcoatRoughness:opts.ccRough||0.01,
+            reflectivity:1.0,
+            ior:2.4, // high IOR for strong Fresnel on metals
+            emissive:opts.emissive||color,
+            emissiveIntensity:opts.eI||0.03
+        });
+    }
+
+    // COPPER — warm metallic with micro-roughness
+    function copperMat(opts={}){
+        return new THREE.MeshPhysicalMaterial({
+            color:0xd4845a,  // accurate copper base
+            roughness:opts.rough||0.18,
+            metalness:1.0,
+            envMap:envMap,
+            envMapIntensity:5.0,
+            clearcoat:0.3,
+            clearcoatRoughness:0.15,
+            reflectivity:1.0,
+            emissive:0x8b4513,
+            emissiveIntensity:0.04
+        });
+    }
+
+    // GOLD — rich warm metallic with high reflectivity
+    function goldMat(opts={}){
+        return new THREE.MeshPhysicalMaterial({
+            color:0xdaa520,  // accurate gold base
+            roughness:opts.rough||0.08,
+            metalness:1.0,
+            envMap:envMap,
+            envMapIntensity:6.0,
+            clearcoat:0.6,
+            clearcoatRoughness:0.03,
+            reflectivity:1.0,
+            emissive:0xb8860b,
+            emissiveIntensity:0.06
+        });
+    }
+
+    // BRAIN CORTEX — wet gray-pink tissue with subsurface blood and moisture
+    function cortexMat(opts={}){
+        return new THREE.MeshStandardMaterial({
+            color:opts.color||0x9a6050,
+            roughness:opts.rough||0.58,
+            metalness:0.04, // wet brain surface
+            envMap:envMap,
+            envMapIntensity:0.08, // visible wet reflections
+            emissive:0x662810,
+            emissiveIntensity:opts.eI||0.30,
+        });
+    }
+
+    // GLOW — additive blending for spikes / signals
+    function glowMat(color,opacity=0.7){
+        return new THREE.MeshBasicMaterial({color,transparent:true,opacity,blending:THREE.AdditiveBlending});
+    }
+
+    // MYELIN SHEATH — waxy, semi-translucent lipid insulation with wet pearlescence
+    function myelinMat(){
+        return new THREE.MeshStandardMaterial({
+            color:0x7a5838,roughness:0.55,metalness:0.05,
+            envMap:envMap,envMapIntensity:0.06, // waxy lipid reflection
+            emissive:0x663318,emissiveIntensity:0.22,
+            transparent:true,opacity:0.92
+        });
+    }
+
+    // ═══════════════════════════════════════════
+    // BIOLOGICAL COLORS (realistic)
+    // ═══════════════════════════════════════════
+    const BIO={
+        soma:      0x9a6050,  // Dark warm flesh (bloody brain tissue)
+        nucleus:   0x501828,  // Very dark plum nucleus
+        dendrite:  0x8a5848,  // Dark flesh-tan dendrite
+        axon:      0x7a4838,  // Dark warm flesh axon
+        myelin:    0x8a6858,  // Dark flesh myelin
+        synBouton: 0x8a1810,  // Dark blood-red synaptic terminal
+        vesicle:   0x3388bb,  // Darker blue vesicles
+        spike:     0x00ffcc,  // Bright cyan-green signal
+        membrane:  0x786048,  // Dark warm flesh membrane
+        ranvier:   0x683028,  // Dark warm node of Ranvier
+    };
+
+    // CIRCUIT COLORS (physically accurate metal references)
+    const CIR={
+        silicon:  0x1e1e28,  // Dark polished silicon die
+        copper:   0xd4845a,  // Accurate copper (slightly rose-gold)
+        gold:     0xdaa520,  // Real gold (not bright yellow)
+        pcb:      0x0d3012,  // Dark solder-mask green
+        led:      0x00ff44,  // Activity LED
+        solder:   0xb8b8b8,  // Tin-lead solder (matte silver)
+        dielectric:0x141422, // Dark chip substrate
+    };
+
+    const PAL={ synapse:0x00e5ff, inhibit:0xff3366 }; // accent
+
+    // ═══════════════════════════════════════════
+    // CONTENT SECTIONS
+    // ═══════════════════════════════════════════
+    const sections=[
+        {name:"Neuromorphic Computing",subtitle:"",year:"",equation:"",eqLabel:"",concepts:[],hideScript:true,narratives:[{title:"",text:""}]},
+        {
+            name:"The Biological Neuron",
+            subtitle:"86 billion neurons, each with ~7,000 synaptic connections, consume just 20 watts — the most efficient computer known.",
+            year:"1907 — Lapicque",
+            equation:"τ<sub>m</sub> dV/dt = −(V − E<sub>L</sub>) + R·I(t)<br>if V ≥ V<sub>th</sub> → spike, reset to V<sub>reset</sub>",
+            eqLabel:"Leaky Integrate-and-Fire",
+            concepts:["Membrane Potential","Action Potential","Synaptic Integration","Refractory Period","Ion Channels"],
+            narratives:[
+                {title:"The Leaky Integrate-and-Fire Model",text:"A neuron integrates incoming signals on its <strong>membrane capacitance</strong>. Current leaks through resistance R with time constant <strong>τ<sub>m</sub> = RC ≈ 10 ms</strong>. When voltage V crosses threshold V<sub>th</sub>, an action potential fires."},
+                {title:"Spike Timing Is Everything",text:"Information is encoded not just in <strong>firing rates</strong> but in <strong>precise spike timing</strong>. Temporal codes can represent more information per spike than rate codes — a principle neuromorphic hardware exploits."},
+                {title:"Synaptic Plasticity",text:"<strong>Spike-Timing-Dependent Plasticity (STDP)</strong> strengthens connections when pre-synaptic spikes precede post-synaptic ones. This <strong>Hebbian learning rule</strong> enables unsupervised, local learning without backpropagation."},
+                {title:"Energy Efficiency",text:"The human brain runs on <strong>~20 watts</strong> — processing 10<sup>16</sup> synaptic operations per second. Modern GPUs consume <strong>300–700 watts</strong> for a fraction of this throughput. Biology's secret: <strong>event-driven, sparse computation</strong>."}
+            ]
+        },
+        {
+            name:"Spiking Neural Networks",
+            subtitle:"The third generation of neural networks — computing with discrete temporal events rather than continuous activations.",
+            equation:"V[t+1] = βV[t] + W·S[t] − V<sub>th</sub>·S<sub>out</sub>[t]<br>S<sub>out</sub>[t] = Θ(V[t] − V<sub>th</sub>)",
+            eqLabel:"Discrete SNN Dynamics",
+            concepts:["Spike Trains","Temporal Coding","Rate Coding","Surrogate Gradients","Event-Driven"],
+            narratives:[
+                {title:"Beyond Analog Activations",text:"Traditional neural networks use <strong>continuous-valued activations</strong> (ReLU, sigmoid). SNNs transmit information as <strong>binary spikes</strong> — '1' or '0' — across discrete timesteps, enabling massive energy savings."},
+                {title:"Temporal Dynamics",text:"Each spiking neuron maintains a <strong>membrane potential V[t]</strong> that decays by factor <strong>β</strong> (leak) and accumulates weighted input spikes <strong>W·S[t]</strong>. When V crosses threshold, it emits a spike and resets."},
+                {title:"Surrogate Gradient Training",text:"<strong>Surrogate gradients</strong> (2019–2024) unlocked backpropagation for SNNs by replacing the non-differentiable spike function with smooth approximations during training — closing the accuracy gap with ANNs."},
+                {title:"Sparsity Advantage",text:"In a typical SNN, only <strong>1–10%</strong> of neurons fire at any timestep. This <strong>sparse, event-driven</strong> computation means neuromorphic hardware only processes data when spikes occur — idle neurons consume near-zero power."}
+            ]
+        },
+        {
+            name:"Neuromorphic Hardware",
+            subtitle:"Silicon implementations of neural architectures — from IBM TrueNorth to Intel Loihi 2 to Hala Point.",
+            equation:"Loihi 2: 128 cores × 8,192 neurons = 1M neurons/chip<br>Hala Point: 1,152 chips → 1.15 billion neurons",
+            eqLabel:"Intel Neuromorphic Architecture",
+            concepts:["TrueNorth","Loihi 2","Hala Point","Memristors","In-Memory Computing"],
+            narratives:[
+                {title:"IBM TrueNorth (2014)",text:"<strong>TrueNorth</strong>: 4,096 cores simulating <strong>1 million spiking neurons</strong> and 256 million synapses on a single 28nm chip consuming <strong>70 milliwatts</strong>. The first proof that digital design achieves brain-like power efficiency."},
+                {title:"Intel Loihi 2 (2021)",text:"Built on Intel's <strong>pre-production 7nm (Intel 4)</strong> process: 128 neuromorphic cores, <strong>1 million neurons</strong>, 120 million synapses. Fully <strong>programmable neuron models</strong> via microcode — up to <strong>10× faster</strong> than Loihi 1."},
+                {title:"Hala Point (2024)",text:"The world's largest neuromorphic system: <strong>1,152 Loihi 2 chips</strong> with <strong>1.15 billion neurons</strong> and 128 billion synapses in a <strong>microwave-oven-sized</strong> chassis. Achieves <strong>15 TOPS/W</strong> — processes <strong>20× faster than a human brain</strong>."},
+                {title:"In-Memory Computing",text:"<strong>Memristive devices</strong> store synaptic weights directly in memory, eliminating the von Neumann bottleneck. Analog compute-in-memory performs <strong>multiply-accumulate operations</strong> at the cost of a single memory read."}
+            ]
+        },
+        {
+            name:"STDP Learning",
+            subtitle:"Spike-Timing-Dependent Plasticity — the brain's local learning rule implemented on-chip.",
+            equation:"ΔW = A<sub>+</sub>·exp(−Δt/τ<sub>+</sub>) if Δt > 0<br>ΔW = −A<sub>−</sub>·exp(Δt/τ<sub>−</sub>) if Δt < 0",
+            eqLabel:"STDP Weight Update",
+            concepts:["Hebbian Learning","LTP/LTD","Temporal Window","Local Learning","Unsupervised"],
+            narratives:[
+                {title:"The Hebbian Principle",text:"'Neurons that <strong>fire together, wire together</strong>.' STDP formalizes this: if a pre-synaptic spike arrives <strong>before</strong> a post-synaptic spike (Δt > 0), the synapse is <strong>strengthened</strong> (Long-Term Potentiation)."},
+                {title:"Anti-Hebbian Depression",text:"If the pre-synaptic spike arrives <strong>after</strong> the post-synaptic spike (Δt < 0), the synapse is <strong>weakened</strong> (Long-Term Depression). The asymmetric time window τ<sub>±</sub> ≈ <strong>10–20 ms</strong> matches biology."},
+                {title:"On-Chip Plasticity",text:"Loihi 2 implements <strong>programmable STDP rules via microcode</strong> embedded in each core. Learning happens <strong>locally</strong> — no global backpropagation, no GPU required. Each synapse updates based only on its own spike history."},
+                {title:"Emergent Computation",text:"STDP enables <strong>unsupervised feature extraction</strong>, competitive learning, and self-organizing maps — all without labeled data. Networks discover <strong>edge detectors, motion patterns, and temporal sequences</strong> autonomously."}
+            ]
+        },
+        {
+            name:"Applications & Future",
+            subtitle:"From edge AI and robotics to brain-computer interfaces — neuromorphic computing's frontier.",
+            equation:"Energy: ~100× less than GPU<br>Latency: ~50× faster inference<br>Efficiency: up to 15 TOPS/W",
+            eqLabel:"Performance Metrics",
+            concepts:["Edge AI","Robotics","Event Cameras","Brain-Computer Interface","Sustainable AI"],
+            narratives:[
+                {title:"Edge Intelligence",text:"Neuromorphic chips enable <strong>always-on sensing</strong> at milliwatt power. Event cameras paired with SNNs achieve <strong>microsecond-latency</strong> vision without frames — ideal for autonomous vehicles, drones, and IoT."},
+                {title:"Adaptive Robotics",text:"Robots with neuromorphic controllers <strong>learn continuously</strong> from sensory feedback. NUS built a robotic skin system on <strong>Loihi</strong> — artificial touch with brain-like edge processing at <strong>milliwatt power</strong>."},
+                {title:"Sustainable AI",text:"Training large language models consumes <strong>tens of gigawatt-hours</strong>. Neuromorphic LLMs with continuous learning could yield <strong>gigawatt-hours of energy savings</strong> by eliminating periodic re-training cycles."},
+                {title:"The Road Ahead",text:"Gradient-based SNN training is now <strong>off-the-shelf</strong>. The algorithmic gap between SNNs and ANNs has <strong>dramatically narrowed</strong>. Commercial neuromorphic processors are approaching <strong>mass-market readiness</strong>."}
+            ]
+        },
+        {name:"Summary & Insights",subtitle:"",equation:"",eqLabel:"",concepts:[],hideScript:true,narratives:[{title:"",text:""}]}
+    ];
+
+    let scene,camera,renderer,group,anims=[];
+    let current=0,currentNarrative=0;
+    let clock=new THREE.Clock();
+    let isPlaying=false,narrativeTimer=0;
+    const NARR_DUR=12;
+
+    function init(){
+        scene=new THREE.Scene();
+        scene.background=new THREE.Color(0x040506);
+        // Atmospheric fog for cinematic depth
+        scene.fog=new THREE.FogExp2(0x040506,0.003);
+
+        camera=new THREE.PerspectiveCamera(32,window.innerWidth/window.innerHeight,0.1,2000);
+        camera.position.set(0,35,130);
+
+        renderer=new THREE.WebGLRenderer({canvas:document.getElementById('canvas'),antialias:true,powerPreference:'high-performance'});
+        renderer.setSize(window.innerWidth,window.innerHeight);
+        renderer.setPixelRatio(Math.min(devicePixelRatio,2.5));
+        renderer.setClearColor(0x040506);
+        renderer.shadowMap.enabled=true;
+        renderer.shadowMap.type=THREE.PCFSoftShadowMap;
+        renderer.toneMapping=THREE.ACESFilmicToneMapping;
+        renderer.toneMappingExposure=0.70;
+        renderer.outputEncoding=THREE.sRGBEncoding;
+
+
+        envMap=createEnvMap();
+        // Do NOT set scene.environment — it washes biological materials white
+        // scene.environment=envMap;
+
+        setupLights();createBG();
+        loadSection(0);animate();
+        window.addEventListener('resize',onResize);
+        document.addEventListener('keydown',onKey);
+    }
+
+    function setupLights(){
+        // Ambient warm fill — slightly warmer for organic tissue
+        scene.add(new THREE.AmbientLight(0xffeedd,0.08));
+
+        // Key — bright warm directional (main surgical light)
+        const key=new THREE.DirectionalLight(0xfff5e8,0.9);
+        key.position.set(50,120,70);key.castShadow=true;
+        key.shadow.mapSize.set(4096,4096);
+        key.shadow.camera.near=0.5;key.shadow.camera.far=600;
+        key.shadow.camera.left=-120;key.shadow.camera.right=120;
+        key.shadow.camera.top=120;key.shadow.camera.bottom=-120;
+        key.shadow.bias=-0.0002;key.shadow.normalBias=0.02;
+        scene.add(key);
+
+        // Secondary key — cooler, softer fill
+        const key2=new THREE.DirectionalLight(0xe8f0ff,0.35);
+        key2.position.set(-60,80,-40);scene.add(key2);
+
+        // Cool rim (blue kicker for edge definition — stronger)
+        const rim=new THREE.PointLight(0x4488cc,1.0,900);
+        rim.position.set(-120,70,-120);scene.add(rim);
+
+        // Warm rim (golden edge light — emphasizes tissue warmth)
+        const warmRim=new THREE.PointLight(0xffaa55,0.6,700);
+        warmRim.position.set(100,50,100);scene.add(warmRim);
+
+        // Fill — cool diffuse from opposite side
+        const fill=new THREE.DirectionalLight(0xc8d8f0,0.25);
+        fill.position.set(-50,30,50);scene.add(fill);
+
+        // Bottom fill (warm bounce from below — simulates table reflection)
+        const bottom=new THREE.PointLight(0xff8855,0.3,300);
+        bottom.position.set(0,-25,0);scene.add(bottom);
+
+        // Top hair light — brighter for silhouette definition
+        const hair=new THREE.PointLight(0xfff0dd,0.6,500);
+        hair.position.set(0,150,0);scene.add(hair);
+
+        // Subtle warm backlight for depth separation
+        const back=new THREE.PointLight(0xdd8844,0.4,400);
+        back.position.set(-80,20,-100);scene.add(back);
+
+        // Accent blood-colored uplight (simulates reflected light off tissue)
+        const bloodUp=new THREE.PointLight(0xcc4422,0.3,200);
+        bloodUp.position.set(0,-10,20);scene.add(bloodUp);
+
+        // Roaming accent lights (cinematic movement)
+        for(let i=0;i<3;i++){
+            const pl=new THREE.PointLight(0x00ccff,0.4,400,2);
+            scene.add(pl);anims.push({obj:pl,type:'volLight',i});
+        }
+    }
+
+    function createBG(){
+        // Ground plane — dark surgical table surface with subtle reflections
+        const floor=new THREE.Mesh(
+            new THREE.PlaneGeometry(500,500),
+            new THREE.MeshStandardMaterial({color:0x080a10,roughness:0.75,metalness:0.05,
+                envMap,envMapIntensity:0.08})
+        );
+        floor.rotation.x=-PI/2;floor.position.y=-35;floor.receiveShadow=true;scene.add(floor);
+
+        // Atmospheric dust/moisture particles floating in the scene
+        const dustGeo=new THREE.BufferGeometry();
+        const dustCount=800;
+        const dustPos=new Float32Array(dustCount*3);
+        const dustSizes=new Float32Array(dustCount);
+        for(let i=0;i<dustCount;i++){
+            dustPos[i*3]=(Math.random()-0.5)*200;
+            dustPos[i*3+1]=(Math.random()-0.5)*120;
+            dustPos[i*3+2]=(Math.random()-0.5)*200;
+            dustSizes[i]=0.08+Math.random()*0.25;
+        }
+        dustGeo.setAttribute('position',new THREE.BufferAttribute(dustPos,3));
+        dustGeo.setAttribute('size',new THREE.BufferAttribute(dustSizes,1));
+        const dustMat=new THREE.PointsMaterial({
+            color:0xffe8d0,size:0.15,transparent:true,opacity:0.08,
+            blending:THREE.AdditiveBlending,depthWrite:false,
+            sizeAttenuation:true
+        });
+        const dust=new THREE.Points(dustGeo,dustMat);
+        dust.name='_dust';scene.add(dust);
+
+        // Subtle god-ray streaks (thin glowing tubes from above)
+        for(let i=0;i<4;i++){
+            const rayPts=[
+                new THREE.Vector3((Math.random()-0.5)*80,80,(Math.random()-0.5)*80),
+                new THREE.Vector3((Math.random()-0.5)*40,-30,(Math.random()-0.5)*40)
+            ];
+            const rayCurve=new THREE.CatmullRomCurve3(rayPts);
+            const rayMesh=new THREE.Mesh(
+                new THREE.TubeGeometry(rayCurve,6,0.8+Math.random()*0.5,4,false),
+                new THREE.MeshBasicMaterial({color:0xfff5e0,transparent:true,opacity:0.012,blending:THREE.AdditiveBlending,depthWrite:false})
+            );
+            scene.add(rayMesh);
+        }
+    }
+
+    // ═══════════════════════════════════════════
+    // UI MANAGEMENT
+    // ═══════════════════════════════════════════
+    function updateUI(){
+        const s=sections[current],n=s.narratives[currentNarrative];
+        document.getElementById('archTitle').textContent=s.name;
+        const sub=document.getElementById('archSubtitle');sub.textContent=s.subtitle;sub.style.display=s.subtitle?'block':'none';
+        const yb=document.querySelector('.year-badge');document.getElementById('archYear').textContent=s.year;yb.style.display=s.year?'inline-flex':'none';
+        document.getElementById('eqMath').innerHTML=s.equation;document.getElementById('eqLabel').textContent=s.eqLabel;
+        const ts=document.querySelector('.title-section'),ep=document.querySelector('.equation-panel');
+        const isMain=current>0&&current<sections.length-1;
+        ts.style.opacity=isMain?1:0;ep.style.opacity=(isMain&&s.equation)?1:0;
+        const so=document.querySelector('.cinematic-script-overlay'),st=document.getElementById('scriptText');
+        if(s.hideScript){so.style.opacity=0;st.classList.remove('active');}
+        else{so.style.opacity=1;st.classList.remove('active');setTimeout(()=>{st.innerHTML=n.text;document.getElementById('scriptSub').textContent=s.name.toUpperCase();st.classList.add('active');},300);}
+        const intro=document.getElementById('introCardOverlay');
+        if(current===0)intro.classList.remove('fade-out');else intro.classList.add('fade-out');
+        const ec=document.getElementById('endCardOverlay');
+        if(current===sections.length-1)ec.classList.add('active');else ec.classList.remove('active');
+        updateSceneVisuals(current-1,currentNarrative);
+    }
+
+    function loadSection(idx){
+        current=idx;currentNarrative=0;narrativeTimer=0;
+        if(group){scene.remove(group);group.traverse(c=>{if(c.geometry)c.geometry.dispose();if(c.material)(Array.isArray(c.material)?c.material:[c.material]).forEach(m=>m.dispose());});}
+        anims=anims.filter(a=>a.type==='volLight');
+        group=new THREE.Group();
+        [buildIntro,buildNeuron,buildSNN,buildHardware,buildSTDP,buildApplications,buildEndCard][idx]();
+        scene.add(group);updateUI();
+    }
+
+    const visualState={mode:'static'};
+    function updateSceneVisuals(si,ni){
+        visualState.mode='static';
+        if(si===0){visualState.mode=['neuronIdle','spikeTiming','plasticityPulse','efficiencyGlow'][ni]||'neuronIdle';}
+        else if(si===1){visualState.mode=['snnSpike','membraneDynamics','surrogateFlow','sparsityReveal'][ni]||'snnSpike';}
+        else if(si===2){visualState.mode=['chipGlow','loihiPulse','halaScale','memristorFlow'][ni]||'chipGlow';}
+        else if(si===3){visualState.mode=['hebbianFire','antiHebbian','onChipLearn','emergentMap'][ni]||'hebbianFire';}
+        else if(si===4){visualState.mode=['edgeSense','robotArm','sustainPulse','futureExpand'][ni]||'edgeSense';}
+    }
+
+    // ═══════════════════════════════════════════
+    // HELPER: Surface-hugging capillary curve
+    // ═══════════════════════════════════════════
+    // Generates a CatmullRomCurve3 that sticks tightly to a sphere surface
+    // by generating sparse control points, building a curve, then re-sampling
+    // at high density and projecting every sample back onto the sphere.
+    function surfaceCapillary(center, surfR, startPhi, startTheta, phiSpread, thetaSpread, numCtrl, wobble){
+        // 1. Generate rough control points on the sphere
+        const rawPts=[];
+        for(let i=0;i<=numCtrl;i++){
+            const t=i/numCtrl;
+            const phi=startPhi+t*phiSpread+Math.sin(i*2.2)*wobble;
+            const theta=startTheta+t*thetaSpread+Math.cos(i*1.7)*wobble*0.6;
+            const r=surfR;
+            rawPts.push(new THREE.Vector3(
+                center.x+r*Math.sin(phi)*Math.cos(theta),
+                center.y+r*Math.cos(phi),
+                center.z+r*Math.sin(phi)*Math.sin(theta)
+            ));
+        }
+        // 2. Build preliminary curve and re-sample densely
+        const tmpCurve=new THREE.CatmullRomCurve3(rawPts);
+        const sampleCount=numCtrl*4;
+        const projPts=[];
+        for(let i=0;i<=sampleCount;i++){
+            const p=tmpCurve.getPoint(i/sampleCount);
+            // 3. Project each sample point back onto the sphere surface
+            const dir=p.clone().sub(center).normalize();
+            p.copy(center).addScaledVector(dir,surfR);
+            projPts.push(p);
+        }
+        return new THREE.CatmullRomCurve3(projPts);
+    }
+
+    // ═══════════════════════════════════════════
+    // HELPER: Organic branching dendrite
+    // ═══════════════════════════════════════════
+    function createDendriteBranch(startPt, direction, length, radius, depth, maxDepth){
+        const segs=14;const pts=[];
+        for(let i=0;i<=segs;i++){
+            const t=i/segs;
+            const wobble=depth*0.6+0.3;
+            pts.push(new THREE.Vector3(
+                startPt.x+direction.x*t*length+(Math.random()-0.5)*wobble,
+                startPt.y+direction.y*t*length+(Math.random()-0.5)*wobble,
+                startPt.z+direction.z*t*length+(Math.random()-0.5)*wobble
+            ));
+        }
+        const curve=new THREE.CatmullRomCurve3(pts);
+        const tubSegs=Math.max(8,segs*3);
+        const geo=new THREE.TubeGeometry(curve,tubSegs,radius*(0.5+0.5*(1-depth/maxDepth)),8,false);
+        // Add per-vertex color to dendrite tube for organic variation
+        const dPos=geo.attributes.position;
+        const dColors=new Float32Array(dPos.count*3);
+        for(let i=0;i<dPos.count;i++){
+            const v=new THREE.Vector3(dPos.getX(i),dPos.getY(i),dPos.getZ(i));
+            const n=Math.sin(v.x*3+v.y*2)*0.08+Math.sin(v.z*5+v.x*4)*0.04;
+            dColors[i*3]=0.50+n+depth*0.02;dColors[i*3+1]=0.36+n-depth*0.02;dColors[i*3+2]=0.26+n*0.5;
+        }
+        geo.setAttribute('color',new THREE.BufferAttribute(dColors,3));
+        const mesh=new THREE.Mesh(geo,new THREE.MeshStandardMaterial({
+            vertexColors:true,roughness:0.55+depth*0.04,metalness:0.03,
+            envMap:envMap,envMapIntensity:0.10,
+            emissive:0x661810,emissiveIntensity:0.15-depth*0.02
+        }));
+        mesh.castShadow=true;
+        group.add(mesh);
+
+        // Spines (tiny protrusions along dendrites — synaptic contact points)
+        if(depth<maxDepth){
+            for(let s=0;s<4;s++){
+                const sp=curve.getPoint(0.2+s*0.2);
+                const spine=new THREE.Mesh(new THREE.SphereGeometry(radius*0.5,6,6),bioMat(BIO.synBouton,{rough:0.7,eI:0.10}));
+                spine.position.copy(sp);spine.position.y+=radius*1.2*(Math.random()-0.5)*2;
+                spine.name='spine';group.add(spine);
+            }
+            // Blood capillaries running along EVERY dendrite branch
+            const numCaps=depth<2?3:depth<3?2:1;
+            const capMat=new THREE.MeshStandardMaterial({color:0x8a1510,roughness:0.45,metalness:0.06,envMap,envMapIntensity:0.08,emissive:0x770a0a,emissiveIntensity:0.28});
+            const subCapMat=new THREE.MeshStandardMaterial({color:0x6a0808,roughness:0.50,metalness:0.04,envMap,envMapIntensity:0.06,emissive:0x550505,emissiveIntensity:0.22});
+            for(let ci=0;ci<numCaps;ci++){
+                const capPts=[];
+                const angOffset=ci*TAU/numCaps;
+                for(let s=0;s<=10;s++){
+                    const p=curve.getPoint(s/10);
+                    const r2=radius*(0.85+ci*0.1);
+                    capPts.push(new THREE.Vector3(
+                        p.x+Math.cos(angOffset+s*0.6)*r2*0.4+(Math.random()-0.5)*0.08,
+                        p.y+Math.sin(angOffset+s*0.6)*r2*0.4+(Math.random()-0.5)*0.08,
+                        p.z+(Math.random()-0.5)*0.15
+                    ));
+                }
+                const capR=0.02+radius*0.03*(1-depth/maxDepth);
+                const capCurve2=new THREE.CatmullRomCurve3(capPts);
+                const capMesh=new THREE.Mesh(new THREE.TubeGeometry(capCurve2,10,capR,4,false),capMat);
+                capMesh.name='dendCap';group.add(capMesh);
+                // Sub-capillary branches — follow parent dendrite curve surface
+                if(depth<3){
+                    for(let bi=0;bi<2;bi++){
+                        const bStartT=0.25+bi*0.4;
+                        const bStart=capCurve2.getPoint(bStartT);
+                        const perpOff=new THREE.Vector3((Math.random()-0.5)*0.25,(Math.random()-0.5)*0.25,(Math.random()-0.5)*0.25);
+                        const bPts=[bStart];
+                        for(let bs=1;bs<=4;bs++){
+                            const walkT=Math.min(1,Math.max(0,bStartT+bs*0.12*(bi===0?1:-1)));
+                            const cp=curve.getPoint(walkT);
+                            bPts.push(new THREE.Vector3(cp.x+perpOff.x*(1+bs*0.25),cp.y+perpOff.y*(1+bs*0.25),cp.z+perpOff.z*(1+bs*0.25)));
+                        }
+                        group.add(new THREE.Mesh(
+                            new THREE.TubeGeometry(new THREE.CatmullRomCurve3(bPts),5,capR*0.5,3,false),subCapMat
+                        ));
+                    }
+                }
+            }
+        }
+
+        // Recursive branching
+        if(depth<maxDepth){
+            const endPt=pts[pts.length-1];
+            const numBranches=depth<2?Math.floor(Math.random()*2)+2:Math.floor(Math.random()*2)+1;
+            for(let b=0;b<numBranches;b++){
+                const newDir=new THREE.Vector3(
+                    direction.x+(Math.random()-0.5)*1.5,
+                    direction.y+(Math.random()-0.5)*1.0,
+                    direction.z+(Math.random()-0.5)*1.5
+                ).normalize();
+                createDendriteBranch(endPt,newDir,length*0.65,radius*0.65,depth+1,maxDepth);
+            }
+        }
+    }
+
+    // ═══════════════════════════════════════════
+    // HELPER: Background scattered neurons (fills empty space with organic tissue)
+    // ═══════════════════════════════════════════
+    function addBackgroundNeurons(grp, animArr, count, spread, ySpread, opts){
+        opts=opts||{};
+        const bgCapMat=new THREE.MeshStandardMaterial({color:0x8a1510,roughness:0.45,metalness:0.06,envMap,envMapIntensity:0.08,emissive:0x770a0a,emissiveIntensity:0.30,transparent:true,opacity:0.70});
+        const bgSubCapMat=new THREE.MeshStandardMaterial({color:0x6a0808,roughness:0.50,metalness:0.04,envMap,envMapIntensity:0.06,emissive:0x550505,emissiveIntensity:0.22,transparent:true,opacity:0.60});
+        const positions=[];
+        for(let i=0;i<count;i++){
+            const angle=Math.random()*TAU;
+            const r=spread*0.4+Math.random()*spread*0.6;
+            const x=Math.cos(angle)*r;
+            const y=(Math.random()-0.5)*ySpread;
+            const z=Math.sin(angle)*r;
+            positions.push(new THREE.Vector3(x,y,z));
+            const size=1.8+Math.random()*2.5;
+
+            // ─── SOMA — 7-octave displacement (matching main neuron quality) ───
+            const sGeo=new THREE.SphereGeometry(size,64,64);
+            const sp=sGeo.attributes.position;
+            const bgVC=new Float32Array(sp.count*3);
+            for(let vi=0;vi<sp.count;vi++){
+                const v=new THREE.Vector3(sp.getX(vi),sp.getY(vi),sp.getZ(vi));
+                const nrm=v.clone().normalize();
+                // 7-octave organic displacement — same algorithm as main neuron
+                const bn1=Math.sin(v.x*1.2)*Math.sin(v.y*1.1)*Math.sin(v.z*1.4)*0.65;
+                const bn2=Math.sin(v.x*2.5+v.y*2.0)*Math.cos(v.z*2.2)*0.35;
+                const bn3=Math.sin(v.x*4.2+v.z*3.5+v.y*1.0)*0.20;
+                const bn4=Math.sin(v.y*6.8+v.x*6.0+v.z*5.5)*0.11;
+                const bn5=Math.sin(v.x*10+v.y*9.2+v.z*8.5)*0.05;
+                const bn6=Math.sin(v.x*15+v.z*14+v.y*13)*0.022;
+                const bn7=Math.sin(v.x*22+v.y*20+v.z*18)*0.010;
+                const bNoise=bn1+bn2+bn3+bn4+bn5+bn6+bn7;
+                v.addScaledVector(nrm,bNoise);
+                sp.setXYZ(vi,v.x,v.y,v.z);
+                // Vertex color: same blood-pooling + vein-hint formula as main neuron
+                const depth=(bNoise+1.5)/3.0;
+                const bloodPool=Math.max(0,0.35-depth)*2.5;
+                const veinHint=Math.max(0,Math.sin(v.x*8+v.z*6)*0.05);
+                bgVC[vi*3  ]=0.45+depth*0.10+bloodPool*0.35+veinHint*0.3;
+                bgVC[vi*3+1]=0.26+depth*0.06-bloodPool*0.12-veinHint*0.1;
+                bgVC[vi*3+2]=0.20+depth*0.04-bloodPool*0.10+veinHint*0.05;
+            }
+            sGeo.setAttribute('color',new THREE.BufferAttribute(bgVC,3));
+            sGeo.computeVertexNormals();
+            const soma=new THREE.Mesh(sGeo,new THREE.MeshStandardMaterial({
+                vertexColors:true,roughness:0.58,metalness:0.04,
+                envMap,envMapIntensity:0.08,
+                emissive:0x661810,emissiveIntensity:0.28,
+                transparent:true,opacity:0.90
+            }));
+            soma.position.set(x,y,z);soma.name=`bgN_${i}`;grp.add(soma);
+            animArr.push({obj:soma,type:'bgNeuronPulse',phase:Math.random()*TAU});
+
+            // ─── MOISTURE LAYER — wet glistening membrane over each bg soma ───
+            const moistGeo=new THREE.SphereGeometry(size*1.03,32,32);
+            const mmp=moistGeo.attributes.position;
+            for(let mi=0;mi<mmp.count;mi++){
+                const mv=new THREE.Vector3(mmp.getX(mi),mmp.getY(mi),mmp.getZ(mi));
+                mv.addScaledVector(mv.clone().normalize(),Math.sin(mv.x*3+mv.y*4)*0.08+Math.sin(mv.x*8)*0.03);
+                mmp.setXYZ(mi,mv.x,mv.y,mv.z);
+            }
+            moistGeo.computeVertexNormals();
+            const moist=new THREE.Mesh(moistGeo,new THREE.MeshStandardMaterial({
+                color:0x996050,roughness:0.15,metalness:0.08,
+                envMap,envMapIntensity:0.08,
+                emissive:0x442010,emissiveIntensity:0.04,
+                transparent:true,opacity:0.05,side:THREE.FrontSide
+            }));
+            moist.position.set(x,y,z);grp.add(moist);
+
+            // ─── NUCLEUS — dark dense core visible inside semi-transparent soma ───
+            const nucSize=size*0.38;
+            const nuc=new THREE.Mesh(
+                new THREE.SphereGeometry(nucSize,16,16),
+                wetBioMat(BIO.nucleus,{rough:0.40,eI:0.10})
+            );
+            nuc.position.set(x,y,z);grp.add(nuc);
+
+            // ─── DENDRITES — vertex-colored organic branches with spines ───
+            const numDend=3+Math.floor(Math.random()*3);
+            for(let d=0;d<numDend;d++){
+                const dir=new THREE.Vector3((Math.random()-0.5),(Math.random()-0.5),(Math.random()-0.5)).normalize();
+                const len=size*1.8+Math.random()*size*2.5;
+                const dendPts=[];
+                const dendSegs=10;
+                for(let s=0;s<=dendSegs;s++){
+                    const t=s/dendSegs;
+                    const wobble=0.3+d*0.15;
+                    dendPts.push(new THREE.Vector3(
+                        x+dir.x*t*len+(Math.random()-0.5)*wobble,
+                        y+dir.y*t*len+(Math.random()-0.5)*wobble,
+                        z+dir.z*t*len+(Math.random()-0.5)*wobble
+                    ));
+                }
+                const curve=new THREE.CatmullRomCurve3(dendPts);
+                const rad=0.06+Math.random()*0.10;
+                // Vertex-colored dendrite tube (organic color variation like main neuron)
+                const dGeo=new THREE.TubeGeometry(curve,16,rad,6,false);
+                const dPos=dGeo.attributes.position;
+                const dCols=new Float32Array(dPos.count*3);
+                for(let di=0;di<dPos.count;di++){
+                    const dv=new THREE.Vector3(dPos.getX(di),dPos.getY(di),dPos.getZ(di));
+                    const dn=Math.sin(dv.x*3+dv.y*2)*0.08+Math.sin(dv.z*5+dv.x*4)*0.04;
+                    dCols[di*3]=0.50+dn;dCols[di*3+1]=0.36+dn-0.02;dCols[di*3+2]=0.26+dn*0.5;
+                }
+                dGeo.setAttribute('color',new THREE.BufferAttribute(dCols,3));
+                grp.add(new THREE.Mesh(dGeo,new THREE.MeshStandardMaterial({
+                    vertexColors:true,roughness:0.55,metalness:0.03,
+                    envMap,envMapIntensity:0.08,
+                    emissive:0x661810,emissiveIntensity:0.15,
+                    transparent:true,opacity:0.75
+                })));
+
+                // Dendritic spines (tiny bumps along branches)
+                for(let s=0;s<3;s++){
+                    const spineP=curve.getPoint(0.25+s*0.25);
+                    const spine=new THREE.Mesh(
+                        new THREE.SphereGeometry(rad*0.6,5,5),
+                        bioMat(BIO.synBouton,{rough:0.7,eI:0.10,transparent:true,opacity:0.7})
+                    );
+                    spine.position.copy(spineP);grp.add(spine);
+                }
+
+                // Sub-branches (secondary dendrite forks)
+                if(Math.random()>0.35){
+                    const ep=dendPts[dendPts.length-1];
+                    const numSub=1+Math.floor(Math.random()*2);
+                    for(let sb=0;sb<numSub;sb++){
+                        const sd=new THREE.Vector3(dir.x+(Math.random()-0.5)*1.5,dir.y+(Math.random()-0.5),dir.z+(Math.random()-0.5)*1.5).normalize();
+                        const sPts=[];
+                        for(let ss=0;ss<=5;ss++){const t2=ss/5;
+                            sPts.push(new THREE.Vector3(ep.x+sd.x*t2*len*0.45+(Math.random()-0.5)*0.25,ep.y+sd.y*t2*len*0.45+(Math.random()-0.5)*0.25,ep.z+sd.z*t2*len*0.45+(Math.random()-0.5)*0.25));
+                        }
+                        grp.add(new THREE.Mesh(
+                            new THREE.TubeGeometry(new THREE.CatmullRomCurve3(sPts),8,rad*0.55,4,false),
+                            bioMat(BIO.dendrite,{rough:0.60,eI:0.12,transparent:true,opacity:0.60})
+                        ));
+                    }
+                }
+
+                // Blood capillary running along dendrite
+                if(d<2){
+                    const capPts=[];
+                    for(let cs=0;cs<=8;cs++){
+                        const ct=cs/8;
+                        const cp=curve.getPoint(ct);
+                        capPts.push(new THREE.Vector3(cp.x+Math.sin(cs*1.5)*rad*0.6,cp.y+Math.cos(cs*1.5)*rad*0.6,cp.z+Math.sin(cs*2)*rad*0.3));
+                    }
+                    grp.add(new THREE.Mesh(new THREE.TubeGeometry(new THREE.CatmullRomCurve3(capPts),8,0.012+Math.random()*0.008,3,false),bgSubCapMat));
+                }
+            }
+
+            // ─── SURFACE BLOOD CAPILLARIES on soma (6 per neuron, with sub-branches) ───
+            const ctr=new THREE.Vector3(x,y,z);
+            for(let bv=0;bv<6;bv++){
+                const c2=surfaceCapillary(ctr,size*1.02,Math.random()*PI,Math.random()*TAU,(Math.random()-0.5)*1.0,0.6,8,0.08);
+                const capMesh=new THREE.Mesh(new THREE.TubeGeometry(c2,16,0.018+Math.random()*0.012,4,false),bgCapMat);
+                grp.add(capMesh);
+                animArr.push({obj:capMesh,type:'vesselPulse',phase:bv*0.8+i*0.5});
+                // Sub-capillary branch
+                if(bv<3){
+                    const bT=0.3+Math.random()*0.4;
+                    const bS=c2.getPoint(bT);
+                    const bO=bS.clone().sub(ctr);
+                    const bPhi=Math.acos(bO.y/bO.length());
+                    const bTheta=Math.atan2(bO.z,bO.x);
+                    const brCurve=surfaceCapillary(ctr,size*1.04,bPhi,bTheta,(Math.random()-0.5)*0.4,0.25,4,0.05);
+                    grp.add(new THREE.Mesh(new THREE.TubeGeometry(brCurve,8,0.010,3,false),bgSubCapMat));
+                }
+            }
+        }
+        // Axon connections between nearby background neurons
+        for(let i=0;i<positions.length;i++){
+            for(let j=i+1;j<positions.length;j++){
+                const dist=positions[i].distanceTo(positions[j]);
+                if(dist<spread*0.7&&Math.random()>0.4){
+                    const mid=positions[i].clone().add(positions[j]).multiplyScalar(0.5);
+                    mid.y+=(Math.random()-0.5)*8;mid.x+=(Math.random()-0.5)*4;mid.z+=(Math.random()-0.5)*4;
+                    const aCurve=new THREE.CatmullRomCurve3([positions[i],mid,positions[j]]);
+                    // Vertex-colored axon connection
+                    const aGeo=new THREE.TubeGeometry(aCurve,14,0.05+Math.random()*0.04,5,false);
+                    const aPos=aGeo.attributes.position;
+                    const aCols=new Float32Array(aPos.count*3);
+                    for(let ai=0;ai<aPos.count;ai++){
+                        const av=new THREE.Vector3(aPos.getX(ai),aPos.getY(ai),aPos.getZ(ai));
+                        const an=Math.sin(av.x*4+av.z*3)*0.06;
+                        aCols[ai*3]=0.42+an;aCols[ai*3+1]=0.28+an;aCols[ai*3+2]=0.20+an*0.5;
+                    }
+                    aGeo.setAttribute('color',new THREE.BufferAttribute(aCols,3));
+                    grp.add(new THREE.Mesh(aGeo,new THREE.MeshStandardMaterial({
+                        vertexColors:true,roughness:0.55,metalness:0.03,
+                        envMap,envMapIntensity:0.06,
+                        emissive:0x661810,emissiveIntensity:0.10,
+                        transparent:true,opacity:0.55
+                    })));
+                    // Traveling spike along connection
+                    if(Math.random()>0.5){
+                        const spk=new THREE.Mesh(new THREE.SphereGeometry(0.4,6,6),glowMat(BIO.spike,0.6));
+                        spk.name=`bgSpk_${i}_${j}`;spk.visible=false;grp.add(spk);
+                        animArr.push({obj:spk,type:'spikeTravel',curve:aCurve,offset:Math.random(),speed:0.06+Math.random()*0.06});
+                    }
+                }
+            }
+        }
+        // Dense ambient particles — neural dust
+        const ambientCount=opts.particles||60;
+        for(let i=0;i<ambientCount;i++){
+            const geo=new THREE.SphereGeometry(0.04+Math.random()*0.08,4,4);
+            const colors=[BIO.spike,PAL.synapse,0xffaa44,0xff6644,0x88ccff,0xffd700];
+            const mat=glowMat(colors[i%colors.length],0.15+Math.random()*0.30);
+            const p=new THREE.Mesh(geo,mat);
+            const th=Math.random()*TAU,pr=spread*0.3+Math.random()*spread*0.8;
+            p.position.set(Math.cos(th)*pr,(Math.random()-0.5)*ySpread*1.2,Math.sin(th)*pr);
+            grp.add(p);
+            animArr.push({obj:p,type:'floater',speed:0.003+Math.random()*0.01,phase:Math.random()*TAU});
+        }
+        // Neural mesh — gossamer web lines connecting space
+        const meshMat=new THREE.MeshStandardMaterial({color:0x446688,roughness:0.5,metalness:0.05,envMap,envMapIntensity:0.08,emissive:0x112244,emissiveIntensity:0.08,transparent:true,opacity:0.08});
+        for(let i=0;i<12;i++){
+            const p1=new THREE.Vector3((Math.random()-0.5)*spread*1.5,(Math.random()-0.5)*ySpread,(Math.random()-0.5)*spread*1.5);
+            const p2=new THREE.Vector3((Math.random()-0.5)*spread*1.5,(Math.random()-0.5)*ySpread,(Math.random()-0.5)*spread*1.5);
+            const m=p1.clone().add(p2).multiplyScalar(0.5);m.y+=(Math.random()-0.5)*10;
+            grp.add(new THREE.Mesh(new THREE.TubeGeometry(new THREE.CatmullRomCurve3([p1,m,p2]),10,0.02,3,false),meshMat));
+        }
+    }
+
+    // ═══════════════════════════════════════════
+    // BUILD: Realistic Biological Neuron
+    // ═══════════════════════════════════════════
+    function buildIntro(){buildNeuron();}
+
+    function buildNeuron(){
+        // === SOMA — Ultra-realistic cell body with deep organic displacement ===
+        const somaGeo=new THREE.SphereGeometry(5.5,128,128); // High-poly for fine detail
+        const pos=somaGeo.attributes.position;
+        const somaColors=new Float32Array(pos.count*3);
+        for(let i=0;i<pos.count;i++){
+            const v=new THREE.Vector3(pos.getX(i),pos.getY(i),pos.getZ(i));
+            const n=v.clone().normalize();
+            // 9-octave displacement for intensely wrinkled organic surface
+            const n1=Math.sin(v.x*1.2)*Math.sin(v.y*1.1)*Math.sin(v.z*1.4)*0.80;
+            const n2=Math.sin(v.x*2.5+v.y*2.0)*Math.cos(v.z*2.2)*0.42;
+            const n3=Math.sin(v.x*4.2+v.z*3.5+v.y*1.0)*0.24;
+            const n4=Math.sin(v.y*6.8+v.x*6.0+v.z*5.5)*0.14;
+            const n5=Math.sin(v.x*10+v.y*9.2+v.z*8.5)*0.065;
+            const n6=Math.sin(v.x*15+v.z*14+v.y*13)*0.030;
+            const n7=Math.sin(v.x*22+v.y*20+v.z*18)*0.014;
+            const n8=Math.sin(v.x*35+v.y*32+v.z*28)*0.006;
+            const n9=Math.sin(v.x*55+v.y*50+v.z*45)*0.003;
+            const noise=n1+n2+n3+n4+n5+n6+n7+n8+n9;
+            v.addScaledVector(n,noise);
+            pos.setXYZ(i,v.x,v.y,v.z);
+            // Vertex color: Ultra-realistic wet flesh with blood pooling
+            const depth=(noise+1.8)/3.6;
+            const bloodPool=Math.max(0,0.35-depth)*2.5;
+            const veinHint=Math.max(0,Math.sin(v.x*8+v.z*6)*0.05); // subsurface vein tint
+            const r=0.45+depth*0.10+bloodPool*0.35+veinHint*0.3;
+            const g=0.26+depth*0.06-bloodPool*0.12-veinHint*0.1;
+            const b=0.20+depth*0.04-bloodPool*0.10+veinHint*0.05;
+            somaColors[i*3]=r;somaColors[i*3+1]=g;somaColors[i*3+2]=b;
+        }
+        somaGeo.setAttribute('color',new THREE.BufferAttribute(somaColors,3));
+        somaGeo.computeVertexNormals();
+        const somaMat=new THREE.MeshStandardMaterial({
+            vertexColors:true,roughness:0.58,metalness:0.04,
+            envMap:envMap,envMapIntensity:0.08, // wet tissue surface
+            emissive:0x661810,emissiveIntensity:0.28,
+            transparent:true,opacity:0.97
+        });
+        const soma=new THREE.Mesh(somaGeo,somaMat);
+        soma.position.set(0,2,0);soma.castShadow=true;soma.name='soma';group.add(soma);
+
+        // === SURFACE BLOOD CAPILLARIES — thin red veins crawling over soma ===
+        const somaCenter=new THREE.Vector3(0,2,0);
+        const somaCapMatMain=new THREE.MeshStandardMaterial({color:0x8a1510,roughness:0.45,metalness:0.06,envMap,envMapIntensity:0.08,emissive:0x770a0a,emissiveIntensity:0.30});
+        const somaCapMatSub=new THREE.MeshStandardMaterial({color:0x6a0808,roughness:0.50,metalness:0.04,envMap,envMapIntensity:0.06,emissive:0x550505,emissiveIntensity:0.22});
+
+        // Thin moisture/mucous membrane over soma surface (wet glistening layer)
+        const moistureGeo=new THREE.SphereGeometry(5.65,80,80);
+        const mp=moistureGeo.attributes.position;
+        for(let i=0;i<mp.count;i++){
+            const v=new THREE.Vector3(mp.getX(i),mp.getY(i),mp.getZ(i));
+            v.addScaledVector(v.clone().normalize(),Math.sin(v.x*3+v.y*4)*0.15+Math.sin(v.x*8)*0.05);
+            mp.setXYZ(i,v.x,v.y,v.z);
+        }
+        moistureGeo.computeVertexNormals();
+        const moisture=new THREE.Mesh(moistureGeo,new THREE.MeshStandardMaterial({
+            color:0x996050,roughness:0.15,metalness:0.08,
+            envMap,envMapIntensity:0.08,
+            emissive:0x442010,emissiveIntensity:0.04,
+            transparent:true,opacity:0.06,side:THREE.FrontSide
+        }));
+        moisture.position.set(0,2,0);moisture.name='somaMoisture';group.add(moisture);
+        for(let c=0;c<12;c++){
+            const capCurve=surfaceCapillary(somaCenter,5.58,Math.random()*PI,Math.random()*TAU,(Math.random()-0.3)*1.2,0.8,16,0.12);
+            const capR=0.03+Math.random()*0.04;
+            const capMesh=new THREE.Mesh(new THREE.TubeGeometry(capCurve,32,capR,5,false),somaCapMatMain);
+            capMesh.name='somaCap';group.add(capMesh);
+            anims.push({obj:capMesh,type:'vesselPulse',phase:c*0.5});
+            // Branch capillaries — also surface-projected
+            if(c<6){
+                for(let b=0;b<2;b++){
+                    const bT=0.3+b*0.35;
+                    const bStart=capCurve.getPoint(bT);
+                    // Get angular position of branch start to seed the sub-capillary
+                    const bOff=bStart.clone().sub(somaCenter);
+                    const bPhi=Math.acos(bOff.y/bOff.length());
+                    const bTheta=Math.atan2(bOff.z,bOff.x);
+                    const branchCurve=surfaceCapillary(somaCenter,5.60,bPhi,bTheta,(Math.random()-0.5)*0.5,0.35,6,0.08);
+                    group.add(new THREE.Mesh(new THREE.TubeGeometry(branchCurve,12,capR*0.5,4,false),somaCapMatSub));
+                }
+            }
+        }
+        soma.position.set(0,2,0);soma.castShadow=true;soma.name='soma';group.add(soma);
+
+        // === NUCLEUS — darker internal body visible through translucent membrane ===
+        const nucGeo=new THREE.SphereGeometry(2.8,32,32);
+        const nucPos=nucGeo.attributes.position;
+        for(let i=0;i<nucPos.count;i++){
+            const v=new THREE.Vector3(nucPos.getX(i),nucPos.getY(i),nucPos.getZ(i));
+            v.addScaledVector(v.clone().normalize(),Math.sin(v.x*3)*Math.sin(v.y*4)*0.3);
+            nucPos.setXYZ(i,v.x,v.y,v.z);
+        }
+        nucGeo.computeVertexNormals();
+        const nucleus=new THREE.Mesh(nucGeo,wetBioMat(BIO.nucleus,{rough:0.38,eI:0.12}));
+        nucleus.position.set(0,2,0);nucleus.name='nucleus';group.add(nucleus);
+
+        // Nucleolus (dark dot inside nucleus)
+        const nucleolus=new THREE.Mesh(new THREE.SphereGeometry(0.9,16,16),
+            bioMat(0x4a2838,{rough:0.5,eI:0.12}));
+        nucleolus.position.set(0.3,2.2,0.2);nucleolus.name='nucleolus';group.add(nucleolus);
+
+        // === ORGANELLES — Mitochondria (sausage shapes inside soma) ===
+        for(let m=0;m<5;m++){
+            const mPts=[];const mStart=new THREE.Vector3((Math.random()-0.5)*3,2+(Math.random()-0.5)*3,(Math.random()-0.5)*3);
+            const mDir=new THREE.Vector3(Math.random()-0.5,Math.random()-0.5,Math.random()-0.5).normalize();
+            for(let s=0;s<=8;s++){
+                const t=s/8;
+                mPts.push(new THREE.Vector3(
+                    mStart.x+mDir.x*t*2.5+Math.sin(s*2)*0.2,
+                    mStart.y+mDir.y*t*2.5+Math.cos(s*1.5)*0.15,
+                    mStart.z+mDir.z*t*2.5
+                ));
+            }
+            const mCurve=new THREE.CatmullRomCurve3(mPts);
+            const mito=new THREE.Mesh(new THREE.TubeGeometry(mCurve,10,0.3+Math.random()*0.15,8,false),
+                bioMat(0x885544,{rough:0.5,eI:0.06,transmission:0.05,thickness:1}));
+            mito.name='mito';group.add(mito);
+            // Inner cristae folds (tiny ridges inside mitochondria)
+            for(let c=0;c<3;c++){
+                const cPos=mCurve.getPoint(0.2+c*0.3);
+                const crista=new THREE.Mesh(new THREE.TorusGeometry(0.2,0.04,6,12),
+                    bioMat(0x664433,{rough:0.6,eI:0.04}));
+                crista.position.copy(cPos);crista.rotation.set(Math.random(),Math.random(),0);
+                group.add(crista);
+            }
+        }
+
+        // Endoplasmic reticulum (folded membrane network around nucleus)
+        for(let e=0;e<4;e++){
+            const ePts=[];
+            const angle=e*PI/2+Math.random()*0.5;
+            for(let s=0;s<=12;s++){
+                const t=s/12;
+                ePts.push(new THREE.Vector3(
+                    Math.cos(angle+t*1.5)*3+Math.sin(s*3)*0.4,
+                    2+Math.sin(t*4)*1.5,
+                    Math.sin(angle+t*1.5)*3+Math.cos(s*2.5)*0.3
+                ));
+            }
+            const eCurve=new THREE.CatmullRomCurve3(ePts);
+            const er=new THREE.Mesh(new THREE.TubeGeometry(eCurve,12,0.15,6,false),
+                membraneMat(0xcc9999,{rough:0.35,transmission:0.2,thickness:1.5,eI:0.04,opacity:0.5}));
+            er.name='er';group.add(er);
+        }
+
+        // === DENDRITES — Organic recursive branching trees ===
+        const dendriteRoots=[
+            {dir:new THREE.Vector3(-1,0.3,0),len:14},
+            {dir:new THREE.Vector3(-0.9,0.7,0.4),len:12},
+            {dir:new THREE.Vector3(-0.8,-0.5,0.3),len:13},
+            {dir:new THREE.Vector3(-0.7,0.5,-0.5),len:11},
+            {dir:new THREE.Vector3(-0.6,-0.3,-0.6),len:10},
+            {dir:new THREE.Vector3(-1,0.1,0.7),len:12},
+        ];
+        dendriteRoots.forEach((d,i)=>{
+            const start=new THREE.Vector3(d.dir.x*5,2+d.dir.y*4,d.dir.z*4);
+            createDendriteBranch(start,d.dir.normalize(),d.len,0.7,0,3);
+        });
+
+        // === AXON HILLOCK — cone transition ===
+        const hillockGeo=new THREE.SphereGeometry(2.8,24,24);
+        hillockGeo.scale(1.3,0.8,0.8);
+        const hillock=new THREE.Mesh(hillockGeo,bioMat(BIO.axon,{rough:0.45,eI:0.05}));
+        hillock.position.set(5.5,2,0);hillock.castShadow=true;hillock.name='hillock';group.add(hillock);
+
+        // === AXON with MYELIN SHEATHS ===
+        const axonPts=[];
+        for(let i=0;i<=40;i++){
+            const t=i/40;
+            axonPts.push(new THREE.Vector3(
+                7+t*55,
+                2+Math.sin(t*2.5)*2.5+Math.sin(t*7)*0.4,
+                Math.cos(t*1.8)*1.5+Math.sin(t*5)*0.3
+            ));
+        }
+        const axonCurve=new THREE.CatmullRomCurve3(axonPts);
+
+        // Bare axon (thin, continuous)
+        const axonMesh=new THREE.Mesh(
+            new THREE.TubeGeometry(axonCurve,60,0.45,8,false),
+            bioMat(BIO.axon,{rough:0.5,eI:0.04})
+        );
+        axonMesh.castShadow=true;axonMesh.name='axon';group.add(axonMesh);
+
+        // Myelin sheaths (segments along axon with gaps = Nodes of Ranvier)
+        const numSheaths=8;
+        for(let s=0;s<numSheaths;s++){
+            const tStart=0.05+s*(0.85/numSheaths);
+            const tEnd=tStart+0.85/numSheaths*0.75;
+            const sheathPts=[];
+            for(let j=0;j<=12;j++){
+                const t=tStart+(tEnd-tStart)*j/12;
+                sheathPts.push(axonCurve.getPoint(t));
+            }
+            const sheathCurve=new THREE.CatmullRomCurve3(sheathPts);
+            // Thicker tube for myelin
+            const sheathR=1.1+Math.sin(s*0.8)*0.15;
+            const sheath=new THREE.Mesh(
+                new THREE.TubeGeometry(sheathCurve,12,sheathR,10,false),
+                myelinMat()
+            );
+            sheath.castShadow=true;sheath.name=`myelin_${s}`;group.add(sheath);
+
+            // Node of Ranvier glow (gap between sheaths)
+            if(s<numSheaths-1){
+                const nodeT=tEnd+0.85/numSheaths*0.12;
+                const nodePos=axonCurve.getPoint(nodeT);
+                const node=new THREE.Mesh(
+                    new THREE.SphereGeometry(0.6,12,12),
+                    bioMat(BIO.ranvier,{rough:0.4,eI:0.12})
+                );
+                node.position.copy(nodePos);node.name=`ranvier_${s}`;group.add(node);
+            }
+        }
+
+        // === AXON BLOOD VESSELS — capillaries running along axon between myelin sheaths ===
+        const axonCapMat=new THREE.MeshStandardMaterial({color:0x8a1510,roughness:0.45,metalness:0.06,envMap,envMapIntensity:0.15,emissive:0x770a0a,emissiveIntensity:0.28});
+        const axonSubCapMat=new THREE.MeshStandardMaterial({color:0x6a0808,roughness:0.50,metalness:0.04,envMap,envMapIntensity:0.12,emissive:0x550505,emissiveIntensity:0.22});
+        // 4 longitudinal capillaries spiraling along the axon
+        for(let ac=0;ac<4;ac++){
+            const acPts=[];
+            const angBase=ac*TAU/4;
+            for(let s=0;s<=30;s++){
+                const t=s/30;
+                const p=axonCurve.getPoint(t*0.85+0.05);
+                const ang=angBase+t*PI*3; // spiral around axon
+                const capR=1.6+Math.sin(s*2)*0.2;
+                acPts.push(new THREE.Vector3(
+                    p.x+Math.cos(ang)*capR*0.3,
+                    p.y+Math.sin(ang)*capR*0.3,
+                    p.z+Math.cos(ang+PI/3)*capR*0.2
+                ));
+            }
+            const acCurve=new THREE.CatmullRomCurve3(acPts);
+            const acMesh=new THREE.Mesh(new THREE.TubeGeometry(acCurve,24,0.025+ac*0.005,4,false),axonCapMat);
+            acMesh.name='axonCap';group.add(acMesh);
+            anims.push({obj:acMesh,type:'vesselPulse',phase:ac*0.7});
+            // Branch capillaries at Nodes of Ranvier — hugging axon surface
+            for(let rs=0;rs<numSheaths-1;rs++){
+                const nodeT=(0.05+rs*(0.85/numSheaths)+0.85/numSheaths*0.87);
+                const normT=Math.min(1,nodeT/(0.85+0.05));
+                const rp=acCurve.getPoint(normT);
+                if(!rp) continue;
+                const perpOff=new THREE.Vector3((Math.random()-0.5)*0.4,(Math.random()-0.5)*0.3,(Math.random()-0.5)*0.4);
+                const bPts=[rp];
+                for(let bs=1;bs<=5;bs++){
+                    const walkT=Math.min(0.99,Math.max(0.01,normT+bs*0.015));
+                    const ap=axonCurve.getPoint(walkT);
+                    bPts.push(new THREE.Vector3(ap.x+perpOff.x*(1+bs*0.2)+Math.sin(bs*2+rs)*0.12,ap.y+perpOff.y*(1+bs*0.2),ap.z+perpOff.z*(1+bs*0.2)));
+                }
+                group.add(new THREE.Mesh(
+                    new THREE.TubeGeometry(new THREE.CatmullRomCurve3(bPts),5,0.015,3,false),axonSubCapMat
+                ));
+            }
+        }
+        // Capillary network around axon hillock
+        for(let hc=0;hc<6;hc++){
+            const hPts=[];
+            const hAng=hc*TAU/6;
+            for(let s=0;s<=8;s++){
+                const t=s/8;
+                hPts.push(new THREE.Vector3(
+                    5.5+t*3+Math.sin(s*2+hc)*0.2,
+                    2+Math.cos(hAng+t*2)*1.8+Math.sin(s*3)*0.3,
+                    Math.sin(hAng+t*2)*1.8+Math.cos(s*2)*0.2
+                ));
+            }
+            group.add(new THREE.Mesh(
+                new THREE.TubeGeometry(new THREE.CatmullRomCurve3(hPts),8,0.03,4,false),axonCapMat
+            ));
+        }
+
+        // === SYNAPTIC BOUTONS at terminals ===
+        for(let i=0;i<6;i++){
+            const tPos=axonCurve.getPoint(0.88+i*0.02);
+            const boutonGeo=new THREE.SphereGeometry(1.4,24,24);
+            const bpos=boutonGeo.attributes.position;
+            const boutonColors=new Float32Array(bpos.count*3);
+            for(let v=0;v<bpos.count;v++){
+                const p=new THREE.Vector3(bpos.getX(v),bpos.getY(v),bpos.getZ(v));
+                const disp=Math.sin(p.x*5)*0.15+Math.sin(p.y*8+p.z*6)*0.06+Math.sin(p.x*14)*0.025;
+                p.addScaledVector(p.clone().normalize(),disp);
+                bpos.setXYZ(v,p.x,p.y,p.z);
+                const t2=(disp+0.24)/0.48;
+                boutonColors[v*3]=0.50+t2*0.08;boutonColors[v*3+1]=0.18+t2*0.04;boutonColors[v*3+2]=0.10+t2*0.03;
+            }
+            boutonGeo.setAttribute('color',new THREE.BufferAttribute(boutonColors,3));
+            boutonGeo.computeVertexNormals();
+            const bouton=new THREE.Mesh(boutonGeo,new THREE.MeshStandardMaterial({
+                vertexColors:true,roughness:0.48,metalness:0.04,
+                envMap,envMapIntensity:0.12,
+                emissive:0x881510,emissiveIntensity:0.10
+            }));
+            bouton.position.copy(tPos);
+            bouton.position.y+=(i-2.5)*3.5;
+            bouton.name=`bouton_${i}`;group.add(bouton);
+            anims.push({obj:bouton,type:'boutonPulse',phase:i*0.8});
+
+            // Vesicles inside bouton
+            for(let v=0;v<4;v++){
+                const ves=new THREE.Mesh(
+                    new THREE.SphereGeometry(0.25,8,8),
+                    bioMat(BIO.vesicle,{rough:0.3,eI:0.15,transparent:true,opacity:0.7})
+                );
+                ves.position.copy(bouton.position);
+                ves.position.x+=(Math.random()-0.5)*1.5;
+                ves.position.y+=(Math.random()-0.5)*1.5;
+                ves.position.z+=(Math.random()-0.5)*1.5;
+                ves.name='vesicle';group.add(ves);
+                anims.push({obj:ves,type:'vesicleDrift',phase:Math.random()*TAU});
+            }
+        }
+
+        // === ACTION POTENTIAL SIGNALS ===
+        for(let i=0;i<10;i++){
+            const spike=new THREE.Mesh(new THREE.SphereGeometry(0.8,10,10),glowMat(BIO.spike,0.9));
+            spike.name=`spike_${i}`;spike.visible=false;group.add(spike);
+            anims.push({obj:spike,type:'spikeTravel',curve:axonCurve,offset:i/10,speed:0.12});
+        }
+
+        // === MEMBRANE POTENTIAL RING (subtle glow) ===
+        const memRing=new THREE.Mesh(
+            new THREE.TorusGeometry(7.5,0.15,12,64),
+            bioMat(BIO.membrane,{rough:0.3,eI:0.12,transparent:true,opacity:0.4})
+        );
+        memRing.position.set(0,2,0);memRing.name='memRing';group.add(memRing);
+        anims.push({obj:memRing,type:'ringPulse'});
+
+        // Background scattered neurons
+        addBackgroundNeurons(group,anims,12,45,50,{particles:80});
+    }
+
+    // ═══════════════════════════════════════════
+    // BUILD: SNN Network (hybrid bio-circuit)
+    // ═══════════════════════════════════════════
+    function buildSNN(){
+        const layers=[5,8,10,8,4];
+        const lSpacing=22,nSpacing=7.5;
+
+        layers.forEach((cnt,li)=>{
+            const x=(li-(layers.length-1)/2)*lSpacing;
+            for(let ni=0;ni<cnt;ni++){
+                const y=(ni-(cnt-1)/2)*nSpacing;
+                // Biological-ish neuron (small soma with organic detail)
+                const nGeo=new THREE.SphereGeometry(1.8,32,32);
+                const np=nGeo.attributes.position;
+                const snnColors=new Float32Array(np.count*3);
+                for(let v=0;v<np.count;v++){
+                    const p=new THREE.Vector3(np.getX(v),np.getY(v),np.getZ(v));
+                    const disp=Math.sin(p.x*4+p.y*3)*0.12+Math.sin(p.x*8+p.z*7)*0.04+Math.sin(p.y*14+p.x*12)*0.015;
+                    p.addScaledVector(p.clone().normalize(),disp);
+                    np.setXYZ(v,p.x,p.y,p.z);
+                    const t=(disp+0.18)/0.36;
+                    const bp=Math.max(0,0.3-t)*1.5;
+                    snnColors[v*3]=0.45+t*0.08+bp*0.2;
+                    snnColors[v*3+1]=0.26+t*0.05-bp*0.06;
+                    snnColors[v*3+2]=0.20+t*0.03-bp*0.05;
+                }
+                nGeo.setAttribute('color',new THREE.BufferAttribute(snnColors,3));
+                nGeo.computeVertexNormals();
+                const col=li===0?BIO.dendrite:li===layers.length-1?BIO.synBouton:BIO.soma;
+                const neuron=new THREE.Mesh(nGeo,new THREE.MeshStandardMaterial({
+                    vertexColors:true,roughness:0.50,metalness:0.04,
+                    envMap,envMapIntensity:0.10,
+                    emissive:new THREE.Color(col).lerp(new THREE.Color(0x881108),0.4),
+                    emissiveIntensity:0.08
+                }));
+                neuron.position.set(x,y,0);neuron.castShadow=true;
+                neuron.name=`sn_${li}_${ni}`;group.add(neuron);
+                anims.push({obj:neuron,type:'snnFire',li,ni,phase:Math.random()*TAU});
+
+                // Surface capillaries on each SNN neuron — tightly hugging sphere
+                const snnCapMat=new THREE.MeshStandardMaterial({color:0x8a1510,roughness:0.45,metalness:0.06,envMap,envMapIntensity:0.08,emissive:0x770a0a,emissiveIntensity:0.28});
+                const snnCenter=new THREE.Vector3(x,y,0);
+                for(let sc=0;sc<3;sc++){
+                    const scCurve=surfaceCapillary(snnCenter,1.88,Math.random()*PI,Math.random()*TAU,(Math.random()-0.3)*1.0,0.6,8,0.10);
+                    const scMesh=new THREE.Mesh(new THREE.TubeGeometry(scCurve,16,0.02+Math.random()*0.015,4,false),snnCapMat);
+                    scMesh.name='snnCap';group.add(scMesh);
+                    anims.push({obj:scMesh,type:'vesselPulse',phase:sc*1.2+ni*0.5});
+                }
+
+                // Axon-like connections to next layer
+                if(li<layers.length-1){
+                    const nCnt=layers[li+1];
+                    for(let nj=0;nj<nCnt;nj++){
+                        if(Math.random()>0.45)continue;
+                        const nx=(li+1-(layers.length-1)/2)*lSpacing;
+                        const ny=(nj-(nCnt-1)/2)*nSpacing;
+                        const mid=new THREE.Vector3((x+nx)/2,(y+ny)/2,(Math.random()-0.5)*6);
+                        const cPts=[new THREE.Vector3(x,y,0),mid,new THREE.Vector3(nx,ny,0)];
+                        const cCurve=new THREE.CatmullRomCurve3(cPts);
+                        const cTube=new THREE.Mesh(
+                            new THREE.TubeGeometry(cCurve,12,0.08,6,false),
+                            bioMat(BIO.axon,{rough:0.52,eI:0.03,transparent:true,opacity:0.30})
+                        );
+                        cTube.name=`sc_${li}_${ni}_${nj}`;group.add(cTube);
+                        // Blood capillary running alongside SNN connection
+                        const connCapPts=[];
+                        const ccOffX=(Math.random()-0.5)*0.15;
+                        const ccOffZ=(Math.random()-0.5)*0.15;
+                        for(let cs=0;cs<=6;cs++){
+                            const cp=cCurve.getPoint(cs/6);
+                            connCapPts.push(new THREE.Vector3(
+                                cp.x+ccOffX+Math.sin(cs*1.8)*0.06,
+                                cp.y+0.15+Math.sin(cs*2)*0.1,
+                                cp.z+ccOffZ+Math.cos(cs*1.5)*0.06
+                            ));
+                        }
+                        group.add(new THREE.Mesh(
+                            new THREE.TubeGeometry(new THREE.CatmullRomCurve3(connCapPts),8,0.014,4,false),
+                            new THREE.MeshStandardMaterial({color:0x6a0808,roughness:0.48,metalness:0.04,envMap,envMapIntensity:0.12,emissive:0x550505,emissiveIntensity:0.22})
+                        ));
+                    }
+                }
+            }
+        });
+
+        // Membrane potential bar (biological look)
+        const barGeo=new THREE.CylinderGeometry(0.8,0.8,18,12);
+        const bar=new THREE.Mesh(barGeo,membraneMat(BIO.membrane,{rough:0.4,eI:0.1,opacity:0.7}));
+        bar.position.set(-52,0,0);bar.name='memBar';group.add(bar);
+        anims.push({obj:bar,type:'memBarAnim'});
+
+        // Threshold marker
+        const thr=new THREE.Mesh(new THREE.BoxGeometry(3,0.2,0.5),glowMat(PAL.inhibit,0.8));
+        thr.position.set(-52,6,0);thr.name='thresh';group.add(thr);
+    }
+
+    // ═══════════════════════════════════════════
+    // BUILD: Neuromorphic Chip (realistic silicon)
+    // ═══════════════════════════════════════════
+    function buildHardware(){
+        const gSize=11,sp=5.2;
+        const off=-(gSize-1)*sp/2;
+
+        // PCB Board — realistic FR4 with satin solder mask
+        const pcb=new THREE.Mesh(
+            new THREE.BoxGeometry(gSize*sp+20,1.5,gSize*sp+20),
+            new THREE.MeshPhysicalMaterial({
+                color:CIR.pcb,roughness:0.55,metalness:0.0,
+                envMap,envMapIntensity:0.4,clearcoat:0.5,clearcoatRoughness:0.2,
+                emissive:0x061008,emissiveIntensity:0.02
+            })
+        );
+        pcb.position.y=-6;pcb.castShadow=true;pcb.receiveShadow=true;pcb.name='pcb';group.add(pcb);
+
+        // Silicon die (dark semiconductor with copper metallization warmth)
+        const die=new THREE.Mesh(
+            new THREE.BoxGeometry(gSize*sp+4,2,gSize*sp+4),
+            chipMat(0x1a1410,{rough:0.012,metal:0.55,envI:4.5,eI:0.012,clearcoat:1.0,ccRough:0.003,emissive:0x1a0e06})
+        );
+        die.position.y=-4;die.castShadow=true;die.name='die';group.add(die);
+
+        // Die substrate layers visible on edge (stacked dielectric + copper)
+        const layerColors=[0x12100e,0xc47840,0x12100e,0xc47840,0x12100e];
+        for(let l=0;l<5;l++){
+            const isMetal=l%2===1;
+            const layer=new THREE.Mesh(
+                new THREE.BoxGeometry(gSize*sp+4.1,0.12,gSize*sp+4.1),
+                isMetal?copperMat({rough:0.25}):chipMat(CIR.dielectric,{rough:0.15,metal:0.1,envI:1.0})
+            );
+            layer.position.y=-4.8+l*0.35;
+            group.add(layer);
+        }
+
+        // Heatspreader lid (polished nickel-plated copper — warm gold mirror)
+        const lidGeo=new THREE.BoxGeometry(gSize*sp+8,0.8,gSize*sp+8);
+        const lid=new THREE.Mesh(lidGeo,goldMat({rough:0.05}));
+        lid.position.y=-2.5;lid.name='lid';group.add(lid);
+
+        // Extra gold frame layer for premium look
+        const frameGeo=new THREE.BoxGeometry(gSize*sp+9,0.3,gSize*sp+9);
+        const frame=new THREE.Mesh(frameGeo,goldMat({rough:0.03}));
+        frame.position.y=-2.0;group.add(frame);
+
+        // Thermal paste peek (barely visible between die and lid)
+        const tpaste=new THREE.Mesh(
+            new THREE.BoxGeometry(gSize*sp+2,0.08,gSize*sp+2),
+            new THREE.MeshPhysicalMaterial({color:0xb8a890,roughness:0.65,metalness:0.25,envMap,envMapIntensity:0.4})
+        );
+        tpaste.position.y=-2.9;group.add(tpaste);
+
+        // Neuromorphic cores grid — copper-tinted metallization layers
+        const coreMat1=copperMat({rough:0.08});
+        const coreMat2=copperMat({rough:0.12});
+        for(let i=0;i<gSize;i++){
+            for(let j=0;j<gSize;j++){
+                const core=new THREE.Mesh(
+                    new THREE.BoxGeometry(3.8,0.6,3.8),
+                    (i+j)%2===0?coreMat1:coreMat2
+                );
+                core.position.set(off+i*sp,-1.8,off+j*sp);
+                core.name=`core_${i}_${j}`;group.add(core);
+                anims.push({obj:core,type:'corePulse',i,j,phase:(i+j)*0.3});
+
+                // Tiny transistor grid pattern on each core surface
+                for(let ti=0;ti<3;ti++){
+                    for(let tj=0;tj<3;tj++){
+                        const tBlock=new THREE.Mesh(
+                            new THREE.BoxGeometry(0.9,0.08,0.9),
+                            chipMat(0x2a1c10,{rough:0.03,metal:0.6,envI:3.0,eI:0.018,emissive:0x140a04})
+                        );
+                        tBlock.position.set(off+i*sp+(ti-1)*1.15,-1.45,off+j*sp+(tj-1)*1.15);
+                        group.add(tBlock);
+                    }
+                }
+
+                // Activity LED on each core
+                const led=new THREE.Mesh(new THREE.SphereGeometry(0.3,10,10),glowMat(CIR.led,0.2));
+                led.position.set(off+i*sp,-1.15,off+j*sp);
+                led.name=`led_${i}_${j}`;group.add(led);
+                anims.push({obj:led,type:'ledBlink',i,j,phase:Math.random()*TAU});
+            }
+        }
+
+        // Decoupling capacitors around die edge
+        const dcapMat=new THREE.MeshPhysicalMaterial({color:0xc8a050,roughness:0.45,metalness:0.1,envMap,envMapIntensity:0.6,clearcoat:0.3});
+        for(let side=0;side<4;side++){
+            for(let ci=0;ci<6;ci++){
+                const pos=(ci-2.5)*sp*1.5;
+                const edgeD=gSize*sp/2+2;
+                let cx,cz;
+                if(side===0){cx=pos;cz=-edgeD;}
+                else if(side===1){cx=pos;cz=edgeD;}
+                else if(side===2){cx=-edgeD;cz=pos;}
+                else{cx=edgeD;cz=pos;}
+                const dcap=new THREE.Mesh(new THREE.BoxGeometry(1.2,0.5,0.6),dcapMat);
+                dcap.position.set(cx,-4.5,cz);
+                if(side>=2)dcap.rotation.y=PI/2;
+                group.add(dcap);
+                // Metal terminals
+                const tm=chipMat(CIR.solder,{rough:0.15,metal:0.9,envI:3.0});
+                const t1=new THREE.Mesh(new THREE.BoxGeometry(0.15,0.52,0.62),tm);
+                t1.position.set(cx+(side>=2?0:0.55),side>=2?-4.5:-4.5,cz+(side>=2?0.55:0));
+                if(side>=2)t1.rotation.y=PI/2;
+                group.add(t1);
+            }
+        }
+
+        // Vias through PCB (small metallic cylinders)
+        const viaMat=copperMat({rough:0.2});
+        for(let vi=0;vi<40;vi++){
+            const vx=(Math.random()-0.5)*(gSize*sp+12);
+            const vz=(Math.random()-0.5)*(gSize*sp+12);
+            const via=new THREE.Mesh(new THREE.CylinderGeometry(0.2,0.2,1.8,8),viaMat);
+            via.position.set(vx,-5.5,vz);
+            group.add(via);
+            // Via ring (annular pad)
+            const ring=new THREE.Mesh(new THREE.TorusGeometry(0.3,0.06,6,12),viaMat);
+            ring.position.set(vx,-4.5,vz);ring.rotation.x=PI/2;
+            group.add(ring);
+        }
+
+        // Copper traces (NoC interconnect) — multiple layers, varying widths
+        const cMat=copperMat();
+        const cMatSignal=copperMat({rough:0.22});
+        // Power rails (thicker, brighter copper)
+        for(let i=0;i<gSize;i+=3){
+            const hPower=new THREE.Mesh(new THREE.BoxGeometry((gSize-1)*sp,0.24,1.0),cMat);
+            hPower.position.set(0,-1.5,off+i*sp);group.add(hPower);
+            const vPower=new THREE.Mesh(new THREE.BoxGeometry(1.0,0.24,(gSize-1)*sp),cMat);
+            vPower.position.set(off+i*sp,-1.5,0);group.add(vPower);
+        }
+        // Signal traces (thinner)
+        for(let i=0;i<gSize;i++){
+            if(i%3===0)continue; // skip power rail positions
+            const hTrace=new THREE.Mesh(new THREE.BoxGeometry((gSize-1)*sp,0.16,0.36),cMatSignal);
+            hTrace.position.set(0,-1.5,off+i*sp);group.add(hTrace);
+            const vTrace=new THREE.Mesh(new THREE.BoxGeometry(0.36,0.16,(gSize-1)*sp),cMatSignal);
+            vTrace.position.set(off+i*sp,-1.5,0);group.add(vTrace);
+        }
+        // Diagonal routing (45° traces between cores)
+        for(let d=0;d<8;d++){
+            const dx=off+(Math.random()*gSize)*sp,dz=off+(Math.random()*gSize)*sp;
+            const len=sp*1.5;
+            const diagTrace=new THREE.Mesh(new THREE.BoxGeometry(len,0.06,0.12),cMatSignal);
+            diagTrace.position.set(dx,-1.48,dz);diagTrace.rotation.y=PI/4*(d%2===0?1:-1);
+            group.add(diagTrace);
+        }
+
+        // Gold wire bonds (around edge) — real gold material
+        const gMat=goldMat();
+        for(let side=0;side<4;side++){
+            for(let i=0;i<10;i++){
+                const t=(i-4.5)*sp*0.9;
+                const bondPts=[];
+                const edgeR=gSize*sp/2+5;
+                let sx,sy=0,sz,ex,ey=-5.5,ez;
+                if(side===0){sx=t;sz=-edgeR;ex=t;ez=-edgeR-4;}
+                else if(side===1){sx=t;sz=edgeR;ex=t;ez=edgeR+4;}
+                else if(side===2){sx=-edgeR;sz=t;ex=-edgeR-4;ez=t;}
+                else{sx=edgeR;sz=t;ex=edgeR+4;ez=t;}
+                bondPts.push(new THREE.Vector3(sx,-2,sz));
+                bondPts.push(new THREE.Vector3((sx+ex)/2,2.5,(sz+ez)/2));
+                bondPts.push(new THREE.Vector3(ex,ey,ez));
+                const bCurve=new THREE.CatmullRomCurve3(bondPts);
+                const bond=new THREE.Mesh(
+                    new THREE.TubeGeometry(bCurve,12,0.25,8,false),gMat
+                );
+                group.add(bond);
+            }
+        }
+
+        // Solder ball array (BGA) — matte tin-lead with subtle reflection
+        const sMat=chipMat(CIR.solder,{rough:0.25,metal:0.85,envI:2.5,eI:0.01});
+        for(let i=0;i<8;i++){
+            for(let j=0;j<8;j++){
+                const ball=new THREE.Mesh(new THREE.SphereGeometry(0.55,12,12),sMat);
+                ball.position.set((i-3.5)*6,-7,(j-3.5)*6);
+                group.add(ball);
+            }
+        }
+    }
+
+    // ═══════════════════════════════════════════
+    // BUILD: STDP Learning (biological scene)
+    // ═══════════════════════════════════════════
+    function buildSTDP(){
+        // Pre-synaptic neuron (ultra-realistic wet tissue with deep organic displacement)
+        const preGeo=new THREE.SphereGeometry(5,80,80);
+        const pp=preGeo.attributes.position;
+        const preColors=new Float32Array(pp.count*3);
+        for(let i=0;i<pp.count;i++){
+            const v=new THREE.Vector3(pp.getX(i),pp.getY(i),pp.getZ(i));
+            // 6-octave organic displacement
+            const d1=Math.sin(v.x*2.2)*Math.sin(v.y*1.8)*0.55;
+            const d2=Math.sin(v.x*4.5+v.z*3.5)*0.18;
+            const d3=Math.sin(v.y*7+v.x*6)*0.08;
+            const d4=Math.sin(v.x*12+v.z*10+v.y*8)*0.035;
+            const d5=Math.sin(v.x*20+v.y*18)*0.015;
+            const d6=Math.sin(v.x*35+v.z*30)*0.006;
+            const d=d1+d2+d3+d4+d5+d6;
+            v.addScaledVector(v.clone().normalize(),d);pp.setXYZ(i,v.x,v.y,v.z);
+            const tone=0.5+d*0.18;
+            const bloodP=Math.max(0,0.3-tone)*1.8;
+            const veinT=Math.max(0,Math.sin(v.x*6+v.z*5)*0.04);
+            preColors[i*3]=0.45+tone*0.06+bloodP*0.25+veinT*0.3;
+            preColors[i*3+1]=0.26+tone*0.04-bloodP*0.08-veinT*0.1;
+            preColors[i*3+2]=0.20+tone*0.03-bloodP*0.06+veinT*0.04;
+        }
+        preGeo.setAttribute('color',new THREE.BufferAttribute(preColors,3));
+        preGeo.computeVertexNormals();
+        const pre=new THREE.Mesh(preGeo,new THREE.MeshStandardMaterial({
+            vertexColors:true,roughness:0.55,metalness:0.04,
+            envMap,envMapIntensity:0.08,
+            emissive:0x661810,emissiveIntensity:0.28,transparent:true,opacity:0.97
+        }));
+        pre.position.set(-28,4,0);pre.castShadow=true;pre.name='preNeuron';group.add(pre);
+
+        // Pre-neuron moisture layer
+        const preMoistGeo=new THREE.SphereGeometry(5.15,48,48);
+        const pmp=preMoistGeo.attributes.position;
+        for(let i=0;i<pmp.count;i++){const v=new THREE.Vector3(pmp.getX(i),pmp.getY(i),pmp.getZ(i));v.addScaledVector(v.clone().normalize(),Math.sin(v.x*4)*0.08);pmp.setXYZ(i,v.x,v.y,v.z);}
+        preMoistGeo.computeVertexNormals();
+        group.add(new THREE.Mesh(preMoistGeo,new THREE.MeshStandardMaterial({
+            color:0x996050,roughness:0.12,metalness:0.08,envMap,envMapIntensity:0.08,
+            emissive:0x442010,emissiveIntensity:0.03,transparent:true,opacity:0.06
+        })).translateX(-28).translateY(4));
+
+        // Pre-synaptic neuron surface blood capillaries
+        const stdpCapMat=new THREE.MeshStandardMaterial({color:0x8a1510,roughness:0.45,metalness:0.06,envMap,envMapIntensity:0.08,emissive:0x770a0a,emissiveIntensity:0.28});
+        const stdpSubCapMat=new THREE.MeshStandardMaterial({color:0x6a0808,roughness:0.50,metalness:0.04,envMap,envMapIntensity:0.06,emissive:0x550505,emissiveIntensity:0.22});
+        const preCenter=new THREE.Vector3(-28,4,0);
+        for(let pc=0;pc<8;pc++){
+            const pcCurve=surfaceCapillary(preCenter,5.15,Math.random()*PI,Math.random()*TAU,(Math.random()-0.3)*1.0,0.7,12,0.10);
+            const pcMesh=new THREE.Mesh(new THREE.TubeGeometry(pcCurve,24,0.025+Math.random()*0.02,4,false),stdpCapMat);
+            pcMesh.name='preCap';group.add(pcMesh);
+            anims.push({obj:pcMesh,type:'vesselPulse',phase:pc*0.8});
+            // Sub-capillary branches — surface-projected
+            if(pc<4){
+                for(let b=0;b<2;b++){
+                    const bT=0.3+b*0.35;
+                    const bS=pcCurve.getPoint(bT);
+                    const bO=bS.clone().sub(preCenter);
+                    const bPhi2=Math.acos(bO.y/bO.length());
+                    const bTheta2=Math.atan2(bO.z,bO.x);
+                    const brCurve=surfaceCapillary(preCenter,5.18,bPhi2,bTheta2,(Math.random()-0.5)*0.5,0.3,5,0.06);
+                    group.add(new THREE.Mesh(new THREE.TubeGeometry(brCurve,10,0.012,3,false),stdpSubCapMat));
+                }
+            }
+        }
+        // Pre nucleus — dark, dense, with organelle detail
+        const preNuc=new THREE.Mesh(new THREE.SphereGeometry(2.2,24,24),wetBioMat(BIO.nucleus,{rough:0.40,eI:0.10}));
+        preNuc.position.set(-28,4,0);group.add(preNuc);
+        // Pre-neuron mitochondria (visible inside semi-transparent soma)
+        for(let m=0;m<3;m++){
+            const mPts=[];const angM=m*TAU/3;
+            for(let s=0;s<=6;s++){
+                const t=s/6;
+                mPts.push(new THREE.Vector3(-28+Math.cos(angM+t*2)*2.5,4+Math.sin(angM+t*1.5)*2+Math.sin(s*3)*0.3,Math.sin(angM+t*2)*2));
+            }
+            const mCurve=new THREE.CatmullRomCurve3(mPts);
+            group.add(new THREE.Mesh(new THREE.TubeGeometry(mCurve,8,0.22,6,false),bioMat(0x885544,{rough:0.45,eI:0.06})));
+        }
+
+        // Post-synaptic neuron (ultra-realistic wet tissue)
+        const postGeo=new THREE.SphereGeometry(5,80,80);
+        const pop=postGeo.attributes.position;
+        const postColors=new Float32Array(pop.count*3);
+        for(let i=0;i<pop.count;i++){
+            const v=new THREE.Vector3(pop.getX(i),pop.getY(i),pop.getZ(i));
+            const d1=Math.sin(v.x*2.6)*Math.sin(v.z*1.9)*0.50;
+            const d2=Math.sin(v.y*4.8+v.x*3.8)*0.16;
+            const d3=Math.sin(v.x*7.5+v.z*6.5)*0.07;
+            const d4=Math.sin(v.y*12+v.x*10+v.z*9)*0.032;
+            const d5=Math.sin(v.x*22+v.y*19)*0.013;
+            const d6=Math.sin(v.z*38+v.x*32)*0.005;
+            const d=d1+d2+d3+d4+d5+d6;
+            v.addScaledVector(v.clone().normalize(),d);pop.setXYZ(i,v.x,v.y,v.z);
+            const tone=0.5+d*0.18;
+            const bloodP=Math.max(0,0.3-tone)*1.8;
+            const veinT=Math.max(0,Math.sin(v.z*7+v.x*5)*0.04);
+            postColors[i*3]=0.45+tone*0.06+bloodP*0.25+veinT*0.3;
+            postColors[i*3+1]=0.26+tone*0.04-bloodP*0.08-veinT*0.1;
+            postColors[i*3+2]=0.20+tone*0.03-bloodP*0.06+veinT*0.04;
+        }
+        postGeo.setAttribute('color',new THREE.BufferAttribute(postColors,3));
+        postGeo.computeVertexNormals();
+        const post=new THREE.Mesh(postGeo,new THREE.MeshStandardMaterial({
+            vertexColors:true,roughness:0.55,metalness:0.04,
+            envMap,envMapIntensity:0.08,
+            emissive:0x661810,emissiveIntensity:0.28,transparent:true,opacity:0.97
+        }));
+        post.position.set(28,4,0);post.castShadow=true;post.name='postNeuron';group.add(post);
+
+        // Post-neuron moisture layer
+        const postMoistGeo=new THREE.SphereGeometry(5.15,48,48);
+        const pomp=postMoistGeo.attributes.position;
+        for(let i=0;i<pomp.count;i++){const v=new THREE.Vector3(pomp.getX(i),pomp.getY(i),pomp.getZ(i));v.addScaledVector(v.clone().normalize(),Math.sin(v.z*4)*0.08);pomp.setXYZ(i,v.x,v.y,v.z);}
+        postMoistGeo.computeVertexNormals();
+        group.add(new THREE.Mesh(postMoistGeo,new THREE.MeshStandardMaterial({
+            color:0x996050,roughness:0.12,metalness:0.08,envMap,envMapIntensity:0.08,
+            emissive:0x442010,emissiveIntensity:0.03,transparent:true,opacity:0.06
+        })).translateX(28).translateY(4));
+        // Post-synaptic neuron surface blood capillaries
+        const postCenter=new THREE.Vector3(28,4,0);
+        for(let pc=0;pc<8;pc++){
+            const pcCurve=surfaceCapillary(postCenter,5.15,Math.random()*PI,Math.random()*TAU,(Math.random()-0.3)*1.0,0.7,12,0.10);
+            const pcMesh=new THREE.Mesh(new THREE.TubeGeometry(pcCurve,24,0.025+Math.random()*0.02,4,false),stdpCapMat);
+            pcMesh.name='postCap';group.add(pcMesh);
+            anims.push({obj:pcMesh,type:'vesselPulse',phase:pc*0.9+2.0});
+            if(pc<4){
+                for(let b=0;b<2;b++){
+                    const bT=0.3+b*0.35;
+                    const bS=pcCurve.getPoint(bT);
+                    const bO=bS.clone().sub(postCenter);
+                    const bPhi2=Math.acos(bO.y/bO.length());
+                    const bTheta2=Math.atan2(bO.z,bO.x);
+                    const brCurve=surfaceCapillary(postCenter,5.18,bPhi2,bTheta2,(Math.random()-0.5)*0.5,0.3,5,0.06);
+                    group.add(new THREE.Mesh(new THREE.TubeGeometry(brCurve,10,0.012,3,false),stdpSubCapMat));
+                }
+            }
+        }
+        // Post nucleus — dark, dense, with organelle detail
+        const postNuc=new THREE.Mesh(new THREE.SphereGeometry(2.2,24,24),wetBioMat(BIO.nucleus,{rough:0.40,eI:0.10}));
+        postNuc.position.set(28,4,0);group.add(postNuc);
+        // Post-neuron mitochondria
+        for(let m=0;m<3;m++){
+            const mPts=[];const angM=m*TAU/3+1.0;
+            for(let s=0;s<=6;s++){
+                const t=s/6;
+                mPts.push(new THREE.Vector3(28+Math.cos(angM+t*2)*2.5,4+Math.sin(angM+t*1.5)*2+Math.sin(s*3)*0.3,Math.sin(angM+t*2)*2));
+            }
+            const mCurve=new THREE.CatmullRomCurve3(mPts);
+            group.add(new THREE.Mesh(new THREE.TubeGeometry(mCurve,8,0.22,6,false),bioMat(0x885544,{rough:0.45,eI:0.06})));
+        }
+
+        // Synaptic cleft — organic nerve bundle connecting both neurons
+        // Anchor endpoints INTO the neuron surfaces (pre at -28, post at +28, radius ~5)
+        const synPts=[];
+        const synStart=new THREE.Vector3(-24,4,0); // inside pre-neuron surface
+        const synEnd=new THREE.Vector3(24,4,0);     // inside post-neuron surface
+        synPts.push(synStart);
+        for(let i=1;i<24;i++){
+            const t=i/24;
+            const x=-24+t*48;
+            // Organic arc with irregular bulges — like a real nerve/axon bundle
+            const mainArc=Math.sin(t*PI)*5;
+            const bump1=Math.sin(t*7.3)*0.6;
+            const bump2=Math.sin(t*13.1+2.0)*0.3;
+            const sag=Math.sin(t*PI*2)*0.8;
+            const y=4+mainArc+bump1+bump2;
+            const z=sag+Math.sin(t*5.7)*0.4;
+            synPts.push(new THREE.Vector3(x,y,z));
+        }
+        synPts.push(synEnd);
+        const synCurve=new THREE.CatmullRomCurve3(synPts);
+
+        // Main nerve sheath — thick organic outer membrane with varying radius
+        const synSegs=64;
+        const synGeo=new THREE.TubeGeometry(synCurve,synSegs,1.0,14,false);
+        // Displace tube vertices for organic wrinkled surface (like real nerve/fascicle)
+        const synPos=synGeo.attributes.position;
+        const synColors=new Float32Array(synPos.count*3);
+        for(let i=0;i<synPos.count;i++){
+            const v=new THREE.Vector3(synPos.getX(i),synPos.getY(i),synPos.getZ(i));
+            // Radius variation along length — thicker near neurons, slightly thinner in middle
+            const nearestT=synCurve.getPoint(0); // approximate t from x position
+            const tApprox=Math.max(0,Math.min(1,(v.x+24)/48));
+            const endThick=1.0+0.3*(1.0-Math.sin(tApprox*PI)); // thicker at ends
+            // Organic noise displacement
+            const n1=Math.sin(v.x*1.8+v.y*2.5)*Math.cos(v.z*2.0)*0.08;
+            const n2=Math.sin(v.x*4.2+v.z*3.1)*0.04;
+            const n3=Math.sin(v.x*8.0+v.y*7.0+v.z*6.0)*0.02;
+            const surfNoise=n1+n2+n3;
+            // Get direction from curve center to vertex, scale by endThick
+            const curveP=synCurve.getPoint(tApprox);
+            const dir=v.clone().sub(curveP);
+            const len=dir.length();
+            if(len>0.001){
+                dir.normalize();
+                const newLen=len*endThick+surfNoise;
+                v.copy(curveP).addScaledVector(dir,newLen);
+            }
+            synPos.setXYZ(i,v.x,v.y,v.z);
+            // Vertex colors: dark flesh with reddish creases
+            const depth=(surfNoise+0.14)/0.28;
+            const bloodPool=Math.max(0,0.3-depth)*1.5;
+            synColors[i*3]=0.48+depth*0.10+bloodPool*0.2;
+            synColors[i*3+1]=0.30+depth*0.06-bloodPool*0.05;
+            synColors[i*3+2]=0.22+depth*0.04-bloodPool*0.04;
+        }
+        synGeo.setAttribute('color',new THREE.BufferAttribute(synColors,3));
+        synGeo.computeVertexNormals();
+        const synMat=new THREE.MeshStandardMaterial({
+            vertexColors:true,roughness:0.52,metalness:0.05, // wet nerve sheath
+            envMap,envMapIntensity:0.08, // moisture on nerve surface
+            emissive:0x661810,emissiveIntensity:0.24,
+        });
+        const synapse=new THREE.Mesh(synGeo,synMat);
+        synapse.castShadow=true;synapse.name='stdpSyn';group.add(synapse);
+
+        // Inner fascicles — smaller nerve fibers bundled inside, visible at connection points
+        const fascicleColors=[0x8a5840,0x7a4838,0x6a3828,0x956050,0x804838];
+        for(let f=0;f<5;f++){
+            const fPts=[];
+            const fAng=f*TAU/5;
+            const fR=0.35+Math.random()*0.15; // offset from center curve
+            for(let s=0;s<=20;s++){
+                const t=s/20;
+                const p=synCurve.getPoint(t);
+                // Spiral slightly around the main nerve
+                const ang=fAng+t*PI*1.5;
+                const r=fR*(0.6+Math.sin(t*PI)*0.4); // tighter at ends, wider in middle
+                fPts.push(new THREE.Vector3(
+                    p.x+Math.cos(ang)*r*0.3,
+                    p.y+Math.sin(ang)*r,
+                    p.z+Math.cos(ang+PI/3)*r*0.5
+                ));
+            }
+            const fCurve=new THREE.CatmullRomCurve3(fPts);
+            const fGeo=new THREE.TubeGeometry(fCurve,20,0.08+f*0.01,6,false);
+            // Displace fascicle surface slightly
+            const fp=fGeo.attributes.position;
+            for(let i=0;i<fp.count;i++){
+                const v=new THREE.Vector3(fp.getX(i),fp.getY(i),fp.getZ(i));
+                const d=Math.sin(v.x*6+v.y*5)*0.01+Math.sin(v.x*12)*0.005;
+                v.x+=d;v.y+=d*0.5;
+                fp.setXYZ(i,v.x,v.y,v.z);
+            }
+            fGeo.computeVertexNormals();
+            const fMesh=new THREE.Mesh(fGeo,bioMat(fascicleColors[f],{rough:0.7,eI:0.08}));
+            fMesh.name='stdpSyn';group.add(fMesh);
+        }
+
+        // Schwann-cell-like wrapping nodes along nerve (myelin bumps)
+        for(let sw=0;sw<8;sw++){
+            const swT=0.1+sw*0.1;
+            const swP=synCurve.getPoint(swT);
+            const swTan=synCurve.getTangent(swT).normalize();
+            const swGeo=new THREE.TorusGeometry(1.15+Math.random()*0.2,0.18+Math.random()*0.08,8,16);
+            const swMesh=new THREE.Mesh(swGeo,bioMat(BIO.myelin,{rough:0.65,eI:0.06}));
+            swMesh.position.copy(swP);
+            // Orient torus perpendicular to curve tangent
+            swMesh.quaternion.setFromUnitVectors(new THREE.Vector3(0,0,1),swTan);
+            swMesh.name='stdpSyn';group.add(swMesh);
+        }
+
+        // Blood capillaries running along the nerve bundle
+        for(let sc=0;sc<4;sc++){
+            const sCapPts=[];
+            const angOff=sc*TAU/4;
+            const capR=1.2+Math.random()*0.3;
+            for(let ss=0;ss<=20;ss++){
+                const t=ss/20;
+                const p=synCurve.getPoint(t);
+                sCapPts.push(new THREE.Vector3(
+                    p.x+Math.cos(angOff+t*PI*2.5)*capR+Math.sin(ss*1.8)*0.08,
+                    p.y+Math.sin(angOff+t*PI*2.5)*capR+Math.cos(ss*1.5)*0.08,
+                    p.z+Math.cos(angOff+t*PI*3)*capR*0.4
+                ));
+            }
+            const sCapCurve=new THREE.CatmullRomCurve3(sCapPts);
+            const sCapMesh=new THREE.Mesh(new THREE.TubeGeometry(sCapCurve,18,0.018+sc*0.004,4,false),stdpCapMat);
+            sCapMesh.name='synCap';group.add(sCapMesh);
+            anims.push({obj:sCapMesh,type:'vesselPulse',phase:sc*1.2});
+        }
+
+        // STDP curve visualization (LTP + LTD)
+        const curvePtsLTP=[];
+        for(let i=0;i<=50;i++){const dt=i*0.5;curvePtsLTP.push(new THREE.Vector3(dt*0.8,-12+8*Math.exp(-dt/10),-18));}
+        const ltpC=new THREE.CatmullRomCurve3(curvePtsLTP);
+        group.add(new THREE.Mesh(new THREE.TubeGeometry(ltpC,50,0.25,6,false),bioMat(0x44dd66,{rough:0.3,eI:0.2})));
+
+        const curvePtsLTD=[];
+        for(let i=0;i<=50;i++){const dt=-i*0.5;curvePtsLTD.push(new THREE.Vector3(dt*0.8,-12-6*Math.exp(dt/15),-18));}
+        const ltdC=new THREE.CatmullRomCurve3(curvePtsLTD);
+        group.add(new THREE.Mesh(new THREE.TubeGeometry(ltdC,50,0.25,6,false),bioMat(0xdd4466,{rough:0.3,eI:0.2})));
+
+        // Δt=0 axis
+        group.add(new THREE.Mesh(new THREE.BoxGeometry(42,0.06,0.06),bioMat(0x888888,{rough:0.5})).translateY(-12).translateZ(-18));
+
+        // Neurotransmitter particles
+        for(let i=0;i<20;i++){
+            const nt=new THREE.Mesh(new THREE.SphereGeometry(0.4,8,8),glowMat(i<10?BIO.spike:BIO.vesicle,0.8));
+            nt.visible=false;nt.name=`nt_${i}`;group.add(nt);
+            anims.push({obj:nt,type:'ntTravel',idx:i,pre:i<10,curve:synCurve});
+        }
+
+        // Organic rings
+        [pre,post].forEach((n,idx)=>{
+            const ring=new THREE.Mesh(new THREE.TorusGeometry(7,0.12,10,48),bioMat(idx?BIO.soma:BIO.dendrite,{rough:0.4,eI:0.08,transparent:true,opacity:0.3}));
+            ring.position.copy(n.position);ring.name=idx?'postRing':'preRing';group.add(ring);
+            anims.push({obj:ring,type:'ringRotate'});
+        });
+
+        // Background scattered neurons
+        addBackgroundNeurons(group,anims,10,50,50,{particles:60});
+    }
+
+    // ═══════════════════════════════════════════
+    // BUILD: Applications (brain-chip hybrid)
+    // ═══════════════════════════════════════════
+    function buildApplications(){
+        // ═══ BRAIN HEMISPHERE — Ultra-realistic cortex ═══
+        const brainGeo=new THREE.SphereGeometry(13,128,128,0,PI);
+        const bp=brainGeo.attributes.position;
+        const brainColors=new Float32Array(bp.count*3);
+        for(let i=0;i<bp.count;i++){
+            const v=new THREE.Vector3(bp.getX(i),bp.getY(i),bp.getZ(i));
+            const n=v.clone().normalize();
+            // 8-octave procedural noise for photorealistic cortical folds
+            // Central sulcus (deep medial groove dividing frontal/parietal)
+            const centralSulcus=-Math.exp(-Math.pow(v.z*0.8,2)*2)*1.8;
+            // Lateral (Sylvian) fissure
+            const sylvian=-Math.exp(-Math.pow(v.y-3,2)*0.8)*Math.max(0,Math.sin(v.x*0.4+0.5))*2.2;
+            // Primary gyri — large broad folds
+            const g1=Math.sin(v.x*0.9+0.3)*Math.sin(v.y*1.3+0.7)*Math.sin(v.z*1.1)*1.8;
+            // Secondary folds
+            const g2=Math.sin(v.x*2.4+v.y*1.8)*Math.cos(v.z*2.1+0.5)*0.9;
+            // Tertiary sulci
+            const g3=Math.sin(v.x*3.8+v.z*3.5+v.y*0.5)*0.5;
+            // Quaternary detail
+            const g4=Math.sin(v.y*5.8+v.x*5.0+v.z*0.8)*0.25;
+            // Fine wrinkles
+            const g5=Math.sin(v.x*8.5+v.z*7.5+v.y*6.5)*0.1;
+            // Micro bumps
+            const g6=Math.sin(v.x*13+v.y*11+v.z*10)*0.04;
+            // Ultra-fine pore texture
+            const g7=Math.sin(v.x*20+v.y*18+v.z*16)*0.015;
+            const totalDisp=centralSulcus+sylvian+g1+g2+g3+g4+g5+g6+g7;
+            v.addScaledVector(n,totalDisp);
+            bp.setXYZ(i,v.x,v.y,v.z);
+            // Per-vertex color: dark bloody flesh brain tissue
+            const depth=(totalDisp+3)/6;
+            const bloodPool=Math.max(0,0.3-depth)*2.5;
+            const r3=0.45+depth*0.10+bloodPool*0.3;
+            const g=0.26+depth*0.06-bloodPool*0.1;
+            const b3=0.18+depth*0.04-bloodPool*0.08;
+            brainColors[i*3]=r3;brainColors[i*3+1]=g;brainColors[i*3+2]=b3;
+        }
+        brainGeo.setAttribute('color',new THREE.BufferAttribute(brainColors,3));
+        brainGeo.computeVertexNormals();
+        const brainMat=new THREE.MeshStandardMaterial({
+            vertexColors:true,
+            roughness:0.52,metalness:0.05, // wet brain surface
+            envMap:envMap,envMapIntensity:0.08, // moisture reflections on gyri
+            emissive:0x661810,emissiveIntensity:0.28,
+        });
+        const brain=new THREE.Mesh(brainGeo,brainMat);
+        brain.position.set(0,4,0);brain.rotation.y=-PI/2;brain.castShadow=true;brain.name='brainHalf';group.add(brain);
+
+        // Pia mater — thin translucent membrane over cortex
+        const piaGeo=new THREE.SphereGeometry(13.3,80,80,0,PI);
+        const piaPts=piaGeo.attributes.position;
+        for(let i=0;i<piaPts.count;i++){
+            const v=new THREE.Vector3(piaPts.getX(i),piaPts.getY(i),piaPts.getZ(i));
+            v.addScaledVector(v.clone().normalize(),Math.sin(v.x*1.5)*Math.sin(v.y*1.8)*0.4);
+            piaPts.setXYZ(i,v.x,v.y,v.z);
+        }
+        piaGeo.computeVertexNormals();
+        const pia=new THREE.Mesh(piaGeo,new THREE.MeshStandardMaterial({
+            color:0x906848,roughness:0.35,metalness:0.06,
+            envMap:envMap,envMapIntensity:0.08,
+            transparent:true,opacity:0.14,side:THREE.FrontSide,
+            emissive:0x552210,emissiveIntensity:0.06
+        }));
+        pia.position.set(0,4,0);pia.rotation.y=-PI/2;pia.name='piaMater';group.add(pia);
+
+        // Major blood vessels (arteries — thicker, dark red, wet, pulsating)
+        const arteryMat=wetBioMat(0x6a0808,{rough:0.40,eI:0.22});
+        const arteryCapMat=wetBioMat(0x991818,{rough:0.38,eI:0.10});
+        const microCapMat=new THREE.MeshStandardMaterial({color:0x8a1510,roughness:0.45,metalness:0.06,envMap,envMapIntensity:0.08,emissive:0x770a0a,emissiveIntensity:0.25});
+        for(let a=0;a<10;a++){
+            const aPts=[];const sPhi=(a/10-0.3)*PI*0.6;const sTheta=a*0.4+0.15;
+            for(let s=0;s<=24;s++){
+                const t=s/24;
+                const phi=sPhi+t*(0.9+Math.sin(a)*0.35)+Math.sin(t*6+a)*0.06;
+                const theta=sTheta+t*0.7;
+                const r=13.5+Math.sin(s*3+a)*0.25;
+                aPts.push(new THREE.Vector3(r*Math.sin(phi)*Math.cos(theta),4+r*Math.cos(phi),r*Math.sin(phi)*Math.sin(theta)));
+            }
+            const aCurve=new THREE.CatmullRomCurve3(aPts);
+            const arteryR=0.12+a*0.018;
+            const arteryMesh=new THREE.Mesh(new THREE.TubeGeometry(aCurve,22,arteryR,8,false),arteryMat);
+            arteryMesh.name='artery';group.add(arteryMesh);
+            anims.push({obj:arteryMesh,type:'vesselPulse',phase:a*0.6});
+            // Primary branch capillaries from each artery — projected to brain surface
+            for(let b=0;b<5;b++){
+                const bStart=aCurve.getPoint(0.1+b*0.18);
+                const bDir=new THREE.Vector3((Math.random()-0.5),(Math.random()-0.5),(Math.random()-0.5)).normalize();
+                const brainC=new THREE.Vector3(0,4,0);
+                const bPts=[bStart];
+                for(let s=1;s<=10;s++){
+                    const prev=bPts[s-1];
+                    const raw=new THREE.Vector3(prev.x+bDir.x*0.7+Math.sin(s*1.5)*0.25,prev.y+bDir.y*0.7,prev.z+bDir.z*0.7+Math.cos(s)*0.2);
+                    const d=raw.clone().sub(brainC).normalize();
+                    raw.copy(brainC).addScaledVector(d,13.6+Math.sin(s*2+b)*0.12);
+                    bPts.push(raw);
+                }
+                const bCurve=new THREE.CatmullRomCurve3(bPts);
+                const bMesh=new THREE.Mesh(new THREE.TubeGeometry(bCurve,8,0.04+Math.random()*0.04,5,false),arteryCapMat);
+                bMesh.name='arteryCap';group.add(bMesh);
+                anims.push({obj:bMesh,type:'vesselPulse',phase:a*0.5+b*0.3});
+                // Secondary micro-capillaries — projected to brain surface
+                for(let mc=0;mc<2;mc++){
+                    const mcStart=bCurve.getPoint(0.3+mc*0.35);
+                    const mcDir=new THREE.Vector3((Math.random()-0.5)*0.8,(Math.random()-0.5)*0.8,(Math.random()-0.5)*0.8);
+                    const mcPts=[mcStart];
+                    for(let ms=1;ms<=6;ms++){
+                        const prev=mcPts[ms-1];
+                        const raw=new THREE.Vector3(prev.x+mcDir.x*0.45,prev.y+mcDir.y*0.45,prev.z+mcDir.z*0.45);
+                        const d=raw.clone().sub(brainC).normalize();
+                        raw.copy(brainC).addScaledVector(d,13.65+Math.sin(ms*3+mc)*0.08);
+                        mcPts.push(raw);
+                    }
+                    group.add(new THREE.Mesh(
+                        new THREE.TubeGeometry(new THREE.CatmullRomCurve3(mcPts),5,0.015+Math.random()*0.015,3,false),microCapMat
+                    ));
+                }
+            }
+        }
+        // Veins (thinner, darker, bluish-red, more numerous, wet)
+        const veinMat=wetBioMat(0x552244,{rough:0.42,eI:0.08});
+        for(let v=0;v<14;v++){
+            const vPts=[];const sPhi=(Math.random()-0.5)*PI*0.55;
+            const sTheta=Math.random()*PI*0.7;
+            const vPhiSpread=(Math.random()-0.3)*1.3;
+            for(let s=0;s<=16;s++){
+                const t=s/16;
+                const phi=sPhi+t*vPhiSpread;
+                const theta=sTheta+t*0.4;
+                const r=13.55;
+                vPts.push(new THREE.Vector3(r*Math.sin(phi)*Math.cos(theta),4+r*Math.cos(phi),r*Math.sin(phi)*Math.sin(theta)));
+            }
+            const vCurve=new THREE.CatmullRomCurve3(vPts);
+            const vMesh=new THREE.Mesh(new THREE.TubeGeometry(vCurve,12,0.04+Math.random()*0.07,5,false),veinMat);
+            vMesh.name='vein';group.add(vMesh);
+            anims.push({obj:vMesh,type:'vesselPulse',phase:v*0.4+1.0});
+            // Vein tributaries — projected to brain surface
+            for(let vt=0;vt<3;vt++){
+                const vtStart=vCurve.getPoint(0.15+vt*0.3);
+                const vtDir=new THREE.Vector3((Math.random()-0.5)*0.8,(Math.random()-0.5)*0.8,(Math.random()-0.5)*0.8);
+                const brC=new THREE.Vector3(0,4,0);
+                const vtPts=[vtStart];
+                for(let vs=1;vs<=6;vs++){
+                    const prev=vtPts[vs-1];
+                    const raw=new THREE.Vector3(prev.x+vtDir.x*0.5,prev.y+vtDir.y*0.5,prev.z+vtDir.z*0.5);
+                    const d=raw.clone().sub(brC).normalize();
+                    raw.copy(brC).addScaledVector(d,13.6+Math.sin(vs*2+vt)*0.1);
+                    vtPts.push(raw);
+                }
+                group.add(new THREE.Mesh(
+                    new THREE.TubeGeometry(new THREE.CatmullRomCurve3(vtPts),5,0.02+Math.random()*0.02,4,false),
+                    bioMat(0x443355,{rough:0.55,eI:0.05})
+                ));
+            }
+        }
+        // Dense micro-capillary bed covering brain surface (the capillary plexus)
+        for(let mc=0;mc<25;mc++){
+            const mcPts=[];
+            const mcPhi=(Math.random()-0.2)*PI*0.5;
+            const mcTheta=Math.random()*PI*0.6;
+            const mcPhiSpread=(Math.random()-0.4)*0.6;
+            for(let s=0;s<=6;s++){
+                const t=s/6;
+                const phi=mcPhi+t*mcPhiSpread;
+                const theta=mcTheta+t*0.2;
+                const r=13.6+Math.sin(s*4+mc)*0.08;
+                mcPts.push(new THREE.Vector3(r*Math.sin(phi)*Math.cos(theta),4+r*Math.cos(phi),r*Math.sin(phi)*Math.sin(theta)));
+            }
+            group.add(new THREE.Mesh(
+                new THREE.TubeGeometry(new THREE.CatmullRomCurve3(mcPts),5,0.01+Math.random()*0.012,3,false),microCapMat
+            ));
+        }
+
+        // ═══ CHIP HEMISPHERE — Highly detailed silicon die ═══
+        const chipGeo=new THREE.SphereGeometry(13,80,80,PI,PI);
+        const chip=new THREE.Mesh(chipGeo,chipMat(CIR.silicon,{rough:0.015,metal:0.55,envI:5.0,eI:0.008}));
+        chip.position.set(0,4,0);chip.rotation.y=-PI/2;chip.castShadow=true;chip.name='chipHalf';group.add(chip);
+
+        // Die pattern — visible transistor grid on chip surface
+        for(let gi=0;gi<8;gi++){
+            for(let gj=0;gj<6;gj++){
+                const phi=(-0.5+gi/8)*PI*0.6;
+                const theta=PI+0.15+gj*PI*0.1;
+                const r=13.15;
+                const block=new THREE.Mesh(new THREE.BoxGeometry(1.2,0.06,0.8),
+                    chipMat(0x252530,{rough:0.08,metal:0.6,envI:3.0,eI:0.015}));
+                block.position.set(r*Math.sin(phi)*Math.cos(theta),4+r*Math.cos(phi),r*Math.sin(phi)*Math.sin(theta));
+                block.lookAt(0,4,0);
+                group.add(block);
+            }
+        }
+
+        // Copper traces on chip — signal lines (thin) and power rails (thick)
+        const cMatThin=copperMat({rough:0.12});
+        const cMatPower=copperMat({rough:0.08});
+        for(let i=0;i<20;i++){
+            const cPts=[];const isPower=i<5;
+            const startPhi=(Math.random()-0.5)*PI*0.55;
+            const startTheta=PI+0.1+Math.random()*PI*0.55;
+            for(let s=0;s<=10;s++){
+                const t=s/10;
+                const phi=startPhi+t*(Math.random()-0.5)*0.7;
+                const theta=startTheta+t*0.3;
+                const r=13.25;
+                cPts.push(new THREE.Vector3(r*Math.sin(phi)*Math.cos(theta),4+r*Math.cos(phi),r*Math.sin(phi)*Math.sin(theta)));
+            }
+            const cCurve=new THREE.CatmullRomCurve3(cPts);
+            group.add(new THREE.Mesh(new THREE.TubeGeometry(cCurve,10,isPower?0.1:0.04,isPower?8:4,false),isPower?cMatPower:cMatThin));
+        }
+        // Gold bond pads on chip surface
+        const gPadMat=goldMat({rough:0.04});
+        for(let i=0;i<16;i++){
+            const phi=(-0.6+i/16*1.2)*PI*0.3;
+            const theta=PI+0.05+((i%4)/4)*PI*0.05;
+            const r=13.3;
+            const pad=new THREE.Mesh(new THREE.CylinderGeometry(0.15,0.15,0.04,12),gPadMat);
+            pad.position.set(r*Math.sin(phi)*Math.cos(theta),4+r*Math.cos(phi),r*Math.sin(phi)*Math.sin(theta));
+            pad.lookAt(0,4,0);
+            group.add(pad);
+        }
+        // SMD capacitors (tiny tan/brown blocks on chip side)
+        const capMat=new THREE.MeshPhysicalMaterial({color:0xc8a050,roughness:0.5,metalness:0.1,envMap,envMapIntensity:0.5});
+        const capTermMat=chipMat(CIR.solder,{rough:0.15,metal:0.9,envI:3.0});
+        for(let i=0;i<10;i++){
+            const phi=(Math.random()-0.5)*PI*0.4;
+            const theta=PI+0.2+Math.random()*PI*0.4;
+            const r=13.4;
+            const cx=r*Math.sin(phi)*Math.cos(theta),cy=4+r*Math.cos(phi),cz=r*Math.sin(phi)*Math.sin(theta);
+            const cap=new THREE.Mesh(new THREE.BoxGeometry(0.3,0.15,0.18),capMat);
+            cap.position.set(cx,cy,cz);cap.lookAt(0,4,0);group.add(cap);
+            // Solder terminals on each end
+            const t1=new THREE.Mesh(new THREE.BoxGeometry(0.06,0.16,0.19),capTermMat);
+            t1.position.set(cx+0.14,cy,cz);t1.lookAt(0,4,0);group.add(t1);
+            const t2=new THREE.Mesh(new THREE.BoxGeometry(0.06,0.16,0.19),capTermMat);
+            t2.position.set(cx-0.14,cy,cz);t2.lookAt(0,4,0);group.add(t2);
+        }
+        // Solder vias (small metallic cylinders)
+        for(let i=0;i<25;i++){
+            const phi=(Math.random()-0.5)*PI*0.5;
+            const theta=PI+0.1+Math.random()*PI*0.5;
+            const r=13.2;
+            const via=new THREE.Mesh(new THREE.CylinderGeometry(0.05,0.05,0.12,8),chipMat(CIR.solder,{rough:0.2,metal:0.85,envI:3.0}));
+            via.position.set(r*Math.sin(phi)*Math.cos(theta),4+r*Math.cos(phi),r*Math.sin(phi)*Math.sin(theta));
+            via.lookAt(0,4,0);
+            group.add(via);
+        }
+        // Activity dots at trace junctions
+        for(let i=0;i<20;i++){
+            const phi=(Math.random()-0.5)*PI*0.7;const theta=PI+Math.random()*PI*0.7;const r=13.5;
+            const dot=new THREE.Mesh(new THREE.SphereGeometry(0.15,8,8),glowMat(PAL.synapse,0.6));
+            dot.position.set(r*Math.sin(phi)*Math.cos(theta),4+r*Math.cos(phi),r*Math.sin(phi)*Math.sin(theta));
+            dot.name=`ct_${i}`;group.add(dot);
+            anims.push({obj:dot,type:'traceGlow',phase:Math.random()*TAU});
+        }
+
+        // Neural dots on brain side
+        for(let i=0;i<20;i++){
+            const phi=(Math.random()-0.5)*PI*0.7;const theta=Math.random()*PI*0.7;const r=13.5;
+            const nd=new THREE.Mesh(new THREE.SphereGeometry(0.25,6,6),glowMat(BIO.spike,0.5));
+            nd.position.set(r*Math.sin(phi)*Math.cos(theta),4+r*Math.cos(phi),r*Math.sin(phi)*Math.sin(theta));
+            nd.name=`nd_${i}`;group.add(nd);
+            anims.push({obj:nd,type:'neuralGlow',phase:Math.random()*TAU});
+        }
+
+        // Orbiting application satellites — mixed metallic/organic materials
+        const orbitR=30;
+        const appMats=[copperMat(),goldMat(),cortexMat(),chipMat(CIR.silicon,{rough:0.03,envI:4.0}),bioMat(BIO.vesicle,{rough:0.3,eI:0.1})];
+        for(let i=0;i<5;i++){
+            const geos=[()=>new THREE.IcosahedronGeometry(2,1),()=>new THREE.OctahedronGeometry(2,1),()=>new THREE.DodecahedronGeometry(2,1),()=>new THREE.TetrahedronGeometry(2.5,1),()=>new THREE.IcosahedronGeometry(1.8,2)];
+            const app=new THREE.Mesh(geos[i](),appMats[i]);
+            app.name=`app_${i}`;group.add(app);
+            anims.push({obj:app,type:'orbit',r:orbitR,speed:0.12+i*0.03,phase:i*TAU/5,yOff:4});
+        }
+        const ring=new THREE.Mesh(new THREE.TorusGeometry(orbitR,0.18,16,100),copperMat({rough:0.12}));
+        ring.position.y=4;ring.rotation.x=PI/2;group.add(ring);
+        anims.push({obj:ring,type:'torusRot'});
+
+        // Background scattered neurons
+        addBackgroundNeurons(group,anims,10,50,45,{particles:60});
+    }
+
+    function buildEndCard(){
+        buildNeuron();
+        // Extra background neurons for end card
+        addBackgroundNeurons(group,anims,6,55,50,{particles:40});
+        // Organic floating particles — tissue fragments, blood cells, moisture droplets
+        for(let i=0;i<80;i++){
+            const isBlood=i<30;
+            const isDroplet=i>=30&&i<50;
+            const geo=isBlood?new THREE.SphereGeometry(0.15+Math.random()*0.1,8,8):
+                      isDroplet?new THREE.SphereGeometry(0.06+Math.random()*0.06,6,6):
+                      new THREE.SphereGeometry(0.1+Math.random()*0.08,6,6);
+            const mat=isBlood?
+                new THREE.MeshStandardMaterial({color:0x991515,roughness:0.4,metalness:0.05,envMap,envMapIntensity:0.15,emissive:0x660808,emissiveIntensity:0.15,transparent:true,opacity:0.5+Math.random()*0.3}):
+                isDroplet?
+                new THREE.MeshStandardMaterial({color:0xccbbaa,roughness:0.1,metalness:0.1,envMap,envMapIntensity:0.3,transparent:true,opacity:0.15+Math.random()*0.1}):
+                glowMat([BIO.spike,BIO.soma,BIO.vesicle,PAL.synapse][i%4],0.3+Math.random()*0.2);
+            const p=new THREE.Mesh(geo,mat);
+            const th=Math.random()*TAU,r=25+Math.random()*40;
+            p.position.set(Math.cos(th)*r,(Math.random()-0.5)*35,Math.sin(th)*r);group.add(p);
+            anims.push({obj:p,type:'floater',speed:0.006+Math.random()*0.012,phase:Math.random()*TAU});
+        }
+    }
+
+    // ═══════════════════════════════════════════
+    // ANIMATION — Rich per-narrative visuals
+    // ═══════════════════════════════════════════
+    function animate(){
+        requestAnimationFrame(animate);
+        const delta=clock.getDelta(),t=clock.getElapsedTime();
+        // Auto-advance disabled — use Arrow keys to navigate
+
+        const getObjs=(pfx)=>group.children.filter(c=>c.name&&c.name.startsWith(pfx));
+        group.rotation.y+=delta*0.1;
+
+        // Animate atmospheric dust particles
+        const dustObj=scene.getObjectByName('_dust');
+        if(dustObj){
+            const dp=dustObj.geometry.attributes.position;
+            for(let i=0;i<dp.count;i++){
+                dp.setY(i,dp.getY(i)+Math.sin(t*0.3+i*0.1)*0.008);
+                dp.setX(i,dp.getX(i)+Math.cos(t*0.2+i*0.07)*0.005);
+            }
+            dp.needsUpdate=true;
+            dustObj.rotation.y=t*0.01;
+        }
+
+        // ── SECTION 1: BIOLOGICAL NEURON (per-narrative) ──
+        if(visualState.mode==='neuronIdle'){
+            // Narrative 0: LIF Model — show membrane charging + spike
+            // Highlight soma pulsing like charging membrane potential
+            const soma=getObjs('soma')[0];
+            if(soma){
+                const charge=(Math.sin(t*1.5)+1)*0.5; // 0→1 charging
+                soma.material.emissiveIntensity=0.04+charge*0.12;
+                // When "threshold" crossed, bright flash
+                if(charge>0.92)soma.material.emissiveIntensity=0.3;
+            }
+            // Membrane ring pulses with charge cycle
+            getObjs('memRing').forEach(r=>{r.scale.setScalar(1+Math.sin(t*1.5)*0.08);r.material.opacity=0.3+Math.sin(t*1.5)*0.15;});
+            // Spikes travel when threshold fires
+            getObjs('spike_').forEach(s=>{s.visible=Math.sin(t*1.5)>0.85;});
+        }
+        else if(visualState.mode==='spikeTiming'){
+            // Narrative 1: Spike Timing — rapid spikes, highlight nodes of Ranvier
+            getObjs('spike_').forEach(s=>{s.visible=true;});
+            // Nodes of Ranvier glow brightly (saltatory conduction)
+            getObjs('ranvier').forEach((r,i)=>{
+                const wave=t*8-i*1.5;
+                const bright=Math.exp(-((wave%8)-0)*(( wave%8)-0)*0.5)*0.4;
+                r.material.emissiveIntensity=0.08+bright;
+                r.scale.setScalar(1+bright*0.8);
+            });
+            // Myelin sheaths subtly pulse
+            getObjs('myelin').forEach((m,i)=>{m.material.emissiveIntensity=0.02+Math.sin(t*6+i)*0.02;});
+        }
+        else if(visualState.mode==='plasticityPulse'){
+            // Narrative 2: STDP — synaptic boutons swell, vesicles released
+            getObjs('bouton').forEach((b,i)=>{
+                const pulse=Math.sin(t*4+i*1.2);
+                b.scale.setScalar(1+Math.max(0,pulse)*0.4);
+                b.material.emissiveIntensity=0.06+Math.max(0,pulse)*0.15;
+            });
+            // Vesicles drift toward synapse
+            getObjs('vesicle').forEach(v=>{v.material.opacity=0.5+Math.sin(t*5)*0.3;});
+            // Dendrite spines glow when "activated"
+            getObjs('spine').forEach((s,i)=>{s.material.emissiveIntensity=Math.sin(t*3+i*2)>0.5?0.2:0.04;});
+        }
+        else if(visualState.mode==='efficiencyGlow'){
+            // Narrative 3: Energy Efficiency — dim everything, only sparse spikes
+            const soma=getObjs('soma')[0];
+            if(soma)soma.material.emissiveIntensity=0.03+Math.sin(t*0.8)*0.03; // Very low power glow
+            getObjs('spike_').forEach((s,i)=>{s.visible=Math.sin(t*2+i*3)>0.9;}); // Very sparse spikes
+            // Myelin sheaths insulating look
+            getObjs('myelin').forEach(m=>{m.material.emissiveIntensity=0.01;});
+            // Boutons dim — low activity
+            getObjs('bouton').forEach(b=>{b.material.emissiveIntensity=0.02;});
+        }
+
+        // ── SECTION 2: SNN (per-narrative) ──
+        else if(visualState.mode==='snnSpike'){
+            // Narrative 0: Binary spikes — neurons flash on/off sharply
+            getObjs('sn_').forEach((n,i)=>{
+                const fire=Math.sin(t*4+i*0.7+parseFloat(n.name.split('_')[1])*2);
+                n.material.emissiveIntensity=fire>0.8?0.35:0.02;
+                n.scale.setScalar(fire>0.8?1.2:1);
+            });
+        }
+        else if(visualState.mode==='membraneDynamics'){
+            // Narrative 1: Membrane V[t] — show bar charging and resetting
+            const bar=getObjs('memBar')[0],thr=getObjs('thresh')[0];
+            if(bar){
+                const cycle=t*2%6; // 6s cycle
+                const v=cycle<4?cycle/4:0; // charge for 4s then reset
+                bar.scale.y=0.05+v*1.0;
+                bar.position.y=-9+v*12;
+                bar.material.emissiveIntensity=v>0.85?0.3:0.06;
+                if(v>0.85&&bar.material.color)bar.material.color.setHex(PAL.inhibit);
+                else if(bar.material.color)bar.material.color.setHex(BIO.membrane);
+            }
+            // Neurons fire in sequence when bar resets
+            getObjs('sn_').forEach((n,i)=>{
+                const layerDelay=parseFloat(n.name.split('_')[1])*0.3;
+                const fire=Math.sin(t*2-layerDelay);
+                n.material.emissiveIntensity=fire>0.9?0.3:0.02;
+            });
+        }
+        else if(visualState.mode==='surrogateFlow'){
+            // Narrative 2: Surrogate gradients — smooth wave propagating backward
+            getObjs('sn_').forEach(n=>{
+                const li=parseFloat(n.name.split('_')[1]);
+                const ni=parseFloat(n.name.split('_')[2]);
+                // Forward spike wave
+                const fwd=Math.sin(t*3-li*1.2+ni*0.3);
+                // Backward gradient wave (delayed, inverted)
+                const bwd=Math.sin(t*3+li*1.0-ni*0.3-2);
+                const combined=Math.max(fwd,bwd*0.6);
+                n.material.emissiveIntensity=Math.max(0,combined)*0.25;
+                n.scale.setScalar(1+Math.max(0,combined)*0.1);
+            });
+            // Connections brighten during backward pass
+            getObjs('sc_').forEach(c=>{
+                if(c.material)c.material.opacity=0.15+Math.sin(t*3)*0.1;
+            });
+        }
+        else if(visualState.mode==='sparsityReveal'){
+            // Narrative 3: Sparsity — most neurons dark, very few fire
+            getObjs('sn_').forEach((n,i)=>{
+                // Only ~8% fire per frame
+                const hash=(Math.sin(i*127.1+Math.floor(t*3)*311.7)*43758.5453)%1;
+                const active=hash>0.92;
+                n.material.emissiveIntensity=active?0.4:0.01;
+                n.scale.setScalar(active?1.15:0.95);
+            });
+        }
+
+        // ── SECTION 3: HARDWARE (per-narrative) ──
+        else if(visualState.mode==='chipGlow'){
+            // Narrative 0: TrueNorth — uniform grid activity
+            getObjs('led_').forEach(l=>{
+                const[,i,j]=l.name.split('_').map(Number);
+                const w=Math.sin(t*2+i*0.4+j*0.4);
+                l.material.opacity=w>0.2?0.7:0.03;
+            });
+            getObjs('core_').forEach(c=>{c.material.emissiveIntensity=0.04+Math.sin(t*2)*0.02;});
+        }
+        else if(visualState.mode==='loihiPulse'){
+            // Narrative 1: Loihi 2 — wave of activity across cores
+            getObjs('led_').forEach(l=>{
+                const[,i,j]=l.name.split('_').map(Number);
+                const wave=Math.sin(t*4-(i+j)*0.6);
+                l.material.opacity=wave>0.5?0.9:0.02;
+                if(wave>0.5)l.material.color.setHex(0x00ff88);
+                else l.material.color.setHex(CIR.led);
+            });
+        }
+        else if(visualState.mode==='halaScale'){
+            // Narrative 2: Hala Point — massive parallel activity, all cores lit
+            getObjs('core_').forEach((c,idx)=>{
+                const i=parseFloat(c.name.split('_')[1]),j=parseFloat(c.name.split('_')[2]);
+                c.material.emissiveIntensity=0.03+Math.abs(Math.sin(t*5+i*0.3+j*0.4))*0.06;
+                c.scale.y=1+Math.sin(t*3+i+j)*0.15;
+            });
+            getObjs('led_').forEach(l=>{l.material.opacity=0.6+Math.sin(t*8)*0.3;});
+        }
+        else if(visualState.mode==='memristorFlow'){
+            // Narrative 3: In-Memory Computing — data flowing through traces
+            getObjs('led_').forEach((l,idx)=>{
+                const prog=(t*3+idx*0.2)%10;
+                l.material.opacity=prog<1?0.9:0.05;
+                if(prog<1)l.material.color.setHex(0xffaa00);
+                else l.material.color.setHex(CIR.led);
+            });
+        }
+
+        // ── SECTION 4: STDP (per-narrative) ──
+        else if(visualState.mode==='hebbianFire'){
+            // Narrative 0: Pre→Post — pre fires first, then post, synapse strengthens
+            const pre=getObjs('preNeuron')[0],post=getObjs('postNeuron')[0];
+            const cycle=t*2%4;
+            if(pre)pre.material.emissiveIntensity=cycle<1?0.25:0.04;
+            if(post)post.material.emissiveIntensity=(cycle>0.5&&cycle<1.5)?0.25:0.04;
+            // Synapse strengthening shown via emissive glow (no scaling — keeps connection intact)
+            getObjs('stdpSyn').forEach(s=>{
+                if(s.material&&s.material.emissiveIntensity!==undefined)
+                    s.material.emissiveIntensity=0.12+Math.max(0,Math.sin(t*1.5))*0.25;
+            });
+            getObjs('nt_').forEach(n=>{if(n.visible)n.material.opacity=0.8;});
+        }
+        else if(visualState.mode==='antiHebbian'){
+            // Narrative 1: Post→Pre — post fires first, synapse weakens
+            const pre=getObjs('preNeuron')[0],post=getObjs('postNeuron')[0];
+            const cycle=t*2%4;
+            if(post)post.material.emissiveIntensity=cycle<1?0.25:0.04;
+            if(pre)pre.material.emissiveIntensity=(cycle>0.5&&cycle<1.5)?0.25:0.04;
+            // Synapse weakening shown via dimming emissive (no scaling — keeps connection intact)
+            getObjs('stdpSyn').forEach(s=>{
+                if(s.material&&s.material.emissiveIntensity!==undefined)
+                    s.material.emissiveIntensity=Math.max(0.02,0.12-Math.max(0,Math.sin(t*1.5))*0.10);
+            });
+        }
+        else if(visualState.mode==='onChipLearn'){
+            // Narrative 2: On-chip — both neurons fire rapidly, synapse pulses
+            const pre=getObjs('preNeuron')[0],post=getObjs('postNeuron')[0];
+            if(pre)pre.material.emissiveIntensity=0.05+Math.abs(Math.sin(t*6))*0.2;
+            if(post)post.material.emissiveIntensity=0.05+Math.abs(Math.sin(t*6+0.3))*0.2;
+            // Synapse oscillation shown via emissive pulsing (no scaling — keeps connection intact)
+            getObjs('stdpSyn').forEach(s=>{
+                if(s.material&&s.material.emissiveIntensity!==undefined)
+                    s.material.emissiveIntensity=0.08+Math.abs(Math.sin(t*4))*0.18;
+            });
+            // Rings spin fast (processing)
+            getObjs('preRing').forEach(r=>{r.rotation.z=t*3;});
+            getObjs('postRing').forEach(r=>{r.rotation.z=-t*3;});
+        }
+        else if(visualState.mode==='emergentMap'){
+            // Narrative 3: Emergent — everything pulses in self-organizing pattern
+            getObjs('preNeuron').forEach(n=>{n.material.emissiveIntensity=0.05+Math.sin(t*2)*0.08;});
+            getObjs('postNeuron').forEach(n=>{n.material.emissiveIntensity=0.05+Math.cos(t*2)*0.08;});
+            getObjs('nt_').forEach((n,i)=>{n.visible=true;n.material.opacity=0.4+Math.sin(t*3+i)*0.3;});
+            getObjs('preRing').forEach(r=>{r.rotation.x=t*0.5;r.rotation.z=t*1.5;});
+            getObjs('postRing').forEach(r=>{r.rotation.x=-t*0.5;r.rotation.z=-t*1.5;});
+        }
+
+        // ── SECTION 5: APPLICATIONS (per-narrative) ──
+        else if(visualState.mode==='edgeSense'){
+            // Narrative 0: Edge AI — circuit dots pulse rapidly (sensing)
+            getObjs('ct_').forEach((d,i)=>{d.material.opacity=0.3+Math.sin(t*8+i*2)*0.5;d.scale.setScalar(1+Math.sin(t*8+i)*0.4);});
+            getObjs('nd_').forEach(n=>{n.material.opacity=0.2;});
+        }
+        else if(visualState.mode==='robotArm'){
+            // Narrative 1: Robotics — neural side glows with feedback loops
+            getObjs('nd_').forEach((n,i)=>{n.material.opacity=0.3+Math.sin(t*5+i*1.5)*0.4;n.scale.setScalar(1+Math.sin(t*4+i)*0.3);});
+            getObjs('ct_').forEach(d=>{d.material.opacity=0.15;});
+        }
+        else if(visualState.mode==='sustainPulse'){
+            // Narrative 2: Sustainable AI — slow, efficient glow
+            getObjs('ct_').forEach(d=>{d.material.opacity=0.1+Math.sin(t*0.8)*0.1;});
+            getObjs('nd_').forEach(n=>{n.material.opacity=0.1+Math.sin(t*0.8)*0.1;});
+            getObjs('app_').forEach(a=>{a.material.emissiveIntensity=0.05+Math.sin(t*1)*0.05;});
+        }
+        else if(visualState.mode==='futureExpand'){
+            // Narrative 3: Future — everything activates, satellites grow
+            getObjs('app_').forEach((a,i)=>{a.scale.setScalar(1+Math.sin(t*2+i)*0.25);a.material.emissiveIntensity=0.1+Math.sin(t*3+i)*0.1;});
+            getObjs('ct_').forEach(d=>{d.material.opacity=0.5+Math.sin(t*4)*0.3;});
+            getObjs('nd_').forEach(n=>{n.material.opacity=0.5+Math.sin(t*4)*0.3;});
+        }
+
+        // ── Per-object baseline animations (always running) ──
+        anims.forEach(a=>{
+            switch(a.type){
+                case'volLight':{const r=60,ang=t*0.05+a.i*TAU/3;a.obj.position.set(Math.cos(ang)*r,35+Math.sin(t*0.2+a.i)*15,Math.sin(ang)*r);break;}
+                case'boutonPulse':{a.obj.scale.setScalar(1+Math.sin(t*2.5+a.phase)*0.08);break;}
+                case'vesicleDrift':{a.obj.position.y+=Math.sin(t*2+a.phase)*0.004;a.obj.position.x+=Math.cos(t*1.5+a.phase)*0.002;break;}
+                case'spikeTravel':{const prog=((t*a.speed+a.offset)%1);a.obj.position.copy(a.curve.getPoint(prog));a.obj.material.opacity=0.4+Math.sin(t*12)*0.4;break;}
+                case'ringPulse':{a.obj.rotation.x=PI/2+Math.sin(t*0.4)*0.2;a.obj.rotation.z=t*0.2;break;}
+                case'snnFire':{if(visualState.mode==='static'){const fire=Math.sin(t*3+a.phase+a.li*1.5);a.obj.material.emissiveIntensity=fire>0.7?0.25:0.02;}break;}
+                case'memBarAnim':{if(visualState.mode==='static'){const v=(Math.sin(t*2)+1)*0.5;a.obj.scale.y=0.1+v*0.9;a.obj.position.y=-9+v*9;}break;}
+                case'corePulse':{if(visualState.mode==='static')a.obj.material.emissiveIntensity=Math.max(0,Math.sin(t*2+a.phase))*0.05;break;}
+                case'ledBlink':{if(visualState.mode==='static'){const on=Math.sin(t*5+a.phase)>0.6;a.obj.material.opacity=on?0.6:0.03;}break;}
+                case'ringRotate':{a.obj.rotation.x+=delta*0.3;a.obj.rotation.y+=delta*0.2;break;}
+                case'orbit':{const ang=t*a.speed+a.phase;a.obj.position.set(Math.cos(ang)*a.r,a.yOff+Math.sin(t*0.5+a.phase)*3,Math.sin(ang)*a.r);a.obj.rotation.x=t*0.4;a.obj.rotation.y=t*0.6;break;}
+                case'torusRot':{a.obj.rotation.z=t*0.012;break;}
+                case'vesselPulse':{
+                    // Blood vessel pulsation — emissive glow only (no scale to avoid jumping)
+                    const heartRate=1.2;
+                    const pulse=Math.sin(t*heartRate*TAU+a.phase);
+                    const systole=Math.max(0,pulse);
+                    if(a.obj.material&&a.obj.material.emissiveIntensity!==undefined){
+                        a.obj.material.emissiveIntensity=0.2+systole*0.12;
+                    }
+                    break;
+                }
+                case'floater':{a.obj.position.x+=a.speed*0.15;a.obj.position.y+=Math.sin(t*1.2+a.phase)*0.015;if(a.obj.position.x>70)a.obj.position.x=-70;break;}
+                case'bgNeuronPulse':{const pulse=(Math.sin(t*1.8+a.phase)+1)*0.5;a.obj.material.emissiveIntensity=0.06+pulse*0.12;a.obj.material.opacity=0.40+pulse*0.20;break;}
+                case'traceGlow':case'neuralGlow':{if(visualState.mode==='static'){a.obj.material.opacity=0.15+Math.sin(t*3+a.phase)*0.2;}break;}
+                case'ntTravel':{const prog=((t*0.35+a.idx*0.1)%1);a.obj.position.copy(a.curve.getPoint(a.pre?prog:1-prog));a.obj.visible=prog>0.1&&prog<0.9;break;}
+            }
+        });
+
+        // Cinematic camera orbit — slow, elegant, with breathing
+        const cR=115,cS=0.02;
+        camera.position.x=Math.sin(t*cS)*cR;
+        camera.position.z=Math.cos(t*cS)*cR;
+        camera.position.y=30+Math.sin(t*cS*0.2)*10+Math.sin(t*0.15)*2; // breathing motion
+        camera.lookAt(0,2,0);
+        renderer.render(scene,camera);
+    }
+
+    function onResize(){camera.aspect=window.innerWidth/window.innerHeight;camera.updateProjectionMatrix();renderer.setSize(window.innerWidth,window.innerHeight);}
+    function onKey(e){
+        if(e.key==='ArrowRight'){if(currentNarrative<sections[current].narratives.length-1){currentNarrative++;updateUI();}else loadSection((current+1)%sections.length);}
+        if(e.key==='ArrowLeft'){if(currentNarrative>0){currentNarrative--;updateUI();}else loadSection((current-1+sections.length)%sections.length);}
+        if(e.key===' '){e.preventDefault();isPlaying=!isPlaying;}
+    }
+    window.loadSection=loadSection;
+    init();
+    </script>
+</body>
+</html>

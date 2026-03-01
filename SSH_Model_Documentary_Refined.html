@@ -1,0 +1,1874 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The SSH Model — Topological Physics</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=DM+Sans:wght@300;400;500;600;700&family=IBM+Plex+Mono:wght@300;400;500;600&display=swap');
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box
+        }
+
+        body {
+            font-family: 'DM Sans', sans-serif;
+            background: linear-gradient(160deg, #0f0f12 0%, #1a1a2e 40%, #16213e 100%);
+            overflow: hidden;
+            color: #e8e6e3;
+        }
+
+        #canvas {
+            width: 100vw;
+            height: 100vh;
+            display: block;
+            position: fixed;
+            top: 0;
+            left: 0
+        }
+
+        .letterbox-top,
+        .letterbox-bottom {
+            position: fixed;
+            left: 0;
+            right: 0;
+            height: 42px;
+            background: rgba(15, 15, 18, 0.92);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            z-index: 400;
+        }
+
+        .letterbox-top {
+            top: 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.06)
+        }
+
+        .letterbox-bottom {
+            bottom: 0;
+            border-top: 1px solid rgba(255, 255, 255, 0.06)
+        }
+
+        .ui-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            pointer-events: none;
+            z-index: 300
+        }
+
+        .header-bar {
+            position: absolute;
+            top: 40px;
+            left: 40px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            z-index: 100;
+        }
+
+        /* Cinematic Captions */
+        .cinematic-script-overlay {
+            position: fixed;
+            bottom: 80px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 80%;
+            max-width: 900px;
+            text-align: center;
+            z-index: 500;
+            pointer-events: none;
+            opacity: 1;
+            transition: opacity 0.8s ease;
+        }
+
+        .script-text {
+            font-family: 'DM Sans', sans-serif;
+            font-size: 1.8em;
+            /* Modern and clean */
+            color: #ffffff;
+            font-weight: 500;
+            line-height: 1.4;
+            text-shadow: 0 2px 12px rgba(0, 0, 0, 0.7), 0 0 40px rgba(0, 0, 0, 0.4);
+            opacity: 0;
+            transform: translateY(20px);
+            transition: all 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .script-text.active {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .script-text strong {
+            color: #ffd700;
+            /* Bright yellow */
+            font-weight: 700;
+            text-shadow: 0 0 10px rgba(255, 215, 0, 0.5), 0 1px 3px rgba(0, 0, 0, 0.6);
+        }
+
+        .script-sub {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.7em;
+            text-transform: uppercase;
+            letter-spacing: 4px;
+            color: #00d2ff;
+            /* Dark gold accent */
+            margin-bottom: 15px;
+            opacity: 1;
+            font-weight: 700;
+            text-shadow: 0 0 8px rgba(0, 210, 255, 0.4);
+        }
+
+        .network-logo {
+            font-family: 'Cormorant Garamond', serif;
+            font-weight: 700;
+            font-size: 0.9em;
+            letter-spacing: 6px;
+            text-transform: uppercase;
+            color: #ffffff;
+            text-shadow: 0 1px 4px rgba(0, 0, 0, 0.5);
+        }
+
+        .live-dot {
+            width: 8px;
+            height: 8px;
+            background: #00d2ff;
+            border-radius: 50%;
+            box-shadow: 0 0 12px rgba(0, 210, 255, 0.8);
+            animation: livePulse 2s ease-in-out infinite
+        }
+
+        @keyframes livePulse {
+
+            0%,
+            100% {
+                opacity: 1;
+                transform: scale(1);
+            }
+
+            50% {
+                opacity: 0.3;
+                transform: scale(1.3);
+            }
+        }
+
+        .title-section {
+            position: absolute;
+            top: 100px;
+            left: 42px;
+            max-width: 440px;
+            background: transparent;
+            padding: 0;
+            border-left: 4px solid #00d2ff;
+            padding-left: 24px;
+            transition: opacity 1s ease;
+        }
+
+        .series-tag {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.6em;
+            font-weight: 700;
+            letter-spacing: 4px;
+            text-transform: uppercase;
+            color: #0f0f12;
+            background: #00d2ff;
+            display: inline-block;
+            padding: 4px 10px;
+            margin-bottom: 18px;
+        }
+
+        .main-title {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: clamp(2.2em, 4vw, 3.5em);
+            font-weight: 600;
+            color: #ffffff;
+            line-height: 0.95;
+            margin-bottom: 12px;
+            letter-spacing: -0.04em;
+            text-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+        }
+
+        .main-subtitle {
+            font-size: 0.88em;
+            font-weight: 500;
+            color: #d0cfc8;
+            line-height: 1.6;
+            margin-bottom: 22px;
+            max-width: 380px;
+        }
+
+        .year-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            border-bottom: 2px solid rgba(255, 255, 255, 0.2);
+            padding: 0 0 4px 0;
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.75em;
+            color: #b0b0b0;
+        }
+
+        .year-badge span {
+            color: #00d2ff;
+            font-weight: 700
+        }
+
+        .equation-panel {
+            position: absolute;
+            top: 100px;
+            right: 42px;
+            border-right: 4px solid #00d2ff;
+            padding-right: 24px;
+            max-width: 400px;
+            background: transparent;
+            text-align: right;
+            transition: opacity 1s ease;
+        }
+
+        .eq-label {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.55em;
+            font-weight: 700;
+            letter-spacing: 4px;
+            text-transform: uppercase;
+            color: #9a9a9a;
+            margin-bottom: 12px;
+        }
+
+        .eq-math {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.85em;
+            color: #ffffff;
+            line-height: 1.8;
+            font-weight: 600;
+            text-shadow: 0 1px 4px rgba(0, 0, 0, 0.3);
+        }
+
+
+        .narrative-panel {
+            position: absolute;
+            bottom: 60px;
+            left: 42px;
+            right: 42px;
+            background: rgba(15, 15, 18, 0.6);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            border-left: 8px solid #00d2ff;
+            padding: 25px 40px;
+            max-width: 800px;
+            border-top: 1px solid rgba(255, 255, 255, 0.04);
+        }
+
+        .narrative-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+            padding-bottom: 8px;
+        }
+
+        .narr-label {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.6em;
+            font-weight: 700;
+            letter-spacing: 4px;
+            text-transform: uppercase;
+            color: #9a9a9a;
+        }
+
+        .step-indicator {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.68em;
+            color: #0f0f12;
+            font-weight: 700;
+            background: #00d2ff;
+            padding: 2px 8px;
+        }
+
+        .narr-title {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 1.6em;
+            font-weight: 600;
+            color: #ffffff;
+            margin-bottom: 10px;
+            letter-spacing: -0.2px;
+        }
+
+        .narr-text {
+            font-size: 1em;
+            color: #e0deda;
+            line-height: 1.75;
+            font-weight: 400;
+        }
+
+        .narr-text strong {
+            color: #00d2ff;
+            /* Dark gold accent emphasis */
+            font-weight: 700;
+        }
+
+
+        .footer-bar {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 60px;
+            background: rgba(10, 10, 14, 0.95);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-top: 1px solid rgba(255, 255, 255, 0.06);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 42px;
+            z-index: 500;
+        }
+
+        .footer-left {
+            display: flex;
+            align-items: center;
+            gap: 20px
+        }
+
+        .footer-icon {
+            width: 26px;
+            height: 26px;
+            background: #00d2ff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Cormorant Garamond', serif;
+            font-weight: 700;
+            font-size: 0.9em;
+            color: #0f0f12;
+        }
+
+        .footer-url {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.72em;
+            font-weight: 700;
+            color: #fff;
+            letter-spacing: 1.5px;
+        }
+
+        .footer-right {
+            text-align: right;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            gap: 2px;
+        }
+
+        .footer-copy {
+            display: none;
+            /* Hide year to save space or combine */
+        }
+
+        .footer-name {
+            font-size: 0.75em;
+            font-weight: 700;
+            color: #fff;
+            margin-bottom: -2px;
+        }
+
+        .footer-cred {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.52em;
+            color: #00d2ff;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1.8px;
+            opacity: 0.9;
+        }
+
+        /* Intro Card Styles - Modern & Striking */
+        .intro-card-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: transparent;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-end;
+            padding-bottom: 12vh;
+            opacity: 1;
+            transition: opacity 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            z-index: 2000;
+            text-align: center;
+            overflow: hidden;
+        }
+
+        .intro-card-overlay.fade-out {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .intro-card-overlay.fade-out .intro-title {
+            transform: scale(1.05);
+            opacity: 0;
+        }
+
+        .intro-card-overlay.fade-out .intro-pre-title {
+            transform: translateY(-20px);
+            opacity: 0;
+        }
+
+        .intro-card-overlay.fade-out .intro-accent-line {
+            transform: scaleX(0);
+        }
+
+        .intro-pre-title {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.75em;
+            font-weight: 600;
+            letter-spacing: 6px;
+            text-transform: uppercase;
+            color: #b0b0b0;
+            opacity: 0;
+            transform: translateY(10px);
+            animation: introFadeUp 0.35s cubic-bezier(0.16, 1, 0.3, 1) 0.05s forwards;
+            transition: all 0.3s ease;
+        }
+
+        .intro-title {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: clamp(4em, 12vw, 9em);
+            font-weight: 600;
+            color: #ffffff;
+            margin: 10px 0 0 0;
+            letter-spacing: -4px;
+            line-height: 0.85;
+            opacity: 0;
+            transform: translateY(25px);
+            animation: introTitleReveal 0.4s cubic-bezier(0.16, 1, 0.3, 1) 0.15s forwards;
+            transition: all 0.3s ease;
+        }
+
+        .intro-title span {
+            display: inline-block;
+        }
+
+        .intro-accent-line {
+            width: 60px;
+            height: 4px;
+            background: #00d2ff;
+            margin-top: 20px;
+            transform: scaleX(0);
+            animation: introLineExpand 0.3s cubic-bezier(0.16, 1, 0.3, 1) 0.35s forwards;
+            transition: transform 0.25s ease;
+        }
+
+        @keyframes introFadeUp {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes introTitleReveal {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes introLineExpand {
+            to {
+                transform: scaleX(1);
+            }
+        }
+
+        .credits-name {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 2.5em;
+            font-weight: 600;
+            color: #ffffff;
+            margin-bottom: 10px;
+        }
+
+        .credits-link {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.7em;
+            margin-top: 30px;
+            color: #999;
+            text-decoration: none;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+            transition: all 0.3s;
+        }
+
+        .credits-link:hover {
+            color: #fff;
+            border-bottom-color: #00d2ff;
+        }
+
+        /* End Card Styles */
+        .end-card-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: transparent;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 1s ease-in-out;
+            z-index: 1000;
+            text-align: center;
+        }
+
+        .end-card-overlay.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .credits-title {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 4em;
+            font-weight: 400;
+            color: #ffffff;
+            margin-bottom: 20px;
+        }
+
+        .credits-subtitle {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.8em;
+            letter-spacing: 5px;
+            text-transform: uppercase;
+            color: #444;
+            margin-bottom: 40px;
+        }
+    </style>
+</head>
+
+<body>
+    <canvas id="canvas"></canvas>
+    <div class="letterbox-top"></div>
+    <div class="letterbox-bottom"></div>
+
+    <div class="ui-overlay">
+        <div class="header-bar">
+            <div class="network-logo">Topological Physics</div>
+        </div>
+
+        <div class="title-section">
+            <div class="series-tag">Understanding Topological Insulators</div>
+            <div class="main-title" id="archTitle">The SSH Model</div>
+            <div class="main-subtitle" id="archSubtitle">The simplest one-dimensional topological insulator.</div>
+            <div class="year-badge">Introduced <span id="archYear">1979</span></div>
+        </div>
+
+        <div class="equation-panel">
+            <div class="eq-label" id="eqLabel">SSH Hamiltonian</div>
+            <div class="eq-math" id="eqMath">H = Σₙ [ v |A,n⟩⟨B,n| + w |A,n+1⟩⟨B,n| ] + h.c.</div>
+        </div>
+
+        <div class="cinematic-script-overlay">
+            <div class="script-sub" id="scriptSub">PHASE I: THE DIMERIZED LATTICE</div>
+            <div class="script-text" id="scriptText">The SSH model describes a topological chain with alternating bond
+                strengths.</div>
+        </div>
+
+    </div>
+
+    <div class="intro-card-overlay" id="introCardOverlay">
+        <div class="intro-pre-title">Topological Physics</div>
+        <div class="intro-title"><span>SSH Model</span></div>
+        <div class="intro-accent-line"></div>
+    </div>
+
+    <div class="end-card-overlay" id="endCardOverlay">
+        <div class="credits-title">Thank You</div>
+        <div class="credits-subtitle">Topological Physics</div>
+        <div class="credits-name">Samarjith Biswas</div>
+        <p style="font-size: 0.9em; max-width: 500px; color: #666; font-style: italic;">"Unveiling the geometry of the
+            quantum world."</p>
+        <a href="https://samarjithbiswas.com" class="credits-link">www.SamarjithBiswas.com</a>
+        <div style="margin-top: 40px; font-family: 'IBM Plex Mono'; font-size: 0.6em; color: #aaa;">© 2026</div>
+    </div>
+
+    <div class="footer-bar">
+        <div class="footer-left">
+            <div class="footer-icon">S</div>
+            <div class="footer-url">SamarjithBiswas.com</div>
+        </div>
+        <div class="footer-right">
+            <div class="footer-copy">© 2026</div>
+            <div class="footer-name">Samarjith Biswas</div>
+            <div class="footer-cred">Quantum Systems · AI-Driven Optimization</div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script>
+        const PI = Math.PI, TAU = 2 * PI;
+
+        // LUXURY SCIENTIFIC METAL PALETTE
+        const PAL = {
+            gold: 0xffcc33,    // Rich 24K Gold
+            black: 0x000000,
+            platinum: 0xE5E4E2,
+            silver: 0xBCC6CC,
+            carbon: 0x1A1A1A,
+            glass: 0xffffff,
+            copper: 0xcc6600,   // Polished Scientific Copper
+            steel: 0x111111,
+            chrome: 0xf1ff00
+        };
+
+        const sections = [
+            {
+                name: "The SSH Model",
+                subtitle: "",
+                year: "",
+                equation: "",
+                eqLabel: "",
+                concepts: [],
+                hideScript: true,
+                narratives: [
+                    { title: "", text: "" }
+                ]
+            },
+            {
+                name: "The SSH Model",
+                subtitle: "A one-dimensional dimerized lattice with alternating hopping amplitudes — the minimal model exhibiting topological band topology.",
+                year: "1979",
+                equation: "H = Σₙ [ v c†<sub>A,n</sub> c<sub>B,n</sub> + w c†<sub>A,n+1</sub> c<sub>B,n</sub> ] + h.c.",
+                eqLabel: "Real-Space Hamiltonian",
+                concepts: ["Dimerized Chain", "Alternating Hoppings", "Sublattices A & B", "Unit Cell", "Chiral Symmetry"],
+                narratives: [
+                    { title: "The Dimerized Chain", text: "The <strong>SSH model</strong> describes a chain of atoms with two alternating bond strengths. Each unit cell contains sublattice <strong>A</strong> and <strong>B</strong> sites connected by intracell hopping <strong>v</strong> and intercell hopping <strong>w</strong>." },
+                    { title: "Polyacetylene Origins", text: "Su, Schrieffer, and Heeger introduced this model in 1979 to describe <strong>soliton excitations in polyacetylene</strong> (CH)ₓ — contributing to the <strong>2000 Nobel Prize in Chemistry</strong>." },
+                    { title: "Two Distinct Phases", text: "When <strong>w > v</strong>, the system is <strong>topological</strong> with protected edge states. When <strong>v > w</strong>, it is <strong>trivial</strong>. The boundary <strong>v = w</strong> marks a quantum phase transition." },
+                    { title: "Symmetry Protection", text: "The SSH Hamiltonian possesses <strong>chiral symmetry</strong>: σ_z H σ_z = −H. This pins the spectrum symmetrically about E = 0 and protects the <strong>winding number</strong> topological invariant." }
+                ]
+            },
+            {
+                name: "Bloch Hamiltonian",
+                subtitle: "Fourier-transforming to momentum space reveals a 2×2 matrix parametrized by the d-vector on the Pauli basis.",
+                equation: "H(k) = d<sub>x</sub>(k) σ<sub>x</sub> + d<sub>y</sub>(k) σ<sub>y</sub><br>d<sub>x</sub> = v + w cos k  ·  d<sub>y</sub> = w sin k",
+                eqLabel: "Bloch Representation",
+                concepts: ["Bloch's Theorem", "Brillouin Zone", "Pauli Matrices", "d-Vector d(k)", "Momentum Space"],
+                narratives: [
+                    { title: "Real to Momentum Space", text: "Applying <strong>Bloch's theorem</strong> to the periodic chain, each crystal momentum k yields a 2×2 Hamiltonian H(k) acting on the sublattice degree of freedom." },
+                    { title: "The d-Vector", text: "H(k) decomposes as <strong>d(k) · σ</strong>, where d = (v + w cos k, w sin k). As k varies, d(k) traces a <strong>circle of radius w centered at (v, 0)</strong>." },
+                    { title: "Energy Eigenvalues", text: "The eigenvalues are <strong>E±(k) = ±|d(k)|</strong>, forming two bands separated by gap <strong>Δ = 2|v − w|</strong>." },
+                    { title: "Geometric Interpretation", text: "Whether the d(k) loop encircles the origin determines the topological phase — a purely geometric criterion for band topology." }
+                ]
+            },
+            {
+                name: "Band Structure",
+                subtitle: "Two energy bands E±(k) = ±√(v² + w² + 2vw cos k) with a gap that closes at the topological phase transition.",
+                equation: "E<sub>±</sub>(k) = ± √(v² + w² + 2vw cos k)<br>Band Gap  Δ = 2|v − w|",
+                eqLabel: "Energy Dispersion",
+                concepts: ["Valence Band", "Conduction Band", "Gap Δ = 2|v − w|", "Phase Transition", "Density of States"],
+                narratives: [
+                    { title: "Two-Band Structure", text: "The SSH model yields exactly <strong>two energy bands</strong> symmetric about E = 0 — the valence band E₋(k) and conduction band E₊(k)." },
+                    { title: "The Phase Transition", text: "At <strong>v = w</strong>, the gap closes at k = π — the hallmark of a <strong>topological quantum phase transition</strong>." },
+                    { title: "Van Hove Singularities", text: "The <strong>density of states</strong> diverges at the band edges — characteristic Van Hove singularities of one-dimensional systems." },
+                    { title: "Adiabatic Continuity", text: "Within each phase, the band structure can be <strong>continuously deformed</strong> without closing the gap — the foundation of topological classification." }
+                ]
+            },
+            {
+                name: "Winding Number",
+                subtitle: "The topological invariant ν counts encirclements of the origin by d(k). The Zak phase γ = πν.",
+                equation: "ν = (1/2π) ∮ [d<sub>x</sub> ∂<sub>k</sub>d<sub>y</sub> − d<sub>y</sub> ∂<sub>k</sub>d<sub>x</sub>] / |d|² dk<br>Zak Phase  γ = πν",
+                eqLabel: "Topological Invariant",
+                concepts: ["Winding Number ν", "Zak Phase γ", "Berry Phase", "Quantized Invariant", "Origin Encirclement"],
+                narratives: [
+                    { title: "The Winding Number", text: "The <strong>winding number ν</strong> counts how many times d(k) encircles the origin as k sweeps from −π to π. This integer is <strong>topologically robust</strong>." },
+                    { title: "Geometric Picture", text: "d(k) traces a circle of <strong>radius w centered at (v, 0)</strong>. When w > v → <strong>ν = 1</strong>. When v > w → <strong>ν = 0</strong>." },
+                    { title: "The Zak Phase", text: "The <strong>Zak phase</strong> γ = πν is the Berry phase across the Brillouin zone, quantized to 0 or π by inversion symmetry." },
+                    { title: "Topological Protection", text: "The winding number is <strong>invariant under continuous deformations</strong> — only gap-closing events can change ν." }
+                ]
+            },
+            {
+                name: "Edge States",
+                subtitle: "Zero-energy states localized at boundaries — the physical manifestation of bulk-boundary correspondence.",
+                equation: "|ψ<sub>edge</sub>⟩ ~ (−v/w)<sup>n</sup>  ·  ξ = 1/ln(w/v)<br>Edge modes = Bulk ν",
+                eqLabel: "Bulk-Boundary Correspondence",
+                concepts: ["Zero-Energy Modes", "Exponential Decay", "Localization ξ", "Bulk-Boundary", "Disorder Robustness"],
+                narratives: [
+                    { title: "Bulk-Boundary Correspondence", text: "The number of protected boundary modes equals the bulk topological invariant. For <strong>ν = 1</strong>, one zero-energy state appears at each edge." },
+                    { title: "Exponential Localization", text: "Edge state amplitude decays as <strong>|ψ(n)|² ~ exp(−2n/ξ)</strong> with localization length <strong>ξ = 1/ln(w/v)</strong>." },
+                    { title: "Zero-Energy Pinning", text: "Chiral symmetry forces edge states to <strong>exactly E = 0</strong> — perturbations cannot shift them while symmetry is preserved." },
+                    { title: "Disorder Robustness", text: "Edge states survive <strong>substantial random disorder</strong>, provided the bulk gap remains open and chiral symmetry is preserved." }
+                ]
+            },
+            {
+                name: "Acoustic Analogue",
+                subtitle: "The SSH model maps directly to phononic crystals with alternating spring constants.",
+                equation: "ω²<sub>±</sub>(q) = (k₁+k₂)/m ± |d(q)|/m<br>Zak phase γ = π  →  edge mode",
+                eqLabel: "Phononic Dispersion",
+                concepts: ["Mass-Spring Chain", "Phononic Crystals", "Acoustic Edge States", "Backscatter Immunity", "Metamaterials"],
+                narratives: [
+                    { title: "Quantum–Acoustic Isomorphism", text: "The SSH model maps <strong>exactly</strong> to masses connected by alternating springs k₁, k₂. The dispersion ω²(q) is <strong>isomorphic</strong> to E²(k)." },
+                    { title: "Acoustic Edge States", text: "When k₂ > k₁, <strong>localized vibrational modes</strong> appear at boundaries — demonstrated by <strong>Xiao et al. (Nature Physics, 2015)</strong>." },
+                    { title: "Topological Waveguides", text: "Topological edge states are <strong>immune to backscattering</strong> from defects — enabling robust acoustic routing in metamaterials." },
+                    { title: "Higher Dimensions", text: "The SSH concept extends to <strong>2D phononic crystals</strong> with valley-Hall edge states for frequency-selective acoustic routing." }
+                ]
+            },
+            {
+                name: "Summary & Insights",
+                subtitle: "",
+                equation: "",
+                eqLabel: "",
+                concepts: [],
+                hideScript: true,
+                narratives: [
+                    { title: "", text: "" }
+                ]
+            }
+        ];
+
+        let scene, camera, renderer;
+        let current = 0, currentNarrative = 0;
+        let group, anims = [];
+        let clock = new THREE.Clock();
+        let isPlaying = true, narrativeTimer = 0;
+        const NARR_DUR = 10;
+
+        let envMap;
+
+        // High-Gloss Studio Environment (Softbox + Dark Bounce)
+        function createEnvMap() {
+            const c = document.createElement('canvas');
+            c.width = 512; c.height = 256;
+            const ctx = c.getContext('2d');
+
+            // Deep Grey Studio Base (Adds depth to reflections)
+            ctx.fillStyle = '#444444';
+            ctx.fillRect(0, 0, 512, 256);
+
+            // Studio "Softbox" Panels (Brilliant highlights)
+            ctx.fillStyle = '#ffffff';
+            ctx.fillRect(100, 10, 312, 40); // Top softbox
+            ctx.fillRect(30, 0, 20, 256);   // Side rim
+            ctx.fillRect(460, 0, 20, 256);  // Side rim
+
+            // "Dark Bounce" Panels (Creates professional metallic depth)
+            ctx.fillStyle = '#0a1012';
+            ctx.fillRect(0, 80, 512, 40);   // Horizontal negative fill
+            ctx.fillRect(200, 160, 112, 60); // Lower negative bounce
+
+            // Horizon Line
+            ctx.fillStyle = 'rgba(20,20,20, 0.4)';
+            ctx.fillRect(0, 128, 512, 128);
+
+            const tex = new THREE.CanvasTexture(c);
+            tex.mapping = THREE.EquirectangularReflectionMapping;
+            return tex;
+        }
+
+        // HIGH-GLOSS LUXURY METAL (Mirror Finish)
+        function metalMat(color, opts = {}) {
+            return new THREE.MeshPhysicalMaterial({
+                color: color,
+                roughness: opts.rough !== undefined ? opts.rough : 0.03,
+                metalness: opts.metal !== undefined ? opts.metal : 1.0,
+                envMap: envMap,
+                envMapIntensity: opts.envI || 4.0,
+                clearcoat: 1.0,
+                clearcoatRoughness: 0.01,
+                reflectivity: 1.0,
+                emissive: color,
+                emissiveIntensity: opts.eI || 0.1
+            });
+        }
+
+        function init() {
+            scene = new THREE.Scene();
+            scene.background = new THREE.Color(0x0a0a0e);
+
+            camera = new THREE.PerspectiveCamera(36, window.innerWidth / window.innerHeight, 0.1, 2000);
+            camera.position.set(0, 35, 130);
+
+            renderer = new THREE.WebGLRenderer({ canvas: document.getElementById('canvas'), antialias: true });
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+            renderer.setClearColor(0x0a0a0e);
+            renderer.shadowMap.enabled = false;
+            renderer.toneMapping = THREE.ACESFilmicToneMapping;
+            renderer.toneMappingExposure = 1.0; // Slightly brighter for dark scene
+            renderer.outputEncoding = THREE.sRGBEncoding;
+
+            envMap = createEnvMap();
+            scene.environment = envMap;
+
+            setupLights();
+            createBG();
+            loadSection(0);
+            animate();
+
+            window.addEventListener('resize', onResize);
+            document.addEventListener('keydown', onKey);
+        }
+
+        function setupLights() {
+            scene.add(new THREE.AmbientLight(0xffffff, 0.15)); // Subtle ambient for dark scene
+
+            const key = new THREE.DirectionalLight(0xeef0ff, 2.8);
+            key.position.set(40, 100, 60);
+            key.castShadow = true;
+            key.shadow.mapSize.width = 4096;
+            key.shadow.mapSize.height = 4096;
+            key.shadow.camera.near = 0.5;
+            key.shadow.camera.far = 500;
+            key.shadow.camera.left = -100;
+            key.shadow.camera.right = 100;
+            key.shadow.camera.top = 100;
+            key.shadow.camera.bottom = -100;
+            scene.add(key);
+
+            const rim = new THREE.PointLight(0x00d2ff, 5.0, 700); // Gold rim light
+            rim.position.set(-100, 60, -100);
+            scene.add(rim);
+
+            const fill = new THREE.DirectionalLight(0xd0e0ff, 0.8);
+            fill.position.set(-50, 30, 50);
+            scene.add(fill);
+
+            for (let i = 0; i < 3; i++) {
+                const pl = new THREE.PointLight(0x00d2ff, 2.0, 300, 2);
+                scene.add(pl);
+                anims.push({ obj: pl, type: 'volLight', i });
+            }
+        }
+
+        function createBG() {
+            const floorGeo = new THREE.PlaneGeometry(300, 300);
+            const floorMat = new THREE.MeshStandardMaterial({ color: 0x111118, roughness: 0.8, metalness: 0.1 });
+            const floor = new THREE.Mesh(floorGeo, floorMat);
+            floor.rotation.x = -PI / 2; floor.position.y = -32;
+            floor.receiveShadow = true;
+            scene.add(floor);
+
+            const grid = new THREE.GridHelper(200, 30, 0x1a2a3a, 0x151525);
+            grid.position.y = -31.5;
+            grid.material.transparent = true;
+            grid.material.opacity = 0.4;
+            scene.add(grid);
+        }
+
+
+        function updateUI() {
+            const s = sections[current];
+            const n = s.narratives[currentNarrative];
+
+            // Update Technical UI
+            document.getElementById('archTitle').textContent = s.name;
+            const sub = document.getElementById('archSubtitle');
+            sub.textContent = s.subtitle;
+            sub.style.display = s.subtitle ? 'block' : 'none';
+
+            const yearBadge = document.querySelector('.year-badge');
+            document.getElementById('archYear').textContent = s.year;
+            yearBadge.style.display = s.year ? 'inline-flex' : 'none';
+
+            document.getElementById('eqMath').innerHTML = s.equation;
+            document.getElementById('eqLabel').textContent = s.eqLabel;
+
+            // Visibility for Technical UI (Hide on Intro and End sections)
+            const titleSection = document.querySelector('.title-section');
+            const eqPanel = document.querySelector('.equation-panel');
+            const isMainContent = (current > 0 && current < sections.length - 1);
+
+            titleSection.style.opacity = isMainContent ? 1 : 0;
+            eqPanel.style.opacity = (isMainContent && s.equation) ? 1 : 0;
+
+            // Cinematic script logic - hide if section has hideScript flag
+            const scriptOverlay = document.querySelector('.cinematic-script-overlay');
+            const st = document.getElementById('scriptText');
+            
+            if (s.hideScript) {
+                scriptOverlay.style.opacity = 0;
+                st.classList.remove('active');
+            } else {
+                scriptOverlay.style.opacity = 1;
+                st.classList.remove('active');
+                setTimeout(() => {
+                    st.innerHTML = n.text;
+                    document.getElementById('scriptSub').textContent = s.name.toUpperCase();
+                    st.classList.add('active');
+                }, 300);
+            }
+
+            // Intro Card Logic
+            const intro = document.getElementById('introCardOverlay');
+            if (current === 0) {
+                intro.classList.remove('fade-out');
+            } else {
+                intro.classList.add('fade-out');
+            }
+
+            // End Card Logic
+            const endCard = document.getElementById('endCardOverlay');
+            if (current === sections.length - 1) {
+                endCard.classList.add('active');
+            } else {
+                endCard.classList.remove('active');
+            }
+
+            updateSceneVisuals(current - 1, currentNarrative); // Shift idx because of new Intro
+        }
+
+        function loadSection(idx) {
+            current = idx; currentNarrative = 0; narrativeTimer = 0;
+            if (group) { scene.remove(group); group.traverse(c => { if (c.geometry) c.geometry.dispose(); if (c.material) { (Array.isArray(c.material) ? c.material : [c.material]).forEach(m => m.dispose()) } }); }
+            anims = anims.filter(a => ['volLight'].includes(a.type));
+            group = new THREE.Group();
+            [buildIntro, buildChain, buildBloch, buildBands, buildWinding, buildEdge, buildAcoustic, buildEndCard][idx]();
+            scene.add(group);
+            updateUI();
+        }
+
+        function buildIntro() {
+            // Include SSH model for intro
+            buildChain();
+        }
+
+        // ═══════════════════════════════════════════════════
+        // VISUAL STATE MANAGEMENT
+        // ═══════════════════════════════════════════════════
+
+        const visualState = {
+            v: 0.5, w: 1.0,
+            pulse: 0,
+            mode: 'static',
+            time: 0
+        };
+
+        function updateSceneVisuals(secIdx, narIdx) {
+            visualState.mode = 'static';
+            const t = clock.getElapsedTime();
+
+            // Helper to get objects by name pattern
+            const getObjs = (prefix) => group.children.filter(c => c.name && c.name.startsWith(prefix));
+
+            if (secIdx === 0) { // Chain
+                const atomsA = getObjs('atomA');
+                const atomsB = getObjs('atomB');
+                const bondsV = getObjs('bondV');
+                const bondsW = getObjs('bondW');
+
+                // Reset Standard
+                atomsA.forEach(a => { a.position.y = 3.0; a.material.emissiveIntensity = 0; });
+                atomsB.forEach(a => { a.position.y = -3.0; a.material.emissiveIntensity = 0; });
+                bondsV.forEach(b => { b.material.color.setHex(PAL.bronze); b.material.emissiveIntensity = 0; });
+                bondsW.forEach(b => { b.material.color.setHex(PAL.steel); b.material.emissiveIntensity = 0; });
+
+                // Sublattice Frame Animation
+                getObjs('sublatFrame').forEach(f => {
+                    f.rotation.z = t * 0.5;
+                    f.scale.setScalar(1 + Math.sin(t * 3) * 0.05);
+                });
+
+                if (narIdx === 1) { // Polyacetylene - Chemical Pulse
+                    visualState.mode = 'chemPulse';
+                } else if (narIdx === 2) { // Phases - Breathing
+                    visualState.mode = 'breathing';
+                } else if (narIdx === 3) { // Symmetry - Sublattice Split
+                    visualState.mode = 'sublatticeSplit';
+                }
+            }
+            else if (secIdx === 1) { // Bloch
+                const sphere = getObjs('blochSphere')[0];
+                const cursor = getObjs('blochCursor')[0];
+                if (sphere) sphere.material.wireframe = false;
+                if (cursor) cursor.visible = true;
+
+                if (narIdx === 1) { // d-vector Trace
+                    visualState.mode = 'vectorTrace';
+                } else if (narIdx === 2) { // Eigenvalues Pulse
+                    visualState.mode = 'energyPulse';
+                } else if (narIdx === 3) { // Great Circle
+                    visualState.mode = 'greatCircle';
+                }
+            }
+            else if (secIdx === 2) { // Bands
+                const fermi = getObjs('fermi')[0];
+                const gap = getObjs('gapMarker')[0];
+                if (fermi) fermi.visible = true;
+                if (gap) gap.visible = true;
+
+                if (narIdx === 1) { // Gap Collapse
+                    visualState.mode = 'gapCollapse';
+                } else if (narIdx === 2) { // Van Hove
+                    visualState.mode = 'vanHove';
+                } else if (narIdx === 3) { // Spectrum Sweep
+                    visualState.mode = 'spectrumSweep';
+                }
+            }
+            else if (secIdx === 3) { // Winding
+                const loop = getObjs('windLoop')[0];
+                const nu = getObjs('nuSpin')[0];
+
+                if (narIdx === 0) { // Origin Encirclement
+                    visualState.mode = 'originFocus';
+                } else if (narIdx === 1) { // Transition Animation
+                    visualState.mode = 'topoTransition';
+                } else if (narIdx === 2) { // Zak Phase
+                    visualState.mode = 'zakClock';
+                } else if (narIdx === 3) { // Protection
+                    visualState.mode = 'topoProtect';
+                }
+            }
+            else if (secIdx === 4) { // Edge
+                const atoms = getObjs('atom');
+                const env = getObjs('envelope')[0];
+                if (env) env.visible = false;
+                getObjs('atom').forEach(a => { a.visible = true; a.material.opacity = 1; a.material.transparent = false; });
+
+                if (narIdx === 0) { // Bulk-Boundary
+                    visualState.mode = 'bulkBoundary';
+                } else if (narIdx === 1) { // Localization
+                    if (env) { env.visible = true; visualState.mode = 'envReveal'; }
+                } else if (narIdx === 2) { // Zero Energy
+                    visualState.mode = 'zeroMode';
+                } else if (narIdx === 3) { // Disorder
+                    visualState.mode = 'disorder';
+                }
+            }
+            else if (secIdx === 5) { // Acoustic
+                const ripples = getObjs('ripple');
+                ripples.forEach(r => r.visible = false);
+
+                if (narIdx === 0) { // Resonator Modes
+                    visualState.mode = 'resonatorSync';
+                } else if (narIdx === 1) { // Localized modes
+                    visualState.mode = 'edgeVibrate';
+                } else if (narIdx === 2) { // Waveguides
+                    visualState.mode = 'pulsePropVisual';
+                    ripples.forEach(r => r.visible = true);
+                } else if (narIdx === 3) { // Higher Dim
+                    visualState.mode = 'latticeExpand';
+                }
+            }
+            else if (secIdx === 6) { // End Card
+                visualState.mode = 'endCard';
+            }
+        }
+
+        function buildChain() {
+            const N = 8;
+            const bondL = 7.0;
+            const dx = bondL * Math.cos(Math.PI / 6);
+            const dy = bondL * Math.sin(Math.PI / 6);
+
+            const chainGroup = new THREE.Group();
+            chainGroup.name = 'chainGroup'; // transform whole group if needed
+            group.add(chainGroup);
+
+            // Starting position (centered)
+            const totalLen = N * 2 * dx;
+            let currX = -totalLen / 2;
+
+            for (let n = 0; n < N; n++) {
+                const posA = new THREE.Vector3(currX, 3.0, 0);
+                const posB = new THREE.Vector3(currX + dx, -3.0, 0);
+
+                // ATOM A - Mechanical Assembly
+                const a = new THREE.Mesh(new THREE.SphereGeometry(2.2, 32, 32), metalMat(0x222222, { metal: 0.6 }));
+                a.position.copy(posA); a.name = `atomA_${n}`; group.add(a);
+
+                // Hydrogen A (Up)
+                const hA = new THREE.Mesh(new THREE.SphereGeometry(1.2, 24, 24), metalMat(0xffffff, { rough: 0.5, metal: 0.1 }));
+                hA.position.set(currX, 3.0 + 4.9, 0); hA.name = `hydroA_${n}`; group.add(hA);
+                const hBondA = createBond(a.position, hA.position, 0.3, 0xffffff);
+                hBondA.name = `hBondA_${n}`; group.add(hBondA);
+
+                // Sublattice Frame
+                const frameA = new THREE.Mesh(new THREE.TorusGeometry(3, 0.2, 8, 32), metalMat(PAL.gold));
+                frameA.position.copy(posA); frameA.rotation.x = PI / 2; frameA.name = `sublatFrameA_${n}`; group.add(frameA);
+                anims.push({ obj: frameA, type: 'sublatFrame', n, role: 'A' });
+
+                // ATOM B - Mechanical Assembly
+                const b = new THREE.Mesh(new THREE.SphereGeometry(2.2, 32, 32), metalMat(0x222222, { metal: 0.6 }));
+                b.position.copy(posB); b.name = `atomB_${n}`; group.add(b);
+
+                // Hydrogen B (Down)
+                const hB = new THREE.Mesh(new THREE.SphereGeometry(1.2, 24, 24), metalMat(0xffffff, { rough: 0.5, metal: 0.1 }));
+                hB.position.set(currX + dx, -3.0 - 4.9, 0); hB.name = `hydroB_${n}`; group.add(hB);
+                const hBondB = createBond(b.position, hB.position, 0.3, 0xffffff);
+                hBondB.name = `hBondB_${n}`; group.add(hBondB);
+
+                const frameB = new THREE.Mesh(new THREE.TorusGeometry(3, 0.2, 8, 32), metalMat(PAL.copper));
+                frameB.position.copy(posB); frameB.rotation.x = PI / 2; frameB.name = `sublatFrameB_${n}`; group.add(frameB);
+                anims.push({ obj: frameB, type: 'sublatFrame', n, role: 'B' });
+
+                // Bonds with Piston detail
+                const bondV = createBond(posA, posB, 0.6, PAL.gold);
+                bondV.name = `bondV_${n}`; group.add(bondV);
+
+                if (n < N - 1) {
+                    const nextA = new THREE.Vector3(currX + 2 * dx, 3.0, 0);
+                    const bondW = createBond(posB, nextA, 0.6, PAL.steel);
+                    bondW.name = `bondW_${n}`; group.add(bondW);
+                }
+                currX += 2 * dx;
+            }
+        }
+
+        function createBond(p1, p2, rad, col) {
+            const geo = new THREE.CylinderGeometry(rad, rad, 1, 12);
+            geo.translate(0, 0.5, 0); // Origin at bottom
+            geo.rotateX(Math.PI / 2); // Point towards +Z
+            const b = new THREE.Mesh(geo, metalMat(col));
+            b.position.copy(p1);
+            b.lookAt(p2);
+            // Initial scale matches initial distance
+            const dist = p1.distanceTo(p2);
+            b.scale.z = dist;
+            return b;
+        }
+
+        function buildBloch() {
+            // High-End Glass Sphere with Refraction
+            const wGeo = new THREE.SphereGeometry(18, 64, 64);
+            const wMat = new THREE.MeshPhysicalMaterial({
+                color: PAL.gold, roughness: 0.15, transmission: 0.85, thickness: 3,
+                envMap: envMap, envMapIntensity: 2.2, clearcoat: 1, transparent: true, opacity: 0.4, metalness: 0.7
+            });
+            const w = new THREE.Mesh(wGeo, wMat);
+            w.position.y = 4; w.name = 'blochSphere'; group.add(w);
+
+            // Gimbal Rings (Mechanical Hardware)
+            const ringGeo = new THREE.TorusGeometry(20, 0.4, 16, 100);
+            const gimbalX = new THREE.Mesh(ringGeo, metalMat(PAL.gold));
+            gimbalX.position.y = 4; gimbalX.name = 'gimbalX'; group.add(gimbalX);
+
+            const gimbalY = new THREE.Mesh(ringGeo, metalMat(PAL.steel));
+            gimbalY.position.y = 4; gimbalY.rotation.x = PI / 2; gimbalY.name = 'gimbalY'; group.add(gimbalY);
+
+            // Pseudospin Vector Field (Multiple Pulsing Arrows)
+            const v = 0.5, ww = 1.0, numField = 24;
+            for (let i = 0; i < numField; i++) {
+                const k = (i / numField) * TAU - PI;
+                const dx = v + ww * Math.cos(k);
+                const dy = ww * Math.sin(k);
+                const mag = Math.sqrt(dx * dx + dy * dy);
+
+                const arrowGroup = new THREE.Group();
+                const shaft = new THREE.Mesh(new THREE.CylinderGeometry(0.15, 0.15, 17, 8), metalMat(PAL.steel, { rough: 0.4 }));
+                shaft.rotateZ(-PI / 2); shaft.position.x = 8.5;
+                const head = new THREE.Mesh(new THREE.ConeGeometry(0.6, 2, 12), metalMat(PAL.gold));
+                head.rotateZ(-PI / 2); head.position.x = 17;
+
+                arrowGroup.add(shaft); arrowGroup.add(head);
+                arrowGroup.position.set(0, 4, 0);
+                arrowGroup.rotation.z = Math.atan2(dy, dx);
+                arrowGroup.name = `fieldVec_${i}`;
+                group.add(arrowGroup);
+                anims.push({ obj: arrowGroup, type: 'fieldVec', i, total: numField });
+            }
+
+            // Ground Projection Plane
+            const projGeo = new THREE.PlaneGeometry(60, 60);
+            const projMat = new THREE.MeshBasicMaterial({ color: PAL.gold, transparent: true, opacity: 0.05, side: THREE.DoubleSide });
+            const projection = new THREE.Mesh(projGeo, projMat);
+            projection.rotation.x = -PI / 2; projection.position.y = -15; group.add(projection);
+
+            // Trace Path (Glow Tube)
+            const pts = [];
+            for (let i = 0; i <= 100; i++) {
+                const k = -PI + (i / 100) * TAU;
+                const dx = v + ww * Math.cos(k);
+                const dy = ww * Math.sin(k);
+                const mag = Math.sqrt(dx * dx + dy * dy);
+                pts.push(new THREE.Vector3((dx / mag) * 18.5, 4 + (dy / mag) * 18.5, 0));
+            }
+            const pathTube = new THREE.Mesh(new THREE.TubeGeometry(new THREE.CatmullRomCurve3(pts, true), 100, 0.4, 8, true), metalMat(PAL.gold, { envI: 2.5 }));
+            pathTube.name = 'blochPath'; group.add(pathTube);
+
+            // Active Cursor
+            const cursor = new THREE.Mesh(new THREE.SphereGeometry(1.8, 32, 32), metalMat(PAL.chrome, { rough: 0.05, envI: 3 }));
+            cursor.name = 'blochCursor'; group.add(cursor);
+        }
+
+        function buildBands() {
+            const v = 0.4, w = 1.0, nK = 100, kSc = 22, eSc = 15;
+
+            // Upper Band - Crystalline Spheres
+            for (let i = 0; i <= nK; i++) {
+                const k = -PI + (i / nK) * TAU;
+                const E = Math.sqrt(v * v + w * w + 2 * v * w * Math.cos(k));
+                const p = new THREE.Mesh(new THREE.IcosahedronGeometry(0.8, 1), metalMat(PAL.gold, { envI: 2 }));
+                p.position.set((k / PI) * kSc, E * eSc, 0);
+                p.name = `bandPart_U_${i}`; group.add(p);
+                anims.push({ obj: p, type: 'bandPart', k, up: true, v, w, kSc, eSc, ph: i / nK });
+            }
+
+            // Lower Band - Copper Octahedrons
+            for (let i = 0; i <= nK; i++) {
+                const k = -PI + (i / nK) * TAU;
+                const E = Math.sqrt(v * v + w * w + 2 * v * w * Math.cos(k));
+                const p = new THREE.Mesh(new THREE.OctahedronGeometry(0.7, 1), metalMat(PAL.copper, { envI: 1.5 }));
+                p.position.set((k / PI) * kSc, -E * eSc, 0);
+                p.name = `bandPart_L_${i}`; group.add(p);
+                anims.push({ obj: p, type: 'bandPart', k, up: false, v, w, kSc, eSc, ph: i / nK });
+            }
+
+            // Connecting Filaments
+            const curvePtsU = [];
+            for (let i = 0; i <= nK; i++) {
+                const k = -PI + (i / nK) * TAU;
+                const E = Math.sqrt(v * v + w * w + 2 * v * w * Math.cos(k));
+                curvePtsU.push(new THREE.Vector3((k / PI) * kSc, E * eSc, 0));
+            }
+            const bandTubeU = new THREE.Mesh(new THREE.TubeGeometry(new THREE.CatmullRomCurve3(curvePtsU), 100, 0.15, 8, false), metalMat(PAL.gold, { opacity: 0.5, transparent: true }));
+            group.add(bandTubeU);
+
+            // Fermi Level
+            const fGeo = new THREE.PlaneGeometry(kSc * 2.2, kSc * 2.2);
+            const fMat = new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.05, side: THREE.DoubleSide });
+            const fermi = new THREE.Mesh(fGeo, fMat);
+            fermi.rotation.x = PI / 2; fermi.name = 'fermi'; group.add(fermi);
+
+            // Zero line (k-axis)
+            const zGeo = new THREE.CylinderGeometry(0.06, 0.06, kSc * 2 + 6, 8); zGeo.rotateZ(PI / 2);
+            group.add(new THREE.Mesh(zGeo, metalMat(PAL.gunmetal, { rough: 0.4 })));
+
+            // Gap marker
+            const gGeo = new THREE.SphereGeometry(1.6, 32, 32);
+            const gap = new THREE.Mesh(gGeo, metalMat(PAL.chrome, { rough: 0.1, metal: 0.95, envI: 2 }));
+            gap.position.set(kSc, 0, 0); gap.castShadow = true; gap.name = 'gapMarker'; group.add(gap);
+            anims.push({ obj: gap, type: 'gapMarker' });
+
+            // Van Hove Singularity Planes (Hidden initially)
+            // At E = +/- (v+w) and +/- |v-w|.
+            // Max energy roughly 2.0 (v+w). Min energy roughly 0.6 (w-v).
+            const planeGeo = new THREE.PlaneGeometry(kSc * 2.2, 5);
+            const planeMat = new THREE.MeshBasicMaterial({ color: 0x00ffff, transparent: true, opacity: 0.0, side: THREE.DoubleSide, blending: THREE.AdditiveBlending });
+
+            const vh1 = new THREE.Mesh(planeGeo, planeMat); vh1.name = 'vanHoveMax'; vh1.position.y = (v + w) * eSc; vh1.rotation.x = PI / 2; group.add(vh1);
+            const vh2 = new THREE.Mesh(planeGeo, planeMat); vh2.name = 'vanHoveMin'; vh2.position.y = (w - v) * eSc; vh2.rotation.x = PI / 2; group.add(vh2);
+            // Lower band mirrors
+            const vh3 = vh1.clone(); vh3.position.y = -(v + w) * eSc; group.add(vh3);
+            const vh4 = vh2.clone(); vh4.position.y = -(w - v) * eSc; group.add(vh4);
+        }
+
+        function buildWinding() {
+            const v = 0.45, w = 1.3, sc = 18;
+
+            // Origin — dark rust
+            const oGeo = new THREE.SphereGeometry(2.2, 48, 48);
+            const o = new THREE.Mesh(oGeo, metalMat(PAL.rust, { rough: 0.15, metal: 0.9, envI: 1.6 }));
+            o.position.set(0, 4, 0); o.castShadow = true; group.add(o);
+
+            // Loop — DARK GOLD (Glowing)
+            const pts = [];
+            for (let i = 0; i <= 300; i++) {
+                const k = -PI + (i / 300) * TAU;
+                pts.push(new THREE.Vector3((v + w * Math.cos(k)) * sc, 4 + (w * Math.sin(k)) * sc, 0));
+            }
+            const curve = new THREE.CatmullRomCurve3(pts, true);
+            const tGeo = new THREE.TubeGeometry(curve, 300, 0.7, 12, true);
+            const tMat = metalMat(PAL.gold, { rough: 0.12, metal: 0.92, envI: 1.8 });
+            tMat.emissive = new THREE.Color(PAL.gold); tMat.emissiveIntensity = 0.3;
+            const tLoop = new THREE.Mesh(tGeo, tMat); tLoop.name = 'windLoop'; group.add(tLoop);
+
+            // Background Vector Grid (Decoration)
+            const gPts = [];
+            for (let x = -20; x <= 20; x += 4) {
+                for (let y = -10; y <= 20; y += 4) {
+                    const len = 0.8;
+                    gPts.push(new THREE.Vector3(x, y + 4, -5));
+                    gPts.push(new THREE.Vector3(x + len, y + 4 + len * 0.5, -5));
+                }
+            }
+            const gGeo = new THREE.BufferGeometry().setFromPoints(gPts);
+            const gMat = new THREE.LineBasicMaterial({ color: PAL.steel, transparent: true, opacity: 0.15 });
+            group.add(new THREE.LineSegments(gGeo, gMat));
+
+            // Cursor
+            const cGeo = new THREE.SphereGeometry(2.4, 48, 48);
+            const c = new THREE.Mesh(cGeo, metalMat(PAL.chrome, { rough: 0.08, metal: 0.95, envI: 2 }));
+            c.name = 'windCursor'; group.add(c);
+            anims.push({ obj: c, type: 'windCursor', v, w, sc });
+
+            // Arrow line
+            const aMat = new THREE.LineBasicMaterial({ color: PAL.brass, transparent: true, opacity: 0.6 });
+            const aGeo = new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(0, 4, 0), new THREE.Vector3(0, 4, 0)]);
+            const arrow = new THREE.Line(aGeo, aMat); arrow.name = 'windArrow'; group.add(arrow);
+            anims.push({ obj: arrow, type: 'windArrow', v, w, sc });
+
+            // ν indicator
+            const nuGeo = new THREE.DodecahedronGeometry(7, 2);
+            const nu = new THREE.Mesh(nuGeo, metalMat(PAL.copper, { rough: 0.25, metal: 0.85, transparent: true, opacity: 0.45 }));
+            nu.position.set(0, 4, -22); group.add(nu);
+            anims.push({ obj: nu, type: 'nuSpin' });
+        }
+
+        function buildEdge() {
+            const N = 10, sp = 7, off = -(N - 0.5) * sp;
+            const v = 0.3, w = 1.0;
+
+            for (let n = 0; n < N; n++) {
+                const x = off + n * sp * 2, xB = x + sp * 0.55;
+                const ampL = Math.pow(v / w, n), ampR = Math.pow(v / w, N - 1 - n);
+
+                // A atom
+                const aSize = 1.4 + ampL * 3.5;
+                const aGeo = new THREE.SphereGeometry(aSize, 48, 48);
+                const a = new THREE.Mesh(aGeo, metalMat(PAL.gold, { rough: 0.15 + 0.2 * (1 - ampL), metal: 0.85 + 0.1 * ampL }));
+                a.position.set(x, 0, 0); a.castShadow = true;
+                a.name = `atom_${n * 2}`; group.add(a);
+                anims.push({ obj: a, type: 'edgeAtom', amp: ampL });
+
+                // B atom
+                const bSize = 1.2 + ampR * 3;
+                const bGeo = new THREE.SphereGeometry(bSize, 48, 48);
+                const b = new THREE.Mesh(bGeo, metalMat(PAL.copper, { rough: 0.18 + 0.2 * (1 - ampR), metal: 0.82 + 0.1 * ampR }));
+                b.position.set(xB, 0, 0); b.castShadow = true;
+                b.name = `atom_${n * 2 + 1}`; group.add(b);
+                anims.push({ obj: b, type: 'edgeAtom', amp: ampR });
+
+                // Bonds
+                const iGeo = new THREE.CylinderGeometry(0.15, 0.15, xB - x, 10); iGeo.rotateZ(PI / 2);
+                const ib = new THREE.Mesh(iGeo, metalMat(PAL.gunmetal, { rough: 0.4 }));
+                ib.position.set((x + xB) / 2, 0, 0); group.add(ib);
+                if (n < N - 1) {
+                    const xAn = off + (n + 1) * sp * 2;
+                    const wGeo = new THREE.CylinderGeometry(0.28, 0.28, xAn - xB, 10); wGeo.rotateZ(PI / 2);
+                    const wb = new THREE.Mesh(wGeo, metalMat(PAL.bronze, { rough: 0.35 }));
+                    wb.position.set((xB + xAn) / 2, 0, 0); group.add(wb);
+                }
+            }
+
+            // Envelope Curve Visualization
+            const envPts = [];
+            for (let i = 0; i <= 100; i++) {
+                const x = off + (i / 100) * (N * sp * 2);
+                const dist = Math.abs(x - off); // from left edge
+                const distR = Math.abs(x - (off + (N - 1) * sp * 2)); // from right edge
+                const hL = 5 * Math.exp(-0.15 * dist);
+                const hR = 5 * Math.exp(-0.15 * distR);
+                envPts.push(new THREE.Vector3(x, Math.max(hL, hR) + 2, 0));
+            }
+            const envGeo = new THREE.BufferGeometry().setFromPoints(envPts);
+            const envMat = new THREE.LineBasicMaterial({ color: PAL.gold, transparent: true, opacity: 0.3, linetype: 'dashed' });
+            const envLine = new THREE.Line(envGeo, envMat); envLine.name = 'envelope'; group.add(envLine);
+
+            // Edge particles
+            for (let i = 0; i < 50; i++) {
+                const left = i < 25;
+                const baseX = left ? off : (-off + sp * 0.55);
+                const pGeo = new THREE.SphereGeometry(0.22, 10, 10);
+                const p = new THREE.Mesh(pGeo, metalMat(left ? PAL.gold : PAL.copper, { rough: 0.25 }));
+                p.position.set(baseX + (Math.random() - 0.5) * 7, (Math.random() - 0.5) * 7, (Math.random() - 0.5) * 7);
+                group.add(p);
+                anims.push({ obj: p, type: 'edgePart', left, baseX, ph: Math.random() * TAU });
+            }
+        }
+
+        function buildAcoustic() {
+            const N = 7, sp = 10, off = -(N - 0.5) * sp;
+            // Coupled Resonators Logic
+            // v (Intra) = Weak = Thin coupling. w (Inter) = Strong = Thick coupling.
+            const radRes = 3.0;
+            const hRes = 6.0;
+
+            for (let n = 0; n < N; n++) {
+                const xA = off + n * sp * 2, xB = xA + sp * 0.45, xAn = xA + sp * 2;
+
+                // Resonator A (Cylinder)
+                const aGeo = new THREE.CylinderGeometry(radRes, radRes, hRes, 32, 1, false);
+                const a = new THREE.Mesh(aGeo, metalMat(PAL.gold, { rough: 0.18, metal: 0.9, envI: 1.5 }));
+                a.position.set(xA, 0, 0); a.castShadow = true;
+                a.name = `massA_${n}`; group.add(a);
+                anims.push({ obj: a, type: 'resonator', n, role: 'A' });
+
+                // Cavity Interior (Dark top)
+                const capGeo = new THREE.CircleGeometry(radRes * 0.9, 32);
+                const cap = new THREE.Mesh(capGeo, new THREE.MeshBasicMaterial({ color: 0x000000 }));
+                cap.rotation.x = -PI / 2; cap.position.y = hRes / 2 + 0.01;
+                a.add(cap);
+
+                // Resonator B (Cylinder)
+                const bGeo = new THREE.CylinderGeometry(radRes, radRes, hRes, 32, 1, false);
+                const b = new THREE.Mesh(bGeo, metalMat(PAL.bronze, { rough: 0.22, metal: 0.88, envI: 1.4 }));
+                b.position.set(xB, 0, 0); b.castShadow = true;
+                b.name = `massB_${n}`; group.add(b);
+                anims.push({ obj: b, type: 'resonator', n, role: 'B' });
+                const capB = cap.clone(); capB.position.y = hRes / 2 + 0.01; b.add(capB);
+
+                // Coupling v (A->B) WEAK (Thin)
+                const distV = xB - xA;
+                const rV = 0.3; // Thin
+                const tubeVGeo = new THREE.CylinderGeometry(rV, rV, distV - 2 * radRes, 12);
+                tubeVGeo.rotateZ(PI / 2);
+                const tubeV = new THREE.Mesh(tubeVGeo, metalMat(PAL.copper));
+                tubeV.position.set((xA + xB) / 2, 0, 0);
+                group.add(tubeV);
+
+                // Coupling w (B->Next A) STRONG (Thick)
+                if (n < N - 1) {
+                    const distW = xAn - xB;
+                    const rW = 1.2; // Thick
+                    const tubeWGeo = new THREE.CylinderGeometry(rW, rW, distW - 2 * radRes, 12);
+                    tubeWGeo.rotateZ(PI / 2);
+                    const tubeW = new THREE.Mesh(tubeWGeo, metalMat(PAL.steel));
+                    tubeW.position.set((xB + xAn) / 2, 0, 0);
+                    group.add(tubeW);
+                }
+            }
+
+            // Ring (Background Decor)
+            const rGeo = new THREE.TorusGeometry(44, 1, 16, 100);
+            group.add(new THREE.Mesh(rGeo, metalMat(PAL.gold, { rough: 0.2, metal: 0.85, transparent: true, opacity: 0.3 })));
+            anims.push({ obj: group.children[group.children.length - 1], type: 'torusRot' });
+
+            // Sound Particles (Keep for atmosphere)
+            for (let i = 0; i < 40; i++) {
+                const pGeo = new THREE.OctahedronGeometry(0.3, 1);
+                const col = i % 2 ? PAL.gold : PAL.copper;
+                const p = new THREE.Mesh(pGeo, metalMat(col, { rough: 0.3 }));
+                const th = Math.random() * TAU, r = 34 + Math.random() * 16;
+                p.position.set(Math.cos(th) * r, (Math.random() - 0.5) * 20, Math.sin(th) * r);
+                group.add(p);
+                anims.push({ obj: p, type: 'soundP', th, r, sp: 0.003 + Math.random() * 0.005 });
+            }
+        }
+
+        function buildEndCard() {
+            // Include SSH model for end
+            buildChain();
+
+            // Majestic rotating torus as background
+            const tGeo = new THREE.TorusKnotGeometry(12, 0.4, 300, 24, 2, 3);
+            const tMat = metalMat(PAL.gold, { envI: 3.0, rough: 0.02 });
+            const knot = new THREE.Mesh(tGeo, tMat);
+            knot.position.y = 4;
+            knot.position.z = -10; // Push back a bit
+            group.add(knot);
+            anims.push({ obj: knot, type: 'torusRot' });
+
+            // Floating particles
+            for (let i = 0; i < 100; i++) {
+                const p = new THREE.Mesh(new THREE.SphereGeometry(0.2, 8, 8), metalMat(PAL.platinum));
+                const r = 30 + Math.random() * 20;
+                const th = Math.random() * TAU, ph = Math.random() * TAU;
+                p.position.set(Math.cos(th) * Math.sin(ph) * r, Math.sin(th) * Math.sin(ph) * r + 4, Math.cos(ph) * r);
+                group.add(p);
+                anims.push({ obj: p, type: 'soundP', th, r, sp: 0.001 + Math.random() * 0.002 });
+            }
+        }
+
+        function updateChainLayout(lenV, lenW, currX, t, s = 0, splitY = 0) {
+            const getObjs = (prefix) => group.children.filter(c => c.name && c.name.startsWith(prefix));
+            const getCoords = (len, dy) => Math.sqrt(Math.max(0, len * len - dy * dy));
+
+            const globalVibe = Math.sin(t * 2) * 0.05;
+            const _v1 = new THREE.Vector3(), _v2 = new THREE.Vector3();
+
+            for (let n = 0; n < 8; n++) {
+                const a = getObjs(`atomA_${n}`)[0], b = getObjs(`atomB_${n}`)[0];
+                const hA = getObjs(`hydroA_${n}`)[0], hB = getObjs(`hydroB_${n}`)[0];
+                const hbA = getObjs(`hBondA_${n}`)[0], hbB = getObjs(`hBondB_${n}`)[0];
+                const bondV = getObjs(`bondV_${n}`)[0], bondW = getObjs(`bondW_${n}`)[0];
+                const fa = getObjs(`sublatFrameA_${n}`)[0], fb = getObjs(`sublatFrameB_${n}`)[0];
+
+                if (a && b) {
+                    const dyV = 6.0 + splitY * 2;
+                    const dxV = getCoords(lenV, dyV);
+
+                    const ay = 3.0 + splitY + globalVibe;
+                    const by = -3.0 - splitY + globalVibe;
+
+                    a.position.set(currX, ay, 0);
+                    b.position.set(currX + dxV, by, 0);
+
+                    if (hA) hA.position.set(a.position.x, ay + 4.9, 0);
+                    if (hB) hB.position.set(b.position.x, by - 4.9, 0);
+
+                    // Critical: lookAt needs WORLD positions when parent is rotating
+                    if (hbA) { hbA.position.copy(a.position); hbA.lookAt(hA.getWorldPosition(_v1)); }
+                    if (hbB) { hbB.position.copy(b.position); hbB.lookAt(hB.getWorldPosition(_v1)); }
+
+                    if (bondV) {
+                        bondV.position.copy(a.position);
+                        bondV.lookAt(b.getWorldPosition(_v1));
+                        bondV.scale.z = a.position.distanceTo(b.position) * 1.1;
+                        bondV.material.emissiveIntensity = s * 0.5;
+                    }
+
+                    const dxW = getCoords(lenW, dyV);
+                    if (bondW && n < 7) {
+                        const nextA = getObjs(`atomA_${n + 1}`)[0]; // Use actual next atom for lookup if available
+                        if (nextA) {
+                            const nextPosA = new THREE.Vector3(b.position.x + dxW, 3.0 + splitY + globalVibe, 0);
+                            bondW.position.copy(b.position);
+                            // Temporarily set next atom position to calculate world target
+                            const oldPos = nextA.position.clone();
+                            nextA.position.copy(nextPosA);
+                            bondW.lookAt(nextA.getWorldPosition(_v1));
+                            nextA.position.copy(oldPos);
+                            bondW.scale.z = b.position.distanceTo(nextPosA) * 1.1;
+                        }
+                    }
+
+                    if (fa) fa.position.copy(a.position);
+                    if (fb) fb.position.copy(b.position);
+
+                    currX += (dxV + dxW);
+                }
+            }
+        }
+
+        // ═══════════════════════════════════════════════════
+        // ANIMATION
+        // ═══════════════════════════════════════════════════
+        function animate() {
+            requestAnimationFrame(animate);
+            const delta = clock.getDelta(), t = clock.getElapsedTime();
+
+            if (isPlaying) {
+                narrativeTimer += delta;
+                if (narrativeTimer >= NARR_DUR) {
+                    narrativeTimer = 0; currentNarrative++;
+                    // Removed auto-advance for now to let user control pace as per new request? 
+                    // Or keep it. User said "I NEED INDIVAUDIAL GRPAHICS". 
+                    // Let's keep auto-advance but ensure it steps through narratives.
+                    if (currentNarrative >= sections[current].narratives.length) {
+                        currentNarrative = 0;
+                        loadSection((current + 1) % sections.length);
+                    } else {
+                        updateUI();
+                    }
+                }
+            }
+
+            // Global Visual State Animation Logic
+            const getObjs = (prefix) => group.children.filter(c => c.name && c.name.startsWith(prefix));
+
+            // Global Idle Animations (Ensures everything is always alive)
+            group.rotation.y += delta * 0.15;
+
+            getObjs('sublatFrame').forEach((f, i) => {
+                f.rotation.z += delta * 1.5;
+                f.scale.setScalar(1 + Math.sin(t * 3 + i) * 0.05);
+            });
+
+            getObjs('atom').forEach((a, i) => {
+                a.rotation.y += delta * 0.4;
+            });
+
+            // Hamiltonian / Bloch Hardware constant movement
+            const gx = getObjs('gimbalX')[0], gy = getObjs('gimbalY')[0];
+            if (gx) gx.rotation.y += delta * 0.3;
+            if (gy) gy.rotation.x += delta * 0.2;
+
+            const baseL_std = 8.529;
+            const startX_std = -(8 * 2 * (7.0 * Math.cos(Math.PI / 6))) / 2;
+
+            if (visualState.mode === 'chemPulse') {
+                const s = (Math.sin(t * 8) + 1) * 0.5;
+                const lenV = baseL_std * (1.0 - s * 0.2);
+                const lenW = 2 * baseL_std - lenV;
+                updateChainLayout(lenV, lenW, startX_std, t, s);
+            }
+            else if (visualState.mode === 'breathing') {
+                const dL = Math.sin(t * 2) * 0.15;
+                const lenV = baseL_std * (1 - dL);
+                const lenW = baseL_std * (1 + dL);
+                updateChainLayout(lenV, lenW, startX_std, t);
+            }
+            else if (visualState.mode === 'sublatticeSplit') {
+                const splitY = Math.sin(t * 3) * 1.2;
+                updateChainLayout(baseL_std, baseL_std, startX_std, t, 0, splitY);
+            }
+            else if (visualState.mode === 'static') {
+                updateChainLayout(baseL_std, baseL_std, startX_std, t);
+            }
+            else if (visualState.mode === 'vectorTrace') {
+                const cursor = getObjs('blochCursor')[0];
+                const sc = 18.5;
+                if (cursor) {
+                    const tr = t * 1.5;
+                    const v = 0.5, w = 1.0;
+                    const dx = v + w * Math.cos(tr), dy = w * Math.sin(tr);
+                    const mag = Math.sqrt(dx * dx + dy * dy);
+                    cursor.position.set((dx / mag) * sc, 4 + (dy / mag) * sc, 0);
+                    cursor.scale.setScalar(1.2 + Math.sin(t * 10) * 0.2);
+                }
+                // Gimbal Rotation
+                const gx = getObjs('gimbalX')[0], gy = getObjs('gimbalY')[0];
+                if (gx) gx.rotation.y = t * 0.5;
+                if (gy) gy.rotation.z = t * 0.8;
+
+                // Field Pulse
+                getObjs('fieldVec').forEach((f, i) => {
+                    const ph = (t * 2 + i * 0.5) % TAU;
+                    const s = 1 + Math.sin(ph) * 0.15;
+                    f.scale.set(s, s, s);
+                    f.children[1].material.emissiveIntensity = Math.max(0, Math.sin(ph));
+                });
+            }
+            else if (visualState.mode === 'energyPulse') {
+                const sph = getObjs('blochSphere')[0];
+                if (sph) {
+                    sph.scale.setScalar(1 + Math.sin(t * 8) * 0.1);
+                    sph.material.opacity = 0.3 + 0.2 * Math.sin(t * 8);
+                }
+                // Field arrows converge/diverge
+                getObjs('fieldVec').forEach((f, i) => {
+                    f.position.z = Math.sin(t * 4 + i) * 5;
+                });
+            }
+            else if (visualState.mode === 'greatCircle') {
+                group.rotation.y = t * 0.5;
+                group.rotation.x = Math.sin(t * 0.3) * 0.2;
+            }
+            else if (visualState.mode === 'gapCollapse') {
+                const gap = getObjs('gapMarker')[0];
+                // Animate v towards w to close gap
+                // v starts at 0.4. w at 1.0.
+                // Close: v -> 1.0. Open: v -> 0.4.
+                const close = (Math.sin(t * 2) + 1) * 0.5;
+                const newV = 0.4 + close * 0.6; // 0.4 to 1.0
+
+                anims.forEach(a => {
+                    if (a.type === 'bandPart') {
+                        a.v = newV;
+                        a.w = 1.0;
+                    }
+                });
+
+                if (gap) {
+                    gap.scale.setScalar(1 + close * 2);
+                    if (close > 0.9) gap.material.color.setHex(0xff0000); // Critical point
+                    else gap.material.color.setHex(PAL.chrome);
+                }
+            }
+            else if (visualState.mode === 'vanHove') {
+                // Pulse Van Hove Planes
+                // Ensure v/w are default
+                anims.forEach(a => { if (a.type === 'bandPart') { a.v = 0.4; a.w = 1.0; } });
+
+                const intensity = (Math.sin(t * 5) + 1) * 0.5;
+                const planes = ['vanHoveMax', 'vanHoveMin'];
+                planes.forEach(name => {
+                    group.children.filter(c => c.name === name).forEach(p => {
+                        p.material.opacity = 0.2 + intensity * 0.4;
+                        p.visible = true;
+                    });
+                });
+            }
+            else if (visualState.mode === 'topoTransition') {
+                const tr = (Math.sin(t * 1.5) + 1) * 0.5; // 0 to 1
+                const v = 0.45 + (1 - tr) * 1.5; // Starts trivial (v >> w), ends topo
+                const w = 1.3;
+                const sc = 18;
+
+                // Update loop points
+                const loop = getObjs('windLoop')[0];
+                if (loop) {
+                    const pts = [];
+                    for (let i = 0; i <= 100; i++) {
+                        const k = -PI + (i / 100) * TAU;
+                        pts.push(new THREE.Vector3((v + w * Math.cos(k)) * sc, 4 + (w * Math.sin(k)) * sc, 0));
+                    }
+                    const curve = new THREE.CatmullRomCurve3(pts, true);
+                    loop.geometry.dispose();
+                    loop.geometry = new THREE.TubeGeometry(curve, 100, 0.7, 8, true);
+
+                    // Glow and Thickness based on phase
+                    loop.material.emissiveIntensity = tr > 0.8 ? 0.8 : 0.2;
+                    loop.material.color.setHex(tr > 0.8 ? PAL.gold : PAL.steel);
+
+                    // Twist effect
+                    loop.rotation.z = Math.sin(t * 2) * 0.1;
+                }
+            }
+            else if (visualState.mode === 'zakClock') {
+                const arrow = getObjs('windArrow')[0];
+                if (arrow) {
+                    const tr = (t * 0.8) % TAU;
+                    const v = 0.45, w = 1.3, sc = 18;
+                    const pos = arrow.geometry.attributes.position;
+                    pos.setXYZ(1, (v + w * Math.cos(tr)) * sc, 4 + (w * Math.sin(tr)) * sc, 0);
+                    pos.needsUpdate = true;
+
+                    // Show phase accumulation
+                    const nu = getObjs('nuSpin')[0];
+                    if (nu) nu.rotation.z = tr;
+                }
+                camera.position.lerp(new THREE.Vector3(0, 4, 60), 0.05);
+            }
+            else if (visualState.mode === 'bulkBoundary') {
+                // Focus on the edge vs bulk
+                getObjs('atom').forEach((a, i) => {
+                    const isEdge = i < 2 || i > 17;
+                    a.material.emissiveIntensity = isEdge ? 0.8 + Math.sin(t * 5) * 0.2 : 0;
+                    a.material.color.setHex(isEdge ? PAL.gold : PAL.bronze);
+                    if (!isEdge) a.scale.setScalar(0.8);
+                });
+            }
+            else if (visualState.mode === 'envReveal') {
+                const env = getObjs('envelope')[0];
+                if (env) {
+                    env.material.opacity = 0.8 + Math.sin(t * 4) * 0.2;
+                    env.visible = true;
+                }
+                // Shrink bulk atoms to highlight envelope
+                getObjs('atom').forEach((a, i) => {
+                    const isEdge = i < 2 || i > 17;
+                    if (!isEdge) a.material.opacity = 0.2; a.material.transparent = true;
+                });
+            }
+            else if (visualState.mode === 'zeroMode') {
+                getObjs('atom').forEach((a, i) => {
+                    const isEdge = i < 2 || i > 17;
+                    if (isEdge) {
+                        a.scale.setScalar(1.2 + Math.sin(t * 12) * 0.15);
+                        a.material.emissiveIntensity = 1.0;
+                    } else {
+                        a.material.opacity = 0.15;
+                    }
+                });
+            }
+            else if (visualState.mode === 'resonatorSync') {
+                getObjs('mass').forEach(m => {
+                    m.position.y = Math.sin(t * 4 + m.position.x * 0.1) * 2;
+                    m.material.emissiveIntensity = (m.position.y + 2) / 4;
+                });
+            }
+            else if (visualState.mode === 'latticeExpand') {
+                const group_sc = 1 + Math.sin(t * 0.5) * 0.2;
+                group.scale.setScalar(group_sc);
+                group.rotation.y += 0.01;
+            }
+            else if (visualState.mode === 'disorder') {
+                getObjs('atom').forEach(a => {
+                    a.position.y = (Math.random() - 0.5) * 1; // Jitter Y
+                });
+            }
+            else if (visualState.mode === 'edgeVibrate') {
+                // Vibrate the first resonator strongly (Edge Mode)
+                getObjs('massA').forEach(m => {
+                    if (m.name.includes('_0')) {
+                        m.scale.y = 1 + Math.sin(t * 15) * 0.4;
+                        m.material.emissiveIntensity = 0.5 + Math.sin(t * 15) * 0.5;
+                        m.material.color.setHex(0xFF4500); // Red
+                    }
+                });
+            }
+            else if (visualState.mode === 'pulsePropVisual') {
+                // Send a soliton pulse down the chain
+                const speed = 4.0;
+                const wave = (t * speed) % 14; // Loop length roughly 7 unit cells * 2?
+
+                // Resonators have indices 0..6
+                // X pos goes from off to off + 6*sp*2. 
+                // Simple mapping: index i.
+                // A_i, B_i.
+
+                for (let n = 0; n < 7; n++) {
+                    const a = getObjs(`massA_${n}`)[0];
+                    const b = getObjs(`massB_${n}`)[0];
+
+                    if (a) {
+                        const dist = Math.abs(n * 2 - wave);
+                        const amp = Math.max(0, 1 - dist * 0.8); // Peak at wave
+                        a.scale.y = 1 + amp * 0.5;
+                        a.material.emissiveIntensity = amp;
+                        a.material.color.setHSL(0.1, 1, 0.5 + amp * 0.5);
+                    }
+                    if (b) {
+                        const dist = Math.abs((n * 2 + 1) - wave);
+                        const amp = Math.max(0, 1 - dist * 0.8);
+                        b.scale.y = 1 + amp * 0.5;
+                        b.material.emissiveIntensity = amp;
+                        b.material.color.setHSL(0.1, 1, 0.5 + amp * 0.5);
+                    }
+                }
+            }
+
+
+            anims.forEach(a => {
+                switch (a.type) {
+                    case 'volLight': { const r = 60, ang = t * 0.05 + a.i * TAU / 3; a.obj.position.set(Math.cos(ang) * r, 35 + Math.sin(t * 0.2 + a.i) * 15, Math.sin(ang) * r); break }
+
+                    // Atoms managed by visualState (chemPulse/breathing) - removed conflict
+
+                    case 'ring': a.obj.rotation.z = t * 0.12 + a.n * 0.1; break;
+                    case 'floater': { a.obj.position.x += a.speed * 0.2; a.obj.position.y += Math.sin(t * 1.6 + a.phase) * 0.02; if (a.obj.position.x > 70) a.obj.position.x = -70; a.obj.rotation.y = t * 0.8; break }
+                    case 'blochCursor': { const k = -PI + ((t * 0.15) % 1) * TAU; a.obj.position.set((a.v + a.w * Math.cos(k)) * a.sc, 4 + (a.w * Math.sin(k)) * a.sc, 0); break }
+                    case 'wireRot': a.obj.rotation.y = t * 0.05; a.obj.rotation.x = t * 0.025; break;
+                    case 'pauliShape': { a.obj.rotation.x = t * 0.2 + a.i * 0.3; a.obj.rotation.y = t * 0.3 + a.i * 0.4; a.obj.position.y = 24 + Math.sin(t * 0.9 + a.i) * 1.2; break }
+                    case 'gapMarker': { a.obj.scale.setScalar(1 + Math.sin(t * 1.8) * 0.12); break }
+                    case 'bandPart': {
+                        const E = Math.sqrt(a.v * a.v + a.w * a.w + 2 * a.v * a.w * Math.cos(a.k));
+                        a.obj.position.y = (a.up ? E : -E) * a.eSc;
+                        a.obj.rotation.y = t * 2 + a.ph * PI;
+                        // Pulse based on energy
+                        a.obj.scale.setScalar(1 + (E * 0.15) * Math.sin(t * 3));
+                        break;
+                    }
+                    case 'windCursor': { const k = -PI + ((t * 0.08) % 1) * TAU; a.obj.position.set((a.v + a.w * Math.cos(k)) * a.sc, 4 + (a.w * Math.sin(k)) * a.sc, 0); break }
+                    case 'windArrow': { const k = -PI + ((t * 0.08) % 1) * TAU; const pos = a.obj.geometry.attributes.position; pos.setXYZ(1, (a.v + a.w * Math.cos(k)) * a.sc, 4 + (a.w * Math.sin(k)) * a.sc, 0); pos.needsUpdate = true; break }
+                    case 'nuSpin': a.obj.rotation.x = t * 0.1; a.obj.rotation.y = t * 0.16; break;
+                    case 'edgeAtom': { a.obj.scale.setScalar(1 + Math.sin(t * 1.7) * 0.06 * a.amp); break }
+                    case 'edgePart': { const r = 4 * Math.exp(-0.08 * Math.abs(a.obj.position.x - a.baseX)); a.obj.position.x = a.baseX + Math.sin(t * 1.4 + a.ph) * r; a.obj.position.y = Math.cos(t * 1.8 + a.ph) * r; a.obj.position.z = Math.sin(t * 1.6 + a.ph * 1.1) * r; break }
+                    case 'torusRot': a.obj.rotation.x = PI / 2; a.obj.rotation.z = t * 0.015; break;
+                    case 'soundP': { a.th += a.sp; a.obj.position.x = Math.cos(a.th) * a.r; a.obj.position.z = Math.sin(a.th) * a.r; break }
+                    case 'resonator': {
+                        // Idle vibration
+                        a.obj.scale.y = 1 + Math.sin(t * 3 + a.n) * 0.02;
+                        break;
+                    }
+                }
+            });
+
+            const cR = 110, cS = 0.03;
+            camera.position.x = Math.sin(t * cS) * cR;
+            camera.position.z = Math.cos(t * cS) * cR;
+            camera.position.y = 32 + Math.sin(t * cS * 0.25) * 8;
+            camera.lookAt(0, 1, 0);
+
+            renderer.render(scene, camera);
+        }
+
+        function togglePlayback() { isPlaying = !isPlaying; }
+        function onResize() { camera.aspect = window.innerWidth / window.innerHeight; camera.updateProjectionMatrix(); renderer.setSize(window.innerWidth, window.innerHeight) }
+        function onKey(e) {
+            if (e.key === 'ArrowRight') {
+                if (currentNarrative < sections[current].narratives.length - 1) {
+                    currentNarrative++;
+                    updateUI();
+                } else {
+                    loadSection((current + 1) % sections.length);
+                }
+            }
+            if (e.key === 'ArrowLeft') {
+                if (currentNarrative > 0) {
+                    currentNarrative--;
+                    updateUI();
+                } else {
+                    loadSection((current - 1 + sections.length) % sections.length);
+                }
+            }
+            if (e.key === ' ') { e.preventDefault(); togglePlayback() }
+        }
+
+        window.loadSection = loadSection;
+        window.togglePlayback = togglePlayback;
+        init();
+    </script>
+</body>
+
+</html>
