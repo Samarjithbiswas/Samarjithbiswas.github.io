@@ -1,0 +1,573 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Samarjith Biswas | Research Scientist</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <!-- Navigation -->
+  <nav class="navbar" id="navbar">
+    <div class="nav-container">
+      <a href="#hero" class="nav-logo">SB</a>
+      <button class="nav-toggle" id="navToggle" aria-label="Toggle menu">
+        <span></span><span></span><span></span>
+      </button>
+      <ul class="nav-links" id="navLinks">
+        <li><a href="#about">About</a></li>
+        <li><a href="#research">Research</a></li>
+        <li><a href="#skills">Skills</a></li>
+        <li><a href="#experience">Experience</a></li>
+        <li><a href="#publications">Publications</a></li>
+        <li><a href="#education">Education</a></li>
+        <li><a href="#contact">Contact</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <!-- Hero Section -->
+  <section class="hero" id="hero">
+    <canvas id="particleCanvas"></canvas>
+    <div class="hero-content">
+      <div class="hero-badge">Research Scientist III &middot; University of Arizona</div>
+      <h1 class="hero-name">
+        <span class="line">Samarjith</span>
+        <span class="line accent">Biswas</span>
+      </h1>
+      <p class="hero-tagline">Pioneering topological acoustics &amp; quantum-inspired technologies at the intersection of physics, engineering, and AI.</p>
+      <div class="hero-stats">
+        <div class="stat">
+          <span class="stat-number" data-target="1">0</span>
+          <span class="stat-label">US Patent</span>
+        </div>
+        <div class="stat">
+          <span class="stat-label-top">NASA</span>
+          <span class="stat-label">Collaborator</span>
+        </div>
+        <div class="stat">
+          <span class="stat-prefix">$</span><span class="stat-number" data-target="30">0</span><span class="stat-suffix">M</span>
+          <span class="stat-label">NSF Center</span>
+        </div>
+        <div class="stat">
+          <span class="stat-number" data-target="7">0</span><span class="stat-suffix">+</span>
+          <span class="stat-label">Years R&amp;D</span>
+        </div>
+      </div>
+      <div class="hero-cta">
+        <a href="#contact" class="btn btn-primary">Get In Touch</a>
+        <a href="#research" class="btn btn-outline">View Research</a>
+      </div>
+    </div>
+    <div class="scroll-indicator">
+      <div class="mouse"></div>
+      <span>Scroll to explore</span>
+    </div>
+  </section>
+
+  <!-- About Section -->
+  <section class="section" id="about">
+    <div class="container">
+      <div class="section-header">
+        <span class="section-tag">01</span>
+        <h2 class="section-title">About Me</h2>
+        <div class="section-line"></div>
+      </div>
+      <div class="about-grid">
+        <div class="about-text">
+          <p class="about-lead">I'm a Research Scientist at the University of Arizona's <strong>New Frontiers of Sound (NewFoS)</strong> Science &amp; Technology Center, an NSF-funded multi-institutional research hub.</p>
+          <p>My work sits at the intersection of topological acoustics, quantum-inspired systems, and AI-driven computational simulation. I hold a PhD in Mechanical &amp; Aerospace Engineering and collaborate with leading institutions including Caltech, UCLA, Georgia Tech, UC Boulder, CUNY, Wayne State, Spelman College, and University of Alaska-Fairbanks.</p>
+          <p>With a background spanning NASA collaborations, energy harvesting, metamaterials, and advanced manufacturing, I bring a multidisciplinary approach to solving complex engineering challenges.</p>
+          <div class="about-location">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
+            Tucson, AZ &middot; Available for domestic &amp; international relocation
+          </div>
+        </div>
+        <div class="about-highlights">
+          <div class="highlight-card">
+            <div class="highlight-icon">75%</div>
+            <div class="highlight-text">Design Iteration<br>Time Reduction</div>
+          </div>
+          <div class="highlight-card">
+            <div class="highlight-icon">40%</div>
+            <div class="highlight-text">Manufacturing<br>Cost Reduction</div>
+          </div>
+          <div class="highlight-card">
+            <div class="highlight-icon">25%</div>
+            <div class="highlight-text">Performance<br>Improvement</div>
+          </div>
+          <div class="highlight-card">
+            <div class="highlight-icon">$300K+</div>
+            <div class="highlight-text">Facility<br>Management</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Research Section -->
+  <section class="section section-dark" id="research">
+    <div class="container">
+      <div class="section-header">
+        <span class="section-tag">02</span>
+        <h2 class="section-title">Research Focus</h2>
+        <div class="section-line"></div>
+      </div>
+      <div class="research-grid">
+        <div class="research-card" data-aos>
+          <div class="research-number">01</div>
+          <div class="research-icon">
+            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z"/></svg>
+          </div>
+          <h3>Dynamic Topological Acoustics</h3>
+          <p>Phase-change materials enabling frequency-selective wave routing through programmable acoustic pathways.</p>
+        </div>
+        <div class="research-card" data-aos>
+          <div class="research-number">02</div>
+          <div class="research-icon">
+            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+          </div>
+          <h3>Quantum Analogies for QIS</h3>
+          <p>Room-temperature acoustic qubits using topological edge states for quantum information science applications.</p>
+        </div>
+        <div class="research-card" data-aos>
+          <div class="research-number">03</div>
+          <div class="research-icon">
+            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M5 12.55a11 11 0 0114.08 0M1.42 9a16 16 0 0121.16 0M8.53 16.11a6 6 0 016.95 0M12 20h.01"/></svg>
+          </div>
+          <h3>Topological RF Devices</h3>
+          <p>One-way waveguides for next-generation 5G/6G telecommunications with robust signal transmission.</p>
+        </div>
+        <div class="research-card" data-aos>
+          <div class="research-number">04</div>
+          <div class="research-icon">
+            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z"/><path d="M12 6v6l4 2"/></svg>
+          </div>
+          <h3>Environmental Sensing</h3>
+          <p>Climate monitoring and infrastructure assessment through advanced acoustic sensing technologies.</p>
+        </div>
+        <div class="research-card" data-aos>
+          <div class="research-number">05</div>
+          <div class="research-icon">
+            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="4" y="4" width="16" height="16" rx="2"/><path d="M9 9h6v6H9z"/><path d="M9 1v3M15 1v3M9 20v3M15 20v3M20 9h3M20 14h3M1 9h3M1 14h3"/></svg>
+          </div>
+          <h3>AI &amp; Machine Learning</h3>
+          <p>Deep learning, physics-informed neural networks (PINNs), and automated design optimization for engineering systems.</p>
+        </div>
+        <div class="research-card" data-aos>
+          <div class="research-number">06</div>
+          <div class="research-icon">
+            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+          </div>
+          <h3>Energy Harvesting</h3>
+          <p>Thermoacoustic systems and metamaterial-based structures for sustainable energy conversion.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Skills Section -->
+  <section class="section" id="skills">
+    <div class="container">
+      <div class="section-header">
+        <span class="section-tag">03</span>
+        <h2 class="section-title">Technical Expertise</h2>
+        <div class="section-line"></div>
+      </div>
+      <div class="skills-grid">
+        <div class="skill-category">
+          <h3 class="skill-cat-title">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="4" width="16" height="16" rx="2"/><path d="M9 9h6v6H9z"/></svg>
+            AI &amp; Machine Learning
+          </h3>
+          <div class="skill-tags">
+            <span class="skill-tag">Deep Learning</span>
+            <span class="skill-tag">TensorFlow</span>
+            <span class="skill-tag">PyTorch</span>
+            <span class="skill-tag">PINNs</span>
+            <span class="skill-tag">Automated Design Optimization</span>
+          </div>
+        </div>
+        <div class="skill-category">
+          <h3 class="skill-cat-title">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M2 12h20"/></svg>
+            Acoustic Technologies
+          </h3>
+          <div class="skill-tags">
+            <span class="skill-tag">Topological Acoustics</span>
+            <span class="skill-tag">Phononic Crystals</span>
+            <span class="skill-tag">Thermoacoustic Systems</span>
+            <span class="skill-tag">RF Devices</span>
+            <span class="skill-tag">Acoustic Metamaterials</span>
+          </div>
+        </div>
+        <div class="skill-category">
+          <h3 class="skill-cat-title">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 3h6a4 4 0 014 4v14a3 3 0 00-3-3H2z"/><path d="M22 3h-6a4 4 0 00-4 4v14a3 3 0 013-3h7z"/></svg>
+            Simulation &amp; Modeling
+          </h3>
+          <div class="skill-tags">
+            <span class="skill-tag">COMSOL Multiphysics</span>
+            <span class="skill-tag">ANSYS Workbench</span>
+            <span class="skill-tag">ANSYS Fluent</span>
+            <span class="skill-tag">DeltaEC</span>
+            <span class="skill-tag">MATLAB/Simulink</span>
+            <span class="skill-tag">FEA</span>
+            <span class="skill-tag">CFD</span>
+          </div>
+        </div>
+        <div class="skill-category">
+          <h3 class="skill-cat-title">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+            Programming
+          </h3>
+          <div class="skill-tags">
+            <span class="skill-tag">Python</span>
+            <span class="skill-tag">MATLAB</span>
+            <span class="skill-tag">C/C++</span>
+            <span class="skill-tag">LabVIEW</span>
+            <span class="skill-tag">R</span>
+            <span class="skill-tag">FORTRAN</span>
+            <span class="skill-tag">Signal Processing</span>
+          </div>
+        </div>
+        <div class="skill-category">
+          <h3 class="skill-cat-title">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.7 6.3a1 1 0 000 1.4l1.6 1.6a1 1 0 001.4 0l3.77-3.77a6 6 0 01-7.94 7.94l-6.91 6.91a2.12 2.12 0 01-3-3l6.91-6.91a6 6 0 017.94-7.94l-3.76 3.76z"/></svg>
+            Advanced Engineering
+          </h3>
+          <div class="skill-tags">
+            <span class="skill-tag">Energy Harvesting</span>
+            <span class="skill-tag">MEMS Design</span>
+            <span class="skill-tag">Phase-Change Materials</span>
+            <span class="skill-tag">Smart Materials</span>
+            <span class="skill-tag">Additive Manufacturing</span>
+          </div>
+        </div>
+        <div class="skill-category">
+          <h3 class="skill-cat-title">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg>
+            Leadership
+          </h3>
+          <div class="skill-tags">
+            <span class="skill-tag">Project Management</span>
+            <span class="skill-tag">Six Sigma Green Belt</span>
+            <span class="skill-tag">Cross-functional Collaboration</span>
+            <span class="skill-tag">Grant Writing</span>
+            <span class="skill-tag">Technology Transfer</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Experience Section -->
+  <section class="section section-dark" id="experience">
+    <div class="container">
+      <div class="section-header">
+        <span class="section-tag">04</span>
+        <h2 class="section-title">Experience</h2>
+        <div class="section-line"></div>
+      </div>
+      <div class="timeline">
+        <div class="timeline-item" data-aos>
+          <div class="timeline-dot"></div>
+          <div class="timeline-content">
+            <div class="timeline-date">Sept 2024 &mdash; Present</div>
+            <h3>Research Scientist III</h3>
+            <h4>University of Arizona &middot; NewFoS Center</h4>
+            <p>Leading research in topological acoustics and quantum-inspired technologies at an NSF-funded multi-institutional center. Collaborating with Caltech, UCLA, Georgia Tech, UC Boulder, CUNY, Wayne State, Spelman College, and University of Alaska-Fairbanks.</p>
+          </div>
+        </div>
+        <div class="timeline-item" data-aos>
+          <div class="timeline-dot"></div>
+          <div class="timeline-content">
+            <div class="timeline-date">Aug 2019 &mdash; Aug 2024</div>
+            <h3>Graduate Research Associate</h3>
+            <h4>Oklahoma State University</h4>
+            <p>Conducted doctoral research in thermoacoustic meta-structures, energy harvesting, and acoustic metamaterials. Achieved 75% design iteration time reduction and 40% manufacturing cost reduction through innovative approaches.</p>
+          </div>
+        </div>
+        <div class="timeline-item" data-aos>
+          <div class="timeline-dot"></div>
+          <div class="timeline-content">
+            <div class="timeline-date">Aug 2017 &mdash; Jul 2019</div>
+            <h3>Graduate Research Assistant</h3>
+            <h4>Northern Arizona University</h4>
+            <p>Master's research in mechanical engineering with focus on advanced manufacturing, surface roughness analysis, and computational methods.</p>
+          </div>
+        </div>
+        <div class="timeline-item" data-aos>
+          <div class="timeline-dot"></div>
+          <div class="timeline-content">
+            <div class="timeline-date">Apr 2017 &mdash; Aug 2017</div>
+            <h3>Engineer (R&amp;D)</h3>
+            <h4>B-Trac Engineering Ltd &middot; Dhaka, Bangladesh</h4>
+            <p>Research and development engineering role focused on product design and manufacturing optimization.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Publications Section -->
+  <section class="section" id="publications">
+    <div class="container">
+      <div class="section-header">
+        <span class="section-tag">05</span>
+        <h2 class="section-title">Publications</h2>
+        <div class="section-line"></div>
+      </div>
+      <div class="pub-stats">
+        <div class="pub-stat">
+          <span class="pub-stat-num">14+</span>
+          <span class="pub-stat-label">Citations</span>
+        </div>
+        <div class="pub-stat">
+          <span class="pub-stat-num">12+</span>
+          <span class="pub-stat-label">Published Works</span>
+        </div>
+        <div class="pub-stat">
+          <span class="pub-stat-num">3</span>
+          <span class="pub-stat-label">H-Index</span>
+        </div>
+        <div class="pub-stat">
+          <span class="pub-stat-num">1</span>
+          <span class="pub-stat-label">US Patent</span>
+        </div>
+      </div>
+      <div class="pub-list">
+        <div class="pub-year-group">
+          <div class="pub-year">2025</div>
+          <div class="pub-items">
+            <div class="pub-item">
+              <div class="pub-type journal">Journal</div>
+              <div class="pub-details">
+                <h4>On the Relationship Between Acoustic Absorption and Temperature Gradient in a Thermoacoustic Liner</h4>
+                <p>International Journal of Aeroacoustics &middot; 3 citations</p>
+              </div>
+            </div>
+            <div class="pub-item">
+              <div class="pub-type journal">Journal</div>
+              <div class="pub-details">
+                <h4>Multifunctional Characterization of a Thermoacoustic Meta-Structure</h4>
+                <p>Progress in Engineering Science</p>
+              </div>
+            </div>
+            <div class="pub-item">
+              <div class="pub-type patent">Patent</div>
+              <div class="pub-details">
+                <h4>THERMOACOUSTIC META-STRUCTURE</h4>
+                <p>US Patent 2025/128,348</p>
+              </div>
+            </div>
+            <div class="pub-item">
+              <div class="pub-type conference">Conference</div>
+              <div class="pub-details">
+                <h4>Investigation of Meta-Stacks for Thermoacoustic Applications</h4>
+                <p>188th Meeting of the Acoustical Society of America</p>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="pub-year-group">
+          <div class="pub-year">2024</div>
+          <div class="pub-items">
+            <div class="pub-item">
+              <div class="pub-type thesis">Thesis</div>
+              <div class="pub-details">
+                <h4>Doctoral Dissertation</h4>
+                <p>Oklahoma State University</p>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="pub-year-group">
+          <div class="pub-year">2022&ndash;23</div>
+          <div class="pub-items">
+            <div class="pub-item">
+              <div class="pub-type journal">Journal</div>
+              <div class="pub-details">
+                <h4>Journal Article &amp; Conference Proceedings</h4>
+                <p>Journal of the Acoustical Society of America &middot; Feeding Assistive Robot (arXiv)</p>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="pub-year-group">
+          <div class="pub-year">2017&ndash;21</div>
+          <div class="pub-items">
+            <div class="pub-item">
+              <div class="pub-type conference">Conference</div>
+              <div class="pub-details">
+                <h4>INTER-NOISE &amp; International Conference Papers</h4>
+                <p>Noise control, surface roughness research &middot; Master's Thesis at NAU</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="pub-cta">
+        <a href="https://scholar.google.com" target="_blank" rel="noopener" class="btn btn-outline">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+          View Google Scholar
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Education Section -->
+  <section class="section section-dark" id="education">
+    <div class="container">
+      <div class="section-header">
+        <span class="section-tag">06</span>
+        <h2 class="section-title">Education</h2>
+        <div class="section-line"></div>
+      </div>
+      <div class="edu-grid">
+        <div class="edu-card" data-aos>
+          <div class="edu-degree">Ph.D.</div>
+          <h3>Mechanical &amp; Aerospace Engineering</h3>
+          <h4>Oklahoma State University</h4>
+          <span class="edu-year">2019 &mdash; 2024</span>
+        </div>
+        <div class="edu-card" data-aos>
+          <div class="edu-degree">M.S.</div>
+          <h3>Mechanical Engineering</h3>
+          <h4>Northern Arizona University</h4>
+          <span class="edu-year">2017 &mdash; 2019</span>
+        </div>
+        <div class="edu-card" data-aos>
+          <div class="edu-degree">B.S.</div>
+          <h3>Mechanical Engineering</h3>
+          <h4>Rajshahi University of Engineering &amp; Technology</h4>
+          <span class="edu-year">2011 &mdash; 2016</span>
+        </div>
+      </div>
+
+      <div class="awards-section">
+        <h3 class="awards-title">Awards &amp; Certifications</h3>
+        <div class="awards-grid">
+          <div class="award-item">
+            <div class="award-icon">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="7"/><polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88"/></svg>
+            </div>
+            <div>
+              <strong>Best Oral Presentation Award</strong>
+              <span>Oklahoma State University, 2022</span>
+            </div>
+          </div>
+          <div class="award-item">
+            <div class="award-icon">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+            </div>
+            <div>
+              <strong>International Excellence Award</strong>
+              <span>Northern Arizona University, 2018&ndash;19</span>
+            </div>
+          </div>
+          <div class="award-item">
+            <div class="award-icon">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+            </div>
+            <div>
+              <strong>Six Sigma Green Belt</strong>
+              <span>Certified, 2023</span>
+            </div>
+          </div>
+          <div class="award-item">
+            <div class="award-icon">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+            </div>
+            <div>
+              <strong>COMSOL Multiphysics &amp; TensorFlow</strong>
+              <span>Certified Developer</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Contact Section -->
+  <section class="section" id="contact">
+    <div class="container">
+      <div class="section-header">
+        <span class="section-tag">07</span>
+        <h2 class="section-title">Get In Touch</h2>
+        <div class="section-line"></div>
+      </div>
+      <div class="contact-grid">
+        <div class="contact-info">
+          <p class="contact-lead">Interested in collaboration, speaking opportunities, or just want to connect? I'd love to hear from you.</p>
+          <div class="contact-details">
+            <div class="contact-item">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+              <a href="mailto:Contact@samarjithbiswas.com">Contact@samarjithbiswas.com</a>
+            </div>
+            <div class="contact-item">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07 19.5 19.5 0 01-6-6 19.79 19.79 0 01-3.07-8.67A2 2 0 014.11 2h3a2 2 0 012 1.72 12.84 12.84 0 00.7 2.81 2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45 12.84 12.84 0 002.81.7A2 2 0 0122 16.92z"/></svg>
+              <a href="tel:+16022004525">(602) 200-4525</a>
+            </div>
+            <div class="contact-item">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
+              <span>Tucson, AZ, USA</span>
+            </div>
+          </div>
+          <div class="social-links">
+            <a href="https://linkedin.com" target="_blank" rel="noopener" aria-label="LinkedIn" class="social-link">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 01-2.063-2.065 2.064 2.064 0 112.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>
+            </a>
+            <a href="https://youtube.com/@SamarjithbiswasPhD" target="_blank" rel="noopener" aria-label="YouTube" class="social-link">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M23.498 6.186a3.016 3.016 0 00-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 00.502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 002.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 002.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>
+            </a>
+            <a href="https://twitter.com" target="_blank" rel="noopener" aria-label="X / Twitter" class="social-link">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+            </a>
+            <a href="https://instagram.com" target="_blank" rel="noopener" aria-label="Instagram" class="social-link">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="5"/><circle cx="17.5" cy="6.5" r="1.5" fill="currentColor" stroke="none"/></svg>
+            </a>
+            <a href="https://facebook.com" target="_blank" rel="noopener" aria-label="Facebook" class="social-link">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
+            </a>
+          </div>
+        </div>
+        <form class="contact-form" id="contactForm">
+          <div class="form-group">
+            <input type="text" id="name" placeholder=" " required>
+            <label for="name">Your Name</label>
+          </div>
+          <div class="form-group">
+            <input type="email" id="email" placeholder=" " required>
+            <label for="email">Your Email</label>
+          </div>
+          <div class="form-group">
+            <textarea id="message" rows="5" placeholder=" " required></textarea>
+            <label for="message">Your Message</label>
+          </div>
+          <button type="submit" class="btn btn-primary btn-full">
+            Send Message
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+          </button>
+        </form>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-content">
+        <span class="footer-logo">SB</span>
+        <p>&copy; 2026 Samarjith Biswas. All rights reserved.</p>
+        <p class="footer-member">Member, Acoustical Society of America (2021&ndash;Present)</p>
+      </div>
+    </div>
+  </footer>
+
+  <script src="script.js"></script>
+</body>
+</html>
