@@ -26,7 +26,7 @@ class Particle {
     this.size = Math.random() * 2 + 0.5;
     this.speedX = (Math.random() - 0.5) * 0.4;
     this.speedY = (Math.random() - 0.5) * 0.4;
-    this.opacity = Math.random() * 0.5 + 0.1;
+    this.opacity = Math.random() * 0.4 + 0.15;
   }
 
   update() {
@@ -51,7 +51,7 @@ class Particle {
   draw() {
     ctx.beginPath();
     ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
-    ctx.fillStyle = `rgba(108, 99, 255, ${this.opacity})`;
+    ctx.fillStyle = `rgba(90, 80, 230, ${this.opacity})`;
     ctx.fill();
   }
 }
@@ -71,9 +71,9 @@ function connectParticles() {
       const dy = particles[i].y - particles[j].y;
       const dist = Math.sqrt(dx * dx + dy * dy);
       if (dist < 150) {
-        const opacity = (1 - dist / 150) * 0.15;
+        const opacity = (1 - dist / 150) * 0.2;
         ctx.beginPath();
-        ctx.strokeStyle = `rgba(108, 99, 255, ${opacity})`;
+        ctx.strokeStyle = `rgba(90, 80, 230, ${opacity})`;
         ctx.lineWidth = 0.5;
         ctx.moveTo(particles[i].x, particles[i].y);
         ctx.lineTo(particles[j].x, particles[j].y);
