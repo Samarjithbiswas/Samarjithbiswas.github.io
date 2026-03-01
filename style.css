@@ -768,8 +768,8 @@ img {
 
 .pub-type.journal { background: rgba(90, 80, 230, 0.1); color: var(--accent); }
 .pub-type.patent { background: rgba(0, 184, 148, 0.1); color: var(--accent2); }
-.pub-type.conference { background: rgba(230, 150, 30, 0.1); color: #c07800; }
-.pub-type.thesis { background: rgba(220, 80, 80, 0.1); color: #c04040; }
+.pub-type.conference { background: rgba(230, 150, 30, 0.1); color: #8a5a00; }
+.pub-type.thesis { background: rgba(220, 80, 80, 0.1); color: #a03030; }
 
 .pub-details h4 {
   font-size: 0.95rem;
