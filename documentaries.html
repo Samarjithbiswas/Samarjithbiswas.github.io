@@ -120,10 +120,11 @@
     .doc-frame iframe {
       position: absolute;
       top: 0; left: 0;
-      width: 100%; height: 100%;
+      width: 200%; height: 200%;
       border: none;
       pointer-events: none;
-      transition: pointer-events 0.2s;
+      transform: scale(0.5);
+      transform-origin: top left;
     }
     .doc-card:hover .doc-frame iframe {
       pointer-events: auto;

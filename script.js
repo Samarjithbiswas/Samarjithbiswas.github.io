@@ -284,10 +284,91 @@ const scrollObserver = new IntersectionObserver((entries) => {
 animatedElements.forEach(el => scrollObserver.observe(el));
 
 // ==============================
-// APPLE-STYLE SCROLL EFFECTS
+// PROFESSIONAL SCROLL-REVEAL
 // ==============================
 
-// Section Reveal on Scroll
+// Tag all reveal targets
+(function setupReveal() {
+  // Section headers
+  document.querySelectorAll('.section-header').forEach(el => el.classList.add('reveal'));
+
+  // Research cards
+  document.querySelectorAll('.research-card').forEach((el, i) => {
+    el.classList.add('reveal-scale');
+    el.style.transitionDelay = (i * 0.08) + 's';
+  });
+
+  // Exploration cards (Emerging Frontiers)
+  document.querySelectorAll('.exploration-card').forEach((el, i) => {
+    el.classList.add('reveal-scale');
+    el.style.transitionDelay = (i * 0.1) + 's';
+  });
+
+  // Live-viz cards
+  document.querySelectorAll('.live-viz-card').forEach((el, i) => {
+    el.classList.add('reveal-scale');
+    el.style.transitionDelay = (i * 0.09) + 's';
+  });
+
+  // Timeline items
+  document.querySelectorAll('.timeline-item').forEach((el, i) => {
+    el.classList.add('reveal-left');
+    el.style.transitionDelay = (i * 0.1) + 's';
+  });
+
+  // Project blocks
+  document.querySelectorAll('.project-block').forEach((el, i) => {
+    el.classList.add('reveal');
+    el.style.transitionDelay = (i * 0.07) + 's';
+  });
+
+  // Publication items
+  document.querySelectorAll('.pub-item').forEach((el, i) => {
+    el.classList.add('reveal');
+    el.style.transitionDelay = (i * 0.06) + 's';
+  });
+
+  // Article cards
+  document.querySelectorAll('.article-card').forEach((el, i) => {
+    el.classList.add('reveal-scale');
+    el.style.transitionDelay = (i * 0.07) + 's';
+  });
+
+  // Skills cards
+  document.querySelectorAll('.skill-category').forEach((el, i) => {
+    el.classList.add('reveal');
+    el.style.transitionDelay = (i * 0.09) + 's';
+  });
+
+  // Collab banner
+  document.querySelectorAll('.collab-banner-modern').forEach(el => el.classList.add('reveal'));
+
+  // Impact / stat cards
+  document.querySelectorAll('.impact-card, .rcm-card').forEach((el, i) => {
+    el.classList.add('reveal-scale');
+    el.style.transitionDelay = (i * 0.08) + 's';
+  });
+})();
+
+// Single IntersectionObserver for all reveal classes
+const revealClasses = ['.reveal', '.reveal-left', '.reveal-right', '.reveal-scale'];
+const revealElements = document.querySelectorAll(revealClasses.join(','));
+
+const revealObserver = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      entry.target.classList.add('revealed');
+      revealObserver.unobserve(entry.target); // fire once
+    }
+  });
+}, {
+  threshold: 0.12,
+  rootMargin: '0px 0px -60px 0px'
+});
+
+revealElements.forEach(el => revealObserver.observe(el));
+
+// Section Reveal (legacy — kept for in-view class users)
 const allSections = document.querySelectorAll('.section');
 const sectionObserver = new IntersectionObserver((entries) => {
   entries.forEach(entry => {
@@ -296,28 +377,19 @@ const sectionObserver = new IntersectionObserver((entries) => {
     }
   });
 }, {
-  threshold: 0.15,
-  rootMargin: '0px 0px -100px 0px'
+  threshold: 0.08,
+  rootMargin: '0px 0px -80px 0px'
 });
-
 allSections.forEach(section => sectionObserver.observe(section));
 
-// Staggered Children Animation
+// Staggered Children (legacy)
 const staggerContainers = document.querySelectorAll('.research-grid, .skills-grid, .edu-grid, .impact-grid, .pub-stats');
-staggerContainers.forEach(container => {
-  container.classList.add('stagger-children');
-});
-
+staggerContainers.forEach(container => container.classList.add('stagger-children'));
 const staggerObserver = new IntersectionObserver((entries) => {
   entries.forEach(entry => {
-    if (entry.isIntersecting) {
-      entry.target.classList.add('visible');
-    }
+    if (entry.isIntersecting) entry.target.classList.add('visible');
   });
-}, {
-  threshold: 0.2
-});
-
+}, { threshold: 0.2 });
 document.querySelectorAll('.stagger-children').forEach(el => staggerObserver.observe(el));
 
 // Hero Parallax on Scroll
