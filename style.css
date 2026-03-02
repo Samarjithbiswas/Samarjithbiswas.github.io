@@ -1967,6 +1967,126 @@ ul { list-style: none; }
 .section-header.revealed h2 { opacity: 1; transform: none; transition-delay: 0.1s; }
 .section-header.revealed .section-desc { opacity: 1; transform: none; transition-delay: 0.22s; }
 
+/* ==============================
+   PULSEFIT-STYLE PHOTO CAROUSEL
+   ============================== */
+
+/* Container with hidden overflow + edge fades */
+.photo-carousel {
+  position: relative;
+  overflow: hidden;
+  padding: 1.25rem 0 1.5rem;
+  margin: 0 -2rem; /* bleed past section padding */
+}
+
+.photo-carousel::before,
+.photo-carousel::after {
+  content: '';
+  position: absolute;
+  top: 0; bottom: 0;
+  width: 100px;
+  z-index: 5;
+  pointer-events: none;
+}
+.photo-carousel::before {
+  left: 0;
+  background: linear-gradient(90deg, var(--bg) 0%, transparent 100%);
+}
+.photo-carousel::after {
+  right: 0;
+  background: linear-gradient(270deg, var(--bg) 0%, transparent 100%);
+}
+
+/* Section-alt variant (slightly different bg) */
+.section-alt .photo-carousel::before {
+  background: linear-gradient(90deg, var(--bg-alt) 0%, transparent 100%);
+}
+.section-alt .photo-carousel::after {
+  background: linear-gradient(270deg, var(--bg-alt) 0%, transparent 100%);
+}
+
+/* Scrolling track — pause on hover */
+.photo-track {
+  display: flex;
+  gap: 18px;
+  padding: 0 2rem;
+  width: max-content;
+  animation: photo-scroll var(--photo-duration, 32s) linear infinite;
+}
+.photo-carousel:hover .photo-track {
+  animation-play-state: paused;
+}
+
+@keyframes photo-scroll {
+  0%   { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+
+/* Photo card — landscape (team, events) */
+.photo-card {
+  flex-shrink: 0;
+  width: 340px;
+  height: 230px;
+  border-radius: 16px;
+  overflow: hidden;
+  position: relative;
+  cursor: pointer;
+  box-shadow: 0 6px 24px rgba(0,0,0,0.09);
+  transition: transform 0.35s cubic-bezier(0.22,1,0.36,1),
+              box-shadow 0.35s ease;
+}
+.photo-card:hover {
+  transform: translateY(-10px) scale(1.03);
+  box-shadow: 0 18px 48px rgba(0,0,0,0.18);
+}
+
+/* Photo card — square/portrait (technical renders like TAMS) */
+.photo-card-sq {
+  width: 260px;
+  height: 280px;
+}
+
+.photo-card img {
+  width: 100%; height: 100%;
+  object-fit: cover;
+  display: block;
+  transition: transform 0.5s ease;
+}
+.photo-card:hover img {
+  transform: scale(1.06);
+}
+
+/* Bottom gradient + label */
+.photo-card-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, transparent 45%, rgba(0,0,0,0.62) 100%);
+  pointer-events: none;
+}
+
+.photo-card-label {
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  padding: 14px 16px;
+  color: #fff;
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  line-height: 1.3;
+}
+
+/* Reverse track (second row, opposite direction) */
+.photo-track-reverse {
+  animation-direction: reverse;
+}
+
+@media (max-width: 768px) {
+  .photo-carousel { margin: 0 -1.5rem; }
+  .photo-card { width: 270px; height: 185px; }
+  .photo-card-sq { width: 210px; height: 230px; }
+}
+
 /* Smooth Section Transitions (legacy kept) */
 .section {
   opacity: 1;

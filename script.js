@@ -614,6 +614,47 @@ const imageObserver = new IntersectionObserver((entries) => {
 document.querySelectorAll('.blur-reveal').forEach(el => imageObserver.observe(el));
 
 // ==============================
+// PULSEFIT-STYLE PHOTO CAROUSELS
+// ==============================
+
+function buildCarousel(trackId, items, cardClass = '') {
+  const track = document.getElementById(trackId);
+  if (!track) return;
+  // Duplicate for seamless infinite loop (same as pulsefit-hero technique)
+  const allItems = [...items, ...items];
+  track.innerHTML = allItems.map(item => `
+    <div class="photo-card ${cardClass}">
+      <img src="${item.src}" alt="${item.label}" loading="lazy" />
+      <div class="photo-card-overlay"></div>
+      <div class="photo-card-label">${item.label}</div>
+    </div>
+  `).join('');
+}
+
+// Team & Collaborations carousel
+buildCarousel('teamTrack', [
+  { src: '1.jpg',                                                                                            label: 'Presentation' },
+  { src: '2.jpg',                                                                                            label: 'Presentation' },
+  { src: '3.jpg',                                                                                            label: 'Team Meeting' },
+  { src: 'https://samarjithbiswas.com/wp-content/uploads/2024/01/305_roadmap_040822-edited.jpg?w=1024',     label: 'NewFoS Research Team' },
+  { src: 'https://samarjithbiswas.com/wp-content/uploads/2024/01/sam01144.jpg?w=1024',                     label: 'Lab Team Meeting' },
+  { src: 'https://samarjithbiswas.com/wp-content/uploads/2024/02/32_roadmap_040822-1.jpg?w=1024',          label: 'Research Presentation' },
+]);
+
+// TAMS carousel (square/portrait renders)
+buildCarousel('tamsTrack', [
+  { src: 'https://samarjithbiswas.com/wp-content/uploads/2024/01/modular-resonator_isometric_blue_sectional_v6.png?w=1024', label: 'Pie Slice Resonator' },
+  { src: 'https://samarjithbiswas.com/wp-content/uploads/2024/01/spriralresonator-7.png',                                   label: 'Spiral Resonator' },
+  { src: 'https://samarjithbiswas.com/wp-content/uploads/2024/01/spiral-stack_2-turns_blue_-sectionalview_withextra.png?w=750', label: 'Spiral Stack' },
+  { src: 'Themaocosutic Liner_V5.png',                                                                                       label: 'Thermoacoustic Liner' },
+  { src: 'Tams Barriere.png',                                                                                                 label: 'TAMS Barrier' },
+  { src: 'V2HelicalResonator_100_ISSOMERIC_Transparents_Sectional.PNG',                                                      label: 'Helical Resonator' },
+  { src: 'MetaWallAssembly_Isometric_V6_WhiteFebric_V3_Transparent_V2.png',                                                  label: 'Meta Wall Assembly' },
+  { src: 'SpiralStack_2Turns_v4_Slice_ZOOMED.png',                                                                           label: 'Spiral Stack Detail' },
+  { src: 'Stack_GeometryComparison_Font.png_Trimetric.png',                                                                  label: 'Stack Geometry' },
+], 'photo-card-sq');
+
+// ==============================
 // CONTACT FORM
 // ==============================
 document.getElementById('contactForm').addEventListener('submit', (e) => {
