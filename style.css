@@ -1950,22 +1950,18 @@ ul { list-style: none; }
 }
 .reveal-scale.revealed { opacity: 1; transform: translateY(0) scale(1); }
 
-/* Section header — override base reveal so children stagger */
-.section-header.reveal {
+/* Section header — always visible; no hidden initial state to avoid blank gaps */
+.section-header.reveal,
+.section-header.reveal-scale {
   opacity: 1 !important;
   transform: none !important;
 }
 .section-header .section-tag,
 .section-header h2,
 .section-header .section-desc {
-  opacity: 0;
-  transform: translateY(32px);
-  transition: opacity 0.7s cubic-bezier(0.22, 1, 0.36, 1),
-              transform 0.7s cubic-bezier(0.22, 1, 0.36, 1);
+  opacity: 1;
+  transform: none;
 }
-.section-header.revealed .section-tag { opacity: 1; transform: none; }
-.section-header.revealed h2 { opacity: 1; transform: none; transition-delay: 0.1s; }
-.section-header.revealed .section-desc { opacity: 1; transform: none; transition-delay: 0.22s; }
 
 /* ==============================
    PULSEFIT-STYLE PHOTO CAROUSEL
