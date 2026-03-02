@@ -1,0 +1,526 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Interactive Documentaries | Samarjith Biswas</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+  <style>
+    .docs-hero {
+      background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #0f172a 100%);
+      padding: 6rem 2rem 4rem;
+      text-align: center;
+      border-bottom: 1px solid rgba(99,102,241,0.2);
+    }
+    .docs-hero .section-tag {
+      display: inline-block;
+      margin-bottom: 1rem;
+      color: var(--accent-light);
+      background: rgba(99,102,241,0.15);
+      border: 1px solid rgba(99,102,241,0.3);
+      padding: 0.35rem 1rem;
+      border-radius: 999px;
+      font-size: 0.8rem;
+      letter-spacing: 1px;
+      font-family: var(--mono);
+    }
+    .docs-hero h1 {
+      font-size: clamp(2rem, 5vw, 3.5rem);
+      font-weight: 800;
+      color: #fff;
+      line-height: 1.15;
+      margin-bottom: 1rem;
+    }
+    .docs-hero h1 span {
+      background: linear-gradient(135deg, #818cf8 0%, #06b6d4 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .docs-hero p {
+      font-size: 1.1rem;
+      color: rgba(255,255,255,0.65);
+      max-width: 600px;
+      margin: 0 auto 2rem;
+      line-height: 1.7;
+    }
+    .docs-back {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      color: rgba(255,255,255,0.6);
+      text-decoration: none;
+      font-size: 0.9rem;
+      font-weight: 500;
+      transition: color 0.2s;
+      margin-bottom: 2rem;
+    }
+    .docs-back:hover { color: #fff; }
+    .docs-back svg { width: 16px; height: 16px; }
+
+    .docs-container {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 3rem 2rem 6rem;
+    }
+    .docs-section-label {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+      margin-top: 3rem;
+    }
+    .docs-section-label:first-child { margin-top: 0; }
+    .docs-section-label h2 {
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: var(--text);
+    }
+    .docs-section-label::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: var(--border);
+    }
+
+    .docs-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
+      gap: 2rem;
+      margin-bottom: 1rem;
+    }
+
+    .doc-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      overflow: hidden;
+      box-shadow: var(--shadow);
+      transition: all 0.4s cubic-bezier(0.4,0,0.2,1);
+      display: flex;
+      flex-direction: column;
+    }
+    .doc-card:hover {
+      transform: translateY(-8px);
+      box-shadow: var(--shadow-xl);
+      border-color: rgba(99,102,241,0.3);
+    }
+
+    .doc-frame {
+      position: relative;
+      width: 100%;
+      padding-bottom: 56.25%;
+      background: linear-gradient(135deg, #0d0d1a 0%, #0a0a14 100%);
+      overflow: hidden;
+      flex-shrink: 0;
+    }
+    .doc-frame iframe {
+      position: absolute;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      border: none;
+      pointer-events: none;
+      transition: pointer-events 0.2s;
+    }
+    .doc-card:hover .doc-frame iframe {
+      pointer-events: auto;
+    }
+    .doc-frame-overlay {
+      position: absolute;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: linear-gradient(180deg, transparent 55%, rgba(0,0,0,0.35) 100%);
+      pointer-events: none;
+      z-index: 5;
+    }
+    .doc-badge {
+      position: absolute;
+      top: 12px; left: 12px;
+      z-index: 10;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      background: linear-gradient(135deg, #ff416c 0%, #ff4b2b 100%);
+      color: #fff;
+      font-size: 0.65rem;
+      font-weight: 700;
+      padding: 4px 9px;
+      border-radius: 4px;
+      letter-spacing: 0.5px;
+      box-shadow: 0 4px 12px rgba(255,65,108,0.4);
+      pointer-events: none;
+      animation: live-pulse 2s ease-in-out infinite;
+    }
+    .doc-badge::before {
+      content: '';
+      width: 5px; height: 5px;
+      background: #fff;
+      border-radius: 50%;
+      animation: live-dot 1s ease-in-out infinite;
+    }
+    .doc-fullscreen-btn {
+      position: absolute;
+      top: 12px; right: 12px;
+      z-index: 10;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      background: rgba(99,102,241,0.9);
+      color: #fff;
+      font-size: 0.65rem;
+      font-weight: 700;
+      padding: 4px 9px;
+      border-radius: 4px;
+      letter-spacing: 0.5px;
+      text-decoration: none;
+      transition: background 0.2s;
+      pointer-events: auto;
+    }
+    .doc-fullscreen-btn:hover {
+      background: rgba(79,70,229,1);
+    }
+    .doc-fullscreen-btn svg {
+      width: 12px; height: 12px;
+    }
+
+    .doc-info {
+      padding: 1.25rem 1.5rem 1.5rem;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+    }
+    .doc-info h3 {
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: var(--text);
+      margin-bottom: 0.4rem;
+      line-height: 1.3;
+    }
+    .doc-info p {
+      font-size: 0.875rem;
+      color: var(--text-muted);
+      line-height: 1.55;
+      margin-bottom: 1rem;
+      flex: 1;
+    }
+    .doc-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.4rem;
+      margin-bottom: 1rem;
+    }
+    .doc-tags span {
+      font-size: 0.7rem;
+      font-weight: 500;
+      padding: 3px 9px;
+      border-radius: 999px;
+      background: var(--accent-bg);
+      color: var(--accent);
+      border: 1px solid var(--accent-border);
+    }
+    .doc-actions {
+      display: flex;
+      gap: 0.75rem;
+      align-items: center;
+    }
+    .doc-open-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      background: linear-gradient(135deg, var(--accent) 0%, var(--accent-dark) 100%);
+      color: #fff;
+      font-size: 0.85rem;
+      font-weight: 600;
+      padding: 0.55rem 1.25rem;
+      border-radius: 8px;
+      text-decoration: none;
+      transition: all 0.25s;
+      box-shadow: 0 4px 12px rgba(99,102,241,0.25);
+    }
+    .doc-open-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 20px rgba(99,102,241,0.35);
+    }
+    .doc-open-btn svg { width: 14px; height: 14px; }
+
+    @media (max-width: 768px) {
+      .docs-grid { grid-template-columns: 1fr; }
+      .docs-container { padding: 2rem 1rem 4rem; }
+      .docs-hero { padding: 5rem 1.5rem 3rem; }
+    }
+    @media (max-width: 480px) {
+      .docs-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Navigation -->
+  <nav class="navbar" id="navbar">
+    <div class="nav-container">
+      <a href="index.html" class="nav-logo">Samarjith Biswas</a>
+      <button class="nav-toggle" id="navToggle" aria-label="Toggle menu">
+        <span></span><span></span><span></span>
+      </button>
+      <ul class="nav-links" id="navLinks">
+        <li><a href="index.html#about">About</a></li>
+        <li><a href="index.html#research">Research</a></li>
+        <li><a href="index.html#explorations">Explorations</a></li>
+        <li><a href="index.html#projects">Projects</a></li>
+        <li><a href="index.html#experience">Experience</a></li>
+        <li><a href="index.html#publications">Publications</a></li>
+        <li><a href="index.html#articles">Visualizations</a></li>
+        <li><a href="index.html#gallery">Gallery</a></li>
+        <li><a href="index.html#contact">Contact</a></li>
+        <li><a href="documentaries.html" style="color:var(--accent);font-weight:600;">Documentaries</a></li>
+      </ul>
+      <div class="nav-actions">
+        <a href="https://samarjithbiswas.com/wp-content/uploads/2025/02/samarjith_biswas_cv_updated_january_2025.pdf" target="_blank" class="btn btn-sm">Download CV</a>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Hero -->
+  <div class="docs-hero">
+    <a href="index.html" class="docs-back">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>
+      Back to Portfolio
+    </a>
+    <div class="section-tag">Interactive Media</div>
+    <h1>Live Interactive <span>Documentaries</span></h1>
+    <p>Explore cutting-edge science and technology through fully interactive 3D documentaries. Click any preview to interact, or open fullscreen for the full experience.</p>
+  </div>
+
+  <!-- Main Content -->
+  <div class="docs-container">
+
+    <!-- Section: Emerging Frontiers -->
+    <div class="docs-section-label">
+      <h2>Emerging Frontiers</h2>
+    </div>
+    <div class="docs-grid">
+
+      <!-- Physical AI -->
+      <div class="doc-card">
+        <div class="doc-frame">
+          <iframe src="Physical_AI_Documentary.html" loading="lazy" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope"></iframe>
+          <div class="doc-frame-overlay"></div>
+          <span class="doc-badge">LIVE 3D</span>
+          <a href="Physical_AI_Documentary.html" target="_blank" class="doc-fullscreen-btn">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/></svg>
+            Fullscreen
+          </a>
+        </div>
+        <div class="doc-info">
+          <h3>Physical AI</h3>
+          <p>Vision-Language-Action models bridging artificial intelligence with embodied robotics. Humanoid systems that perceive, reason, and act in the real world.</p>
+          <div class="doc-tags">
+            <span>VLA Models</span>
+            <span>Robotics</span>
+            <span>NVIDIA GR00T</span>
+          </div>
+          <div class="doc-actions">
+            <a href="Physical_AI_Documentary.html" target="_blank" class="doc-open-btn">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/></svg>
+              Open Fullscreen
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <!-- Neuromorphic Computing -->
+      <div class="doc-card">
+        <div class="doc-frame">
+          <iframe src="Neuromorphic_Computing_Documentary.html" loading="lazy" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope"></iframe>
+          <div class="doc-frame-overlay"></div>
+          <span class="doc-badge">LIVE 3D</span>
+          <a href="Neuromorphic_Computing_Documentary.html" target="_blank" class="doc-fullscreen-btn">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/></svg>
+            Fullscreen
+          </a>
+        </div>
+        <div class="doc-info">
+          <h3>Neuromorphic Computation</h3>
+          <p>Brain-inspired silicon architectures utilizing spiking neural networks. Ultra-low power computing mimicking biological neural dynamics.</p>
+          <div class="doc-tags">
+            <span>SNN</span>
+            <span>Intel Loihi</span>
+            <span>Event-Driven</span>
+          </div>
+          <div class="doc-actions">
+            <a href="Neuromorphic_Computing_Documentary.html" target="_blank" class="doc-open-btn">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/></svg>
+              Open Fullscreen
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <!-- Orbital Computation -->
+      <div class="doc-card">
+        <div class="doc-frame">
+          <iframe src="orbital_compute_documentary_FinalVersion.html" loading="lazy" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope"></iframe>
+          <div class="doc-frame-overlay"></div>
+          <span class="doc-badge">LIVE 3D</span>
+          <a href="orbital_compute_documentary_FinalVersion.html" target="_blank" class="doc-fullscreen-btn">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/></svg>
+            Fullscreen
+          </a>
+        </div>
+        <div class="doc-info">
+          <h3>Orbital Computation</h3>
+          <p>Space-based computing infrastructure leveraging orbital mechanics. Distributed processing systems beyond Earth's atmosphere for next-gen applications.</p>
+          <div class="doc-tags">
+            <span>LEO Systems</span>
+            <span>Satellite Networks</span>
+            <span>Edge Computing</span>
+          </div>
+          <div class="doc-actions">
+            <a href="orbital_compute_documentary_FinalVersion.html" target="_blank" class="doc-open-btn">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/></svg>
+              Open Fullscreen
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <!-- Space Data Centers -->
+      <div class="doc-card">
+        <div class="doc-frame">
+          <iframe src="Data_Center_Proposal.html" loading="lazy" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope"></iframe>
+          <div class="doc-frame-overlay"></div>
+          <span class="doc-badge">LIVE 3D</span>
+          <a href="Data_Center_Proposal.html" target="_blank" class="doc-fullscreen-btn">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/></svg>
+            Fullscreen
+          </a>
+        </div>
+        <div class="doc-info">
+          <h3>Space Data Centers</h3>
+          <p>Revolutionary concepts for deploying data center infrastructure in space. Leveraging vacuum cooling and solar power for sustainable hyperscale computing.</p>
+          <div class="doc-tags">
+            <span>TAMS</span>
+            <span>Thermal Management</span>
+            <span>Hyperscale</span>
+          </div>
+          <div class="doc-actions">
+            <a href="Data_Center_Proposal.html" target="_blank" class="doc-open-btn">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/></svg>
+              Open Fullscreen
+            </a>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Section: Physics & Acoustics -->
+    <div class="docs-section-label">
+      <h2>Physics &amp; Acoustics</h2>
+    </div>
+    <div class="docs-grid">
+
+      <!-- SSH Model -->
+      <div class="doc-card">
+        <div class="doc-frame">
+          <iframe src="SSH_Model_Documentary_Refined.html" loading="lazy" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope"></iframe>
+          <div class="doc-frame-overlay"></div>
+          <span class="doc-badge">LIVE</span>
+          <a href="SSH_Model_Documentary_Refined.html" target="_blank" class="doc-fullscreen-btn">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/></svg>
+            Fullscreen
+          </a>
+        </div>
+        <div class="doc-info">
+          <h3>The SSH Model — Topological Physics</h3>
+          <p>Topological edge states and bulk-boundary correspondence in the Su-Schrieffer-Heeger model. Interactive quantum physics simulation.</p>
+          <div class="doc-tags">
+            <span>Topology</span>
+            <span>Quantum Mechanics</span>
+            <span>Edge States</span>
+          </div>
+          <div class="doc-actions">
+            <a href="SSH_Model_Documentary_Refined.html" target="_blank" class="doc-open-btn">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/></svg>
+              Open Fullscreen
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <!-- Topological Acoustics -->
+      <div class="doc-card">
+        <div class="doc-frame">
+          <iframe src="Topological_Acoustics_Documentary_Vertical_Dark_Contrast.html" loading="lazy" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope"></iframe>
+          <div class="doc-frame-overlay"></div>
+          <span class="doc-badge">LIVE</span>
+          <a href="Topological_Acoustics_Documentary_Vertical_Dark_Contrast.html" target="_blank" class="doc-fullscreen-btn">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/></svg>
+            Fullscreen
+          </a>
+        </div>
+        <div class="doc-info">
+          <h3>RF Module &amp; Topological Acoustics</h3>
+          <p>Wave propagation in metamaterial structures. Unidirectional acoustic waveguides for next-generation RF and 5G/6G telecommunications.</p>
+          <div class="doc-tags">
+            <span>Metamaterials</span>
+            <span>5G/6G</span>
+            <span>Wave Routing</span>
+          </div>
+          <div class="doc-actions">
+            <a href="Topological_Acoustics_Documentary_Vertical_Dark_Contrast.html" target="_blank" class="doc-open-btn">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/></svg>
+              Open Fullscreen
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <!-- Predictive Coding -->
+      <div class="doc-card">
+        <div class="doc-frame">
+          <iframe src="PredictiveCoding_Documentary_LinkedIn_Final.html" loading="lazy" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope"></iframe>
+          <div class="doc-frame-overlay"></div>
+          <span class="doc-badge">LIVE</span>
+          <a href="PredictiveCoding_Documentary_LinkedIn_Final.html" target="_blank" class="doc-fullscreen-btn">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/></svg>
+            Fullscreen
+          </a>
+        </div>
+        <div class="doc-info">
+          <h3>Predictive Coding</h3>
+          <p>Neural prediction and error minimization in biological and artificial systems. How the brain constructs reality through hierarchical prediction.</p>
+          <div class="doc-tags">
+            <span>Neuroscience</span>
+            <span>Neural Networks</span>
+            <span>Bayesian Brain</span>
+          </div>
+          <div class="doc-actions">
+            <a href="PredictiveCoding_Documentary_LinkedIn_Final.html" target="_blank" class="doc-open-btn">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/></svg>
+              Open Fullscreen
+            </a>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+  </div><!-- end docs-container -->
+
+  <script src="script.js"></script>
+  <script>
+    // Minimal nav toggle for this page
+    const navToggle = document.getElementById('navToggle');
+    const navLinks = document.getElementById('navLinks');
+    if (navToggle && navLinks) {
+      navToggle.addEventListener('click', () => {
+        navLinks.classList.toggle('active');
+        navToggle.classList.toggle('active');
+      });
+    }
+  </script>
+</body>
+</html>
