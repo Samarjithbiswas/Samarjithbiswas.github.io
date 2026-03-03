@@ -14,7 +14,7 @@
 
         body {
             overflow: hidden;
-            background: #0a192f;
+            background: transparent;
         }
 
         #canvas {
@@ -86,7 +86,7 @@
             renderer = new THREE.WebGLRenderer({ canvas: canvas, antialias: true, alpha: true });
             renderer.setSize(window.innerWidth, window.innerHeight);
             renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
-            renderer.setClearColor(0x0a192f, 1);
+            renderer.setClearColor(0x000000, 0);
             renderer.shadowMap.enabled = false;
             renderer.toneMapping = THREE.ACESFilmicToneMapping;
             renderer.toneMappingExposure = 1.0;

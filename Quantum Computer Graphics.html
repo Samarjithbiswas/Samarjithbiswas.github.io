@@ -13,7 +13,7 @@
         }
 
         body {
-            background: #000a20;
+            background: transparent;
             overflow: hidden;
             width: 100vw;
             height: 100vh;
@@ -41,14 +41,15 @@
 
         function init() {
             scene = new THREE.Scene();
-            scene.background = new THREE.Color(0x000a20); // Dark blue background
+            // Transparent background - no scene.background
 
             const cont = document.getElementById('canvas-container');
             camera = new THREE.PerspectiveCamera(28, cont.clientWidth / cont.clientHeight, 0.1, 1000);
             camera.position.set(10, 6, 10);
             camera.lookAt(0, 1, 0);
 
-            renderer = new THREE.WebGLRenderer({ antialias: true });
+            renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+            renderer.setClearColor(0x000000, 0);
             renderer.setSize(cont.clientWidth, cont.clientHeight);
             renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
             renderer.outputEncoding = THREE.sRGBEncoding;

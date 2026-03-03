@@ -13,8 +13,7 @@
         }
 
         body {
-            background: #000a20;
-            /* Dark blue background */
+            background: transparent;
             overflow: hidden;
             width: 100vw;
             height: 100vh;
@@ -42,7 +41,7 @@
             const canvas = document.getElementById('canvas');
 
             scene = new THREE.Scene();
-            scene.background = new THREE.Color(0x000a20); // Dark blue background
+            // Transparent background - no scene.background
 
             camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
             // Position camera to view the horizontal architecture
@@ -50,8 +49,10 @@
 
             renderer = new THREE.WebGLRenderer({
                 canvas: canvas,
-                antialias: true
+                antialias: true,
+                alpha: true
             });
+            renderer.setClearColor(0x000000, 0);
             renderer.setSize(window.innerWidth, window.innerHeight);
             renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
             renderer.toneMapping = THREE.ACESFilmicToneMapping;
