@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SSH Model Only</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            overflow: hidden;
+            background: #0a192f;
+        }
+
+        #canvas {
+            width: 100vw;
+            height: 100vh;
+            display: block;
+            position: fixed;
+            top: 0;
+            left: 0;
+        }
+    </style>
+</head>
+
+<body>
+    <canvas id="canvas"></canvas>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script>
+        const PI = Math.PI, TAU = 2 * PI;
+        const PAL = {
+            gold: 0xffcc33,
+            black: 0x000000,
+            platinum: 0xE5E4E2,
+            silver: 0xBCC6CC,
+            carbon: 0x1A1A1A,
+            glass: 0xffffff,
+            copper: 0xcc6600,
+            steel: 0x111111,
+            chrome: 0xf1ff00
+        };
+
+        let scene, camera, renderer, group, envMap;
+        let clock = new THREE.Clock();
+
+        function createEnvMap() {
+            const c = document.createElement('canvas');
+            c.width = 512; c.height = 256;
+            const ctx = c.getContext('2d');
+            ctx.fillStyle = '#444444'; ctx.fillRect(0, 0, 512, 256);
+            ctx.fillStyle = '#ffffff'; ctx.fillRect(100, 10, 312, 40); ctx.fillRect(30, 0, 20, 256); ctx.fillRect(460, 0, 20, 256);
+            ctx.fillStyle = '#0a1012'; ctx.fillRect(0, 80, 512, 40); ctx.fillRect(200, 160, 112, 60);
+            ctx.fillStyle = 'rgba(20,20,20, 0.4)'; ctx.fillRect(0, 128, 512, 128);
+            const tex = new THREE.CanvasTexture(c);
+            tex.mapping = THREE.EquirectangularReflectionMapping;
+            return tex;
+        }
+
+        function metalMat(color, opts = {}) {
+            return new THREE.MeshPhysicalMaterial({
+                color: color,
+                roughness: opts.rough !== undefined ? opts.rough : 0.03,
+                metalness: opts.metal !== undefined ? opts.metal : 1.0,
+                envMap: envMap,
+                envMapIntensity: opts.envI || 4.0,
+                clearcoat: 1.0,
+                clearcoatRoughness: 0.01,
+                reflectivity: 1.0,
+                emissive: color,
+                emissiveIntensity: opts.eI || 0.1
+            });
+        }
+
+        function init() {
+            scene = new THREE.Scene();
+
+            camera = new THREE.PerspectiveCamera(36, window.innerWidth / window.innerHeight, 0.1, 2000);
+            camera.position.set(0, 20, 80);
+
+            const canvas = document.getElementById('canvas');
+            renderer = new THREE.WebGLRenderer({ canvas: canvas, antialias: true, alpha: true });
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+            renderer.setClearColor(0x0a192f, 1);
+            renderer.shadowMap.enabled = false;
+            renderer.toneMapping = THREE.ACESFilmicToneMapping;
+            renderer.toneMappingExposure = 1.0;
+            renderer.outputEncoding = THREE.sRGBEncoding;
+
+            envMap = createEnvMap();
+            scene.environment = envMap;
+
+            setupLights();
+
+            group = new THREE.Group();
+            buildChain();
+            scene.add(group);
+
+            animate();
+            window.addEventListener('resize', onResize);
+        }
+
+        function setupLights() {
+            scene.add(new THREE.AmbientLight(0xffffff, 0.15));
+            const key = new THREE.DirectionalLight(0xeef0ff, 2.8);
+            key.position.set(40, 100, 60);
+            scene.add(key);
+
+            const rim = new THREE.PointLight(0x00d2ff, 5.0, 700);
+            rim.position.set(-100, 60, -100);
+            scene.add(rim);
+
+            const fill = new THREE.DirectionalLight(0xd0e0ff, 0.8);
+            fill.position.set(-50, 30, 50);
+            scene.add(fill);
+        }
+
+        function buildChain() {
+            const N = 8;
+            const bondL = 7.0;
+            const dx = bondL * Math.cos(Math.PI / 6);
+            const dy = bondL * Math.sin(Math.PI / 6);
+
+            const chainGroup = new THREE.Group();
+            chainGroup.name = 'chainGroup';
+            group.add(chainGroup);
+
+            const totalLen = N * 2 * dx;
+            let currX = -totalLen / 2;
+
+            for (let n = 0; n < N; n++) {
+                const posA = new THREE.Vector3(currX, 3.0, 0);
+                const posB = new THREE.Vector3(currX + dx, -3.0, 0);
+
+                const a = new THREE.Mesh(new THREE.SphereGeometry(2.2, 32, 32), metalMat(0x222222, { metal: 0.6 }));
+                a.position.copy(posA); a.name = `atomA_${n}`; group.add(a);
+
+                const hA = new THREE.Mesh(new THREE.SphereGeometry(1.2, 24, 24), metalMat(0xffffff, { rough: 0.5, metal: 0.1 }));
+                hA.position.set(currX, 3.0 + 4.9, 0); hA.name = `hydroA_${n}`; group.add(hA);
+                const hBondA = createBond(a.position, hA.position, 0.3, 0xffffff);
+                hBondA.name = `hBondA_${n}`; group.add(hBondA);
+
+                const frameA = new THREE.Mesh(new THREE.TorusGeometry(3, 0.2, 8, 32), metalMat(PAL.gold));
+                frameA.position.copy(posA); frameA.rotation.x = PI / 2; frameA.name = `sublatFrameA_${n}`; group.add(frameA);
+
+                const b = new THREE.Mesh(new THREE.SphereGeometry(2.2, 32, 32), metalMat(0x222222, { metal: 0.6 }));
+                b.position.copy(posB); b.name = `atomB_${n}`; group.add(b);
+
+                const hB = new THREE.Mesh(new THREE.SphereGeometry(1.2, 24, 24), metalMat(0xffffff, { rough: 0.5, metal: 0.1 }));
+                hB.position.set(currX + dx, -3.0 - 4.9, 0); hB.name = `hydroB_${n}`; group.add(hB);
+                const hBondB = createBond(b.position, hB.position, 0.3, 0xffffff);
+                hBondB.name = `hBondB_${n}`; group.add(hBondB);
+
+                const frameB = new THREE.Mesh(new THREE.TorusGeometry(3, 0.2, 8, 32), metalMat(PAL.copper));
+                frameB.position.copy(posB); frameB.rotation.x = PI / 2; frameB.name = `sublatFrameB_${n}`; group.add(frameB);
+
+                const bondV = createBond(posA, posB, 0.6, PAL.gold);
+                bondV.name = `bondV_${n}`; group.add(bondV);
+
+                if (n < N - 1) {
+                    const nextA = new THREE.Vector3(currX + 2 * dx, 3.0, 0);
+                    const bondW = createBond(posB, nextA, 0.6, PAL.steel);
+                    bondW.name = `bondW_${n}`; group.add(bondW);
+                }
+                currX += 2 * dx;
+            }
+        }
+
+        function createBond(p1, p2, rad, col) {
+            const geo = new THREE.CylinderGeometry(rad, rad, 1, 12);
+            geo.translate(0, 0.5, 0);
+            geo.rotateX(Math.PI / 2);
+            const b = new THREE.Mesh(geo, metalMat(col));
+            b.position.copy(p1);
+            b.lookAt(p2);
+            const dist = p1.distanceTo(p2);
+            b.scale.z = dist;
+            return b;
+        }
+
+        function updateChainLayout(lenV, lenW, currX, t, s = 0, splitY = 0) {
+            const getObjs = (prefix) => group.children.filter(c => c.name && c.name.startsWith(prefix));
+            const getCoords = (len, dy) => Math.sqrt(Math.max(0, len * len - dy * dy));
+
+            const globalVibe = Math.sin(t * 2) * 0.05;
+            const _v1 = new THREE.Vector3();
+
+            for (let n = 0; n < 8; n++) {
+                const a = getObjs(`atomA_${n}`)[0], b = getObjs(`atomB_${n}`)[0];
+                const hA = getObjs(`hydroA_${n}`)[0], hB = getObjs(`hydroB_${n}`)[0];
+                const hbA = getObjs(`hBondA_${n}`)[0], hbB = getObjs(`hBondB_${n}`)[0];
+                const bondV = getObjs(`bondV_${n}`)[0], bondW = getObjs(`bondW_${n}`)[0];
+                const fa = getObjs(`sublatFrameA_${n}`)[0], fb = getObjs(`sublatFrameB_${n}`)[0];
+
+                if (a && b) {
+                    const dyV = 6.0 + splitY * 2;
+                    const dxV = getCoords(lenV, dyV);
+
+                    const ay = 3.0 + splitY + globalVibe;
+                    const by = -3.0 - splitY + globalVibe;
+
+                    a.position.set(currX, ay, 0);
+                    b.position.set(currX + dxV, by, 0);
+
+                    if (hA) hA.position.set(a.position.x, ay + 4.9, 0);
+                    if (hB) hB.position.set(b.position.x, by - 4.9, 0);
+
+                    if (hbA) { hbA.position.copy(a.position); hbA.lookAt(hA.getWorldPosition(_v1)); }
+                    if (hbB) { hbB.position.copy(b.position); hbB.lookAt(hB.getWorldPosition(_v1)); }
+
+                    if (bondV) {
+                        bondV.position.copy(a.position);
+                        bondV.lookAt(b.getWorldPosition(_v1));
+                        bondV.scale.z = a.position.distanceTo(b.position) * 1.1;
+                        bondV.material.emissiveIntensity = s * 0.5;
+                    }
+
+                    const dxW = getCoords(lenW, dyV);
+                    if (bondW && n < 7) {
+                        const nextA = getObjs(`atomA_${n + 1}`)[0];
+                        if (nextA) {
+                            const nextPosA = new THREE.Vector3(b.position.x + dxW, 3.0 + splitY + globalVibe, 0);
+                            bondW.position.copy(b.position);
+                            const oldPos = nextA.position.clone();
+                            nextA.position.copy(nextPosA);
+                            bondW.lookAt(nextA.getWorldPosition(_v1));
+                            nextA.position.copy(oldPos);
+                            bondW.scale.z = b.position.distanceTo(nextPosA) * 1.1;
+                        }
+                    }
+
+                    if (fa) fa.position.copy(a.position);
+                    if (fb) fb.position.copy(b.position);
+
+                    currX += (dxV + dxW);
+                }
+            }
+        }
+
+        function animate() {
+            requestAnimationFrame(animate);
+            const delta = clock.getDelta(), t = clock.getElapsedTime();
+
+            const getObjs = (prefix) => group.children.filter(c => c.name && c.name.startsWith(prefix));
+
+            // group.rotation.y += delta * 0.15; // Removed overall rotation
+
+            getObjs('sublatFrame').forEach((f, i) => {
+                f.rotation.z += delta * 1.5;
+                f.scale.setScalar(1 + Math.sin(t * 3 + i) * 0.05);
+            });
+
+            // getObjs('atom').forEach((a) => { a.rotation.y += delta * 0.4; }); // Removed ball rotation
+
+            const baseL_std = 8.529;
+            const startX_std = -(8 * 2 * (7.0 * Math.cos(Math.PI / 6))) / 2;
+
+            // Breathing mode as standard
+            const dL = Math.sin(t * 2) * 0.15;
+            const lenV = baseL_std * (1 - dL);
+            const lenW = baseL_std * (1 + dL);
+            updateChainLayout(lenV, lenW, startX_std, t);
+
+            // Fixed camera position instead of orbiting
+            camera.position.set(0, 15, 75);
+            camera.lookAt(0, 0, 0);
+
+            renderer.render(scene, camera);
+        }
+
+        function onResize() {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        }
+
+        init();
+    </script>
+</body>
+
+</html>

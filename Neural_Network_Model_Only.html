@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Neural Network Model</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            overflow: hidden;
+            background: transparent;
+        }
+        
+        canvas {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <div id="canvas-container"></div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script>
+        let scene, camera, renderer;
+        let animationObjects = [];
+        let modelGroup = new THREE.Group();
+
+        const model = {
+            color: 0x4a9eff,
+            accentColor: 0x60a5fa
+        };
+
+        function init() {
+            scene = new THREE.Scene();
+            // No fog, no background — fully transparent
+            
+            camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 2000);
+            camera.position.set(0, 25, 80);
+            
+            renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+            renderer.setClearColor(0x000000, 0); // Fully transparent
+            renderer.shadowMap.enabled = true;
+            renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+            document.getElementById('canvas-container').appendChild(renderer.domElement);
+            
+            setupLighting();
+            buildNeuralNet();
+            scene.add(modelGroup);
+            animate();
+            
+            window.addEventListener('resize', handleResize);
+        }
+
+        function setupLighting() {
+            const ambient = new THREE.AmbientLight(0xffffff, 0.3);
+            scene.add(ambient);
+            
+            const mainLight = new THREE.DirectionalLight(0xffffff, 1.5);
+            mainLight.position.set(60, 80, 60);
+            mainLight.castShadow = true;
+            mainLight.shadow.mapSize.width = 2048;
+            mainLight.shadow.mapSize.height = 2048;
+            mainLight.shadow.camera.near = 0.5;
+            mainLight.shadow.camera.far = 500;
+            scene.add(mainLight);
+            
+            const fillLight = new THREE.DirectionalLight(0x4a9eff, 0.8);
+            fillLight.position.set(-60, 40, 40);
+            scene.add(fillLight);
+            
+            const rimLight = new THREE.DirectionalLight(0x8b5cf6, 0.7);
+            rimLight.position.set(0, -40, -60);
+            scene.add(rimLight);
+            
+            // Dynamic accent lights
+            const accentLight1 = new THREE.PointLight(0x4a9eff, 2.5, 200);
+            accentLight1.position.set(50, 50, 50);
+            scene.add(accentLight1);
+            animationObjects.push({ obj: accentLight1, type: 'accentLight', index: 0 });
+            
+            const accentLight2 = new THREE.PointLight(0xec4899, 2.5, 200);
+            accentLight2.position.set(-50, -50, 50);
+            scene.add(accentLight2);
+            animationObjects.push({ obj: accentLight2, type: 'accentLight', index: 1 });
+            
+            const accentLight3 = new THREE.PointLight(0x10b981, 2, 200);
+            accentLight3.position.set(0, 50, -50);
+            scene.add(accentLight3);
+            animationObjects.push({ obj: accentLight3, type: 'accentLight', index: 2 });
+        }
+
+        function buildNeuralNet() {
+            const architecture = [8, 24, 18, 14, 10, 6, 3, 1];
+            const layerSpacing = 11;
+            const allLayers = [];
+            
+            architecture.forEach((neurons, layerIdx) => {
+                const x = (layerIdx - architecture.length / 2) * layerSpacing;
+                const layer = [];
+                
+                for (let n = 0; n < neurons; n++) {
+                    const y = (n - neurons / 2) * 2.8;
+                    
+                    // Neuron
+                    const neuronGeo = new THREE.SphereGeometry(0.7, 16, 16);
+                    const neuronMat = new THREE.MeshStandardMaterial({
+                        color: model.color,
+                        emissive: model.color,
+                        emissiveIntensity: 0.5,
+                        roughness: 0.15,
+                        metalness: 0.85
+                    });
+                    const neuron = new THREE.Mesh(neuronGeo, neuronMat);
+                    neuron.position.set(x, y, 0);
+                    neuron.castShadow = true;
+                    modelGroup.add(neuron);
+                    layer.push(neuron);
+                    
+                    animationObjects.push({
+                        obj: neuron,
+                        type: 'neuron',
+                        layerIdx: layerIdx,
+                        neuronIdx: n,
+                        phase: Math.random() * Math.PI * 2
+                    });
+                    
+                    // Activation glow
+                    const glowGeo = new THREE.SphereGeometry(0.9, 16, 16);
+                    const glowMat = new THREE.MeshBasicMaterial({
+                        color: model.accentColor,
+                        transparent: true,
+                        opacity: 0.3
+                    });
+                    const glow = new THREE.Mesh(glowGeo, glowMat);
+                    glow.position.set(x, y, 0);
+                    modelGroup.add(glow);
+                    
+                    animationObjects.push({
+                        obj: glow,
+                        type: 'neuronGlow',
+                        neuron: neuron,
+                        layerIdx: layerIdx,
+                        neuronIdx: n,
+                        phase: Math.random() * Math.PI * 2
+                    });
+                }
+                
+                allLayers.push(layer);
+                
+                // Synaptic connections
+                if (layerIdx > 0) {
+                    const prevLayer = allLayers[layerIdx - 1];
+                    layer.forEach(neuron => {
+                        prevLayer.forEach((prevNeuron, pIdx) => {
+                            const points = [prevNeuron.position.clone(), neuron.position.clone()];
+                            const lineGeo = new THREE.BufferGeometry().setFromPoints(points);
+                            const lineMat = new THREE.LineBasicMaterial({
+                                color: model.color,
+                                transparent: true,
+                                opacity: 0.08
+                            });
+                            const synapse = new THREE.Line(lineGeo, lineMat);
+                            modelGroup.add(synapse);
+                            
+                            // Weight strength indicators (some synapses stronger)
+                            if (Math.random() > 0.85) {
+                                const midpoint = new THREE.Vector3().addVectors(
+                                    prevNeuron.position,
+                                    neuron.position
+                                ).multiplyScalar(0.5);
+                                
+                                const weightGeo = new THREE.SphereGeometry(0.12, 8, 8);
+                                const weightMat = new THREE.MeshBasicMaterial({
+                                    color: model.accentColor,
+                                    transparent: true,
+                                    opacity: 0.7
+                                });
+                                const weight = new THREE.Mesh(weightGeo, weightMat);
+                                weight.position.copy(midpoint);
+                                modelGroup.add(weight);
+                                
+                                animationObjects.push({
+                                    obj: weight,
+                                    type: 'weight',
+                                    phase: Math.random() * Math.PI * 2
+                                });
+                            }
+                        });
+                    });
+                }
+            });
+            
+            // Signal propagation particles
+            for (let i = 0; i < 80; i++) {
+                const signalGeo = new THREE.SphereGeometry(0.18, 8, 8);
+                const signalMat = new THREE.MeshBasicMaterial({
+                    color: 0xffffff,
+                    transparent: true,
+                    opacity: 0.9
+                });
+                const signal = new THREE.Mesh(signalGeo, signalMat);
+                
+                const startX = (-architecture.length / 2) * layerSpacing;
+                const endX = (architecture.length / 2) * layerSpacing;
+                signal.position.set(
+                    startX + Math.random() * (endX - startX),
+                    (Math.random() - 0.5) * 30,
+                    0
+                );
+                
+                modelGroup.add(signal);
+                
+                animationObjects.push({
+                    obj: signal,
+                    type: 'signal',
+                    startX: startX,
+                    endX: endX,
+                    speed: 0.4 + Math.random() * 0.3,
+                    phase: Math.random() * Math.PI * 2
+                });
+            }
+            
+            // Backpropagation gradient flow (opposite direction)
+            for (let i = 0; i < 40; i++) {
+                const gradGeo = new THREE.SphereGeometry(0.15, 8, 8);
+                const gradMat = new THREE.MeshBasicMaterial({
+                    color: 0xff4444,
+                    transparent: true,
+                    opacity: 0.7
+                });
+                const gradient = new THREE.Mesh(gradGeo, gradMat);
+                
+                const startX = (-architecture.length / 2) * layerSpacing;
+                const endX = (architecture.length / 2) * layerSpacing;
+                gradient.position.set(
+                    startX + Math.random() * (endX - startX),
+                    (Math.random() - 0.5) * 30,
+                    2
+                );
+                
+                modelGroup.add(gradient);
+                
+                animationObjects.push({
+                    obj: gradient,
+                    type: 'backprop',
+                    startX: startX,
+                    endX: endX,
+                    speed: 0.3 + Math.random() * 0.2
+                });
+            }
+        }
+
+        function animate() {
+            requestAnimationFrame(animate);
+            
+            const time = Date.now() * 0.001;
+            
+            animationObjects.forEach(anim => {
+                switch(anim.type) {
+                    case 'accentLight':
+                        const lightRadius = 70;
+                        const lightAngle = time * 0.2 + anim.index * Math.PI * 0.66;
+                        anim.obj.position.x = Math.cos(lightAngle) * lightRadius;
+                        anim.obj.position.z = Math.sin(lightAngle) * lightRadius;
+                        anim.obj.position.y = 50 + Math.sin(time + anim.index) * 20;
+                        anim.obj.intensity = 2 + Math.sin(time * 2 + anim.index) * 0.5;
+                        break;
+                        
+                    case 'neuron':
+                        const activation = Math.sin(time * 2.8 + anim.phase + anim.layerIdx * 0.6) * 0.5 + 0.5;
+                        anim.obj.material.emissiveIntensity = 0.25 + activation * 0.55;
+                        anim.obj.scale.setScalar(0.75 + activation * 0.45);
+                        break;
+                        
+                    case 'neuronGlow':
+                        const glowActivation = Math.sin(time * 2.8 + anim.phase + anim.layerIdx * 0.6) * 0.5 + 0.5;
+                        anim.obj.scale.setScalar(1 + glowActivation * 0.5);
+                        anim.obj.material.opacity = glowActivation * 0.4;
+                        break;
+                        
+                    case 'weight':
+                        anim.obj.material.opacity = 0.5 + Math.sin(time * 2 + anim.phase) * 0.3;
+                        break;
+                        
+                    case 'signal':
+                        anim.obj.position.x += anim.speed;
+                        if (anim.obj.position.x > anim.endX) {
+                            anim.obj.position.x = anim.startX;
+                        }
+                        anim.obj.material.opacity = 0.7 + Math.sin(time * 3 + anim.obj.position.x * 0.2) * 0.3;
+                        break;
+                        
+                    case 'backprop':
+                        anim.obj.position.x -= anim.speed;
+                        if (anim.obj.position.x < anim.startX) {
+                            anim.obj.position.x = anim.endX;
+                        }
+                        anim.obj.material.opacity = 0.5 + Math.sin(time * 2.5 - anim.obj.position.x * 0.2) * 0.3;
+                        break;
+                }
+            });
+            
+            // Camera orbiting around the neural network
+            const cameraRadius = 85;
+            const cameraSpeed = 0.12;
+            const cameraHeight = 28;
+            
+            camera.position.x = Math.sin(time * cameraSpeed) * cameraRadius;
+            camera.position.z = Math.cos(time * cameraSpeed) * cameraRadius;
+            camera.position.y = cameraHeight + Math.sin(time * 0.07) * 18;
+            camera.lookAt(0, 0, 0);
+            
+            renderer.render(scene, camera);
+        }
+
+        function handleResize() {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        }
+
+        init();
+    </script>
+</body>
+</html>

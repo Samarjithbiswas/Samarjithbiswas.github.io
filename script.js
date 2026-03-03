@@ -641,18 +641,18 @@ function buildCarousel(trackId, items, cardClass = '') {
 }
 
 // ── Carousel data ──────────────────────────────────────────────────────────
+// Team carousel: Only team and collaboration human photos
 const TEAM_ITEMS = [
   { src: '1.jpg',  label: 'Presentation' },
   { src: '2.jpg',  label: 'Conference Talk' },
   { src: '3.jpg',  label: 'Team Meeting' },
   { src: 'ThesisSnap.jpg', label: 'PhD Defense' },
-  { src: 'Untitled_Project_12.png', label: 'Research Lab' },
-  { src: 'Untitled_Project_5.png', label: 'Collaboration' },
   { src: 'ASA_1.jpg', label: 'ASA Presentation' },
   { src: 'ASA_2.jpg', label: 'ASA Conference' },
   { src: 'ASA_3.jpg', label: 'ASA Session' },
 ];
 
+// TAMS carousel: Research models and renderings
 const TAMS_ITEMS = [
   { src: 'Themaocosutic_Liner_V5.png', label: 'Thermoacoustic Liner' },
   { src: 'Tams_Barriere.png', label: 'TAMS Barrier' },
@@ -668,18 +668,17 @@ const TAMS_ITEMS = [
   { src: 'Thermoacoustic_Liner.png', label: 'Thermoacoustic Liner V2' },
 ];
 
-// Combined showcase for hero section (mix of TAMS and team)
+// Innovation showcase: Only 3D models (no human photos)
 const SHOWCASE_ITEMS = [
-  { src: 'Themaocosutic_Liner_V5.png', label: 'Thermoacoustic Liner' },
-  { src: 'ASA_1.jpg', label: 'ASA Presentation' },
-  { src: 'Tams_Barriere.png', label: 'TAMS Barrier' },
-  { src: 'ASA_2.jpg', label: 'ASA Conference' },
-  { src: 'MetaWallAssembly_Isometric_V6_WhiteFebric_V3_Transparent_V2.png', label: 'Meta Wall Assembly' },
-  { src: 'ASA_3.jpg', label: 'ASA Session' },
-  { src: 'V2HelicalResonator_100_ISSOMERIC_Transparents_Sectional.PNG', label: 'Helical Resonator' },
-  { src: 'ThesisSnap.jpg', label: 'PhD Defense' },
   { src: 'SpiralResonator.png', label: 'Spiral Resonator' },
   { src: 'Acoustic_Liner_Turbojet.png', label: 'Turbojet Acoustic Liner' },
+  { src: 'Thermoacoustic_Liner.png', label: 'Thermoacoustic Liner' },
+  { src: 'Themaocosutic_Liner_V5.png', label: 'Thermoacoustic System' },
+  { src: 'Tams_Barriere.png', label: 'TAMS Barrier' },
+  { src: 'MetaWallAssembly_Isometric_V6_WhiteFebric_V3_Transparent_V2.png', label: 'Meta Wall Assembly' },
+  { src: 'V2HelicalResonator_100_ISSOMERIC_Transparents_Sectional.PNG', label: 'Helical Resonator' },
+  { src: 'SpiralStack_2Turns_v4_Slice_ZOOMED.png', label: 'Spiral Stack' },
+  { src: 'Thermopile.png', label: 'Thermopile' },
 ];
 
 // Build carousels as soon as DOM is ready (safe for both inline and deferred)

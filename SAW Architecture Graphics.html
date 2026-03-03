@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SAW Architecture Graphics</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: #000a20;
+            /* Dark blue background */
+            overflow: hidden;
+            width: 100vw;
+            height: 100vh;
+        }
+
+        #canvas {
+            width: 100vw;
+            height: 100vh;
+            display: block;
+        }
+    </style>
+</head>
+
+<body>
+    <canvas id="canvas"></canvas>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+    <script>
+        let scene, camera, renderer, controls;
+        let anims = [];
+        let sawGroup;
+
+        function init() {
+            const canvas = document.getElementById('canvas');
+
+            scene = new THREE.Scene();
+            scene.background = new THREE.Color(0x000a20); // Dark blue background
+
+            camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
+            // Position camera to view the horizontal architecture
+            camera.position.set(0, 15, 160);
+
+            renderer = new THREE.WebGLRenderer({
+                canvas: canvas,
+                antialias: true
+            });
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+            renderer.toneMapping = THREE.ACESFilmicToneMapping;
+            renderer.toneMappingExposure = 1.2;
+            renderer.shadowMap.enabled = true;
+            renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+
+            controls = new THREE.OrbitControls(camera, renderer.domElement);
+            controls.enableDamping = true;
+            controls.dampingFactor = 0.05;
+            controls.target.set(0, 0, 0);
+
+            // Lighting
+            const ambient = new THREE.AmbientLight(0x404050, 1.5);
+            scene.add(ambient);
+
+            const mainLight = new THREE.DirectionalLight(0xffffff, 1.2);
+            mainLight.position.set(20, 50, 20);
+            mainLight.castShadow = true;
+            mainLight.shadow.mapSize.width = 2048;
+            mainLight.shadow.mapSize.height = 2048;
+            scene.add(mainLight);
+
+            const fillLight = new THREE.DirectionalLight(0xaaccff, 0.6);
+            fillLight.position.set(-20, 20, -20);
+            scene.add(fillLight);
+
+            // Build architecture
+            buildSAWFilterDevice();
+
+            // Re-center and adjust the camera to frame the geometry horizontally
+            camera.position.set(0, 15, 160);
+            controls.target.set(0, 0, 0);
+            controls.update();
+
+            window.addEventListener('resize', onWindowResize, false);
+
+            animate();
+        }
+
+        function buildSAWFilterDevice() {
+            sawGroup = new THREE.Group();
+            sawGroup.scale.set(1.5, 1.5, 1.5);
+            // No rotation is applied to keep it horizontal as requested
+
+            // PIEZOELECTRIC SUBSTRATE (LiNbO3)
+            const substrateGeo = new THREE.BoxGeometry(80, 2, 35);
+            const substrateMat = new THREE.MeshStandardMaterial({
+                color: 0x1e3a5f,
+                roughness: 0.4,
+                metalness: 0.1,
+                transparent: true,
+                opacity: 0.9
+            });
+            const substrate = new THREE.Mesh(substrateGeo, substrateMat);
+            substrate.receiveShadow = true;
+            substrate.position.y = 0;
+            sawGroup.add(substrate);
+
+            // Crystal structure pattern on substrate
+            for (let i = 0; i < 200; i++) {
+                const crystalGeo = new THREE.BoxGeometry(0.3, 0.1, 0.3);
+                const crystalMat = new THREE.MeshStandardMaterial({
+                    color: 0x2563eb,
+                    emissive: 0x2563eb,
+                    emissiveIntensity: 0.1
+                });
+                const crystal = new THREE.Mesh(crystalGeo, crystalMat);
+                crystal.position.set(
+                    (Math.random() - 0.5) * 75,
+                    1.05,
+                    (Math.random() - 0.5) * 30
+                );
+                sawGroup.add(crystal);
+            }
+
+            // INPUT IDT
+            buildIDTForSAWFilter(-28, 'input', sawGroup);
+
+            // OUTPUT IDT
+            buildIDTForSAWFilter(28, 'output', sawGroup);
+
+            // PHONONIC CRYSTAL REGION (between IDTs)
+            buildPhononicCrystalForSAWFilter(sawGroup);
+
+            // REFLECTOR GRATINGS
+            buildReflectorsForSAWFilter(-38, sawGroup);
+            buildReflectorsForSAWFilter(38, sawGroup);
+
+            // BOND PADS
+            const padPositions = [
+                { x: -35, z: -14 },
+                { x: -35, z: 14 },
+                { x: 35, z: -14 },
+                { x: 35, z: 14 }
+            ];
+
+            padPositions.forEach(pos => {
+                const padGeo = new THREE.BoxGeometry(4, 0.3, 4);
+                const padMat = new THREE.MeshStandardMaterial({
+                    color: 0xf59e0b,
+                    roughness: 0.3,
+                    metalness: 0.9
+                });
+                const pad = new THREE.Mesh(padGeo, padMat);
+                pad.position.set(pos.x, 1.15, pos.z);
+                pad.castShadow = true;
+                sawGroup.add(pad);
+            });
+
+            // SAW WAVE VISUALIZATION
+            for (let i = 0; i < 60; i++) {
+                const waveGeo = new THREE.SphereGeometry(0.15, 6, 6);
+                const waveMat = new THREE.MeshStandardMaterial({
+                    color: 0x10b981,
+                    emissive: 0x10b981,
+                    emissiveIntensity: 0.8,
+                    transparent: true,
+                    opacity: 0.8
+                });
+                const wave = new THREE.Mesh(waveGeo, waveMat);
+                sawGroup.add(wave);
+                anims.push({
+                    type: 'sawWaveFilter',
+                    obj: wave,
+                    progress: i / 60,
+                    lane: i % 5
+                });
+            }
+
+            scene.add(sawGroup);
+        }
+
+        function buildIDTForSAWFilter(xPos, type, group) {
+            const idtGroup = new THREE.Group();
+            idtGroup.position.x = xPos;
+
+            const fingerCount = 25;
+            const fingerSpacing = 0.6;
+            const fingerWidth = 0.25;
+            const fingerLength = 18;
+
+            const topBusZ = -10;
+            const bottomBusZ = 10;
+
+            for (let i = 0; i < fingerCount; i++) {
+                const fingerGeo = new THREE.BoxGeometry(fingerWidth, 0.15, fingerLength);
+                const fingerMat = new THREE.MeshStandardMaterial({
+                    color: 0xf59e0b,
+                    roughness: 0.3,
+                    metalness: 0.9,
+                    emissive: 0xf59e0b,
+                    emissiveIntensity: 0.1
+                });
+                const finger = new THREE.Mesh(fingerGeo, fingerMat);
+
+                let fingerCenterZ;
+                if (i % 2 === 0) {
+                    fingerCenterZ = topBusZ + fingerLength / 2;
+                } else {
+                    fingerCenterZ = bottomBusZ - fingerLength / 2;
+                }
+
+                finger.position.set(
+                    (i - fingerCount / 2) * fingerSpacing,
+                    1.08,
+                    fingerCenterZ
+                );
+                finger.castShadow = true;
+                idtGroup.add(finger);
+                anims.push({ type: 'idtFingerFilter', obj: finger, i: i, xPos: xPos });
+            }
+
+            const busGeo = new THREE.BoxGeometry(fingerCount * fingerSpacing, 0.15, 1.5);
+            const busMat = new THREE.MeshStandardMaterial({
+                color: 0xf59e0b,
+                roughness: 0.3,
+                metalness: 0.9,
+                emissive: 0xf59e0b,
+                emissiveIntensity: 0.1
+            });
+
+            const topBus = new THREE.Mesh(busGeo, busMat);
+            topBus.position.set(0, 1.08, topBusZ);
+            idtGroup.add(topBus);
+            anims.push({ type: 'idtBusBarFilter', obj: topBus, isTop: true, xPos: xPos });
+
+            const bottomBus = new THREE.Mesh(busGeo.clone(), busMat.clone());
+            bottomBus.position.set(0, 1.08, bottomBusZ);
+            idtGroup.add(bottomBus);
+            anims.push({ type: 'idtBusBarFilter', obj: bottomBus, isTop: false, xPos: xPos });
+
+            const padGeo = new THREE.BoxGeometry(3, 0.2, 4);
+            const topPad = new THREE.Mesh(padGeo, busMat);
+            topPad.position.set(0, 1.1, -13);
+            idtGroup.add(topPad);
+
+            const bottomPad = new THREE.Mesh(padGeo, busMat);
+            bottomPad.position.set(0, 1.1, 13);
+            idtGroup.add(bottomPad);
+
+            group.add(idtGroup);
+        }
+
+        function buildPhononicCrystalForSAWFilter(group) {
+            const pcGroup = new THREE.Group();
+
+            const rows = 8;
+            const cols = 12;
+            const spacing = 1.8;
+
+            for (let i = 0; i < rows; i++) {
+                for (let j = 0; j < cols; j++) {
+                    const pillarGeo = new THREE.CylinderGeometry(0.4, 0.4, 0.6, 16);
+                    const pillarMat = new THREE.MeshStandardMaterial({
+                        color: 0x0ea5e9,
+                        roughness: 0.3,
+                        metalness: 0.7,
+                        emissive: 0x0ea5e9,
+                        emissiveIntensity: 0.2
+                    });
+                    const pillar = new THREE.Mesh(pillarGeo, pillarMat);
+                    pillar.position.set(
+                        (j - cols / 2 + 0.5) * spacing,
+                        1.3,
+                        (i - rows / 2 + 0.5) * spacing
+                    );
+                    pillar.castShadow = true;
+                    pcGroup.add(pillar);
+                    anims.push({ type: 'pcPillarFilter', obj: pillar, i: i, j: j });
+                }
+            }
+
+            const interfaceGeo = new THREE.BoxGeometry(cols * spacing, 0.3, 0.5);
+            const interfaceMat = new THREE.MeshStandardMaterial({
+                color: 0x10b981,
+                emissive: 0x10b981,
+                emissiveIntensity: 0.5
+            });
+            const interface1 = new THREE.Mesh(interfaceGeo, interfaceMat);
+            interface1.position.set(0, 1.15, 0);
+            pcGroup.add(interface1);
+            anims.push({ type: 'topoInterfaceFilter', obj: interface1 });
+
+            group.add(pcGroup);
+        }
+
+        function buildReflectorsForSAWFilter(xPos, group) {
+            const refGroup = new THREE.Group();
+            refGroup.position.x = xPos;
+
+            const stripCount = 15;
+            const stripSpacing = 0.5;
+
+            for (let i = 0; i < stripCount; i++) {
+                const stripGeo = new THREE.BoxGeometry(0.2, 0.1, 10);
+                const stripMat = new THREE.MeshStandardMaterial({
+                    color: 0x6b7280,
+                    roughness: 0.4,
+                    metalness: 0.8
+                });
+                const strip = new THREE.Mesh(stripGeo, stripMat);
+                strip.position.set((i - stripCount / 2) * stripSpacing, 1.05, 0);
+                refGroup.add(strip);
+            }
+
+            group.add(refGroup);
+        }
+
+        function onWindowResize() {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        }
+
+        const clock = new THREE.Clock();
+
+        function animate() {
+            requestAnimationFrame(animate);
+
+            const time = clock.getElapsedTime();
+            controls.update();
+
+            // Process animations
+            for (let i = 0; i < anims.length; i++) {
+                const a = anims[i];
+
+                switch (a.type) {
+                    case 'idtFingerFilter':
+                        const vibFilter = Math.sin(time * 20 + a.i * 0.5) * 0.05;
+                        a.obj.position.y = 1.08 + vibFilter;
+                        a.obj.material.emissiveIntensity = 0.1 + Math.abs(vibFilter) * 2;
+                        break;
+
+                    case 'idtBusBarFilter':
+                        const busVibFilter = Math.sin(time * 20) * 0.05;
+                        a.obj.position.y = 1.08 + busVibFilter;
+                        a.obj.material.emissiveIntensity = 0.1 + Math.abs(busVibFilter) * 2;
+                        break;
+
+                    case 'pcPillarFilter':
+                        const resFilter = Math.sin(time * 8 + a.i * 0.3 + a.j * 0.3) * 0.1;
+                        a.obj.scale.y = 1 + resFilter;
+                        a.obj.material.emissiveIntensity = 0.2 + resFilter * 0.5;
+                        break;
+
+                    case 'topoInterfaceFilter':
+                        a.obj.material.emissiveIntensity = 0.5 + Math.sin(time * 4) * 0.2;
+                        break;
+
+                    case 'sawWaveFilter':
+                        a.progress += 0.004;
+                        if (a.progress > 1) a.progress = 0;
+
+                        const filterX = -35 + a.progress * 70;
+                        const filterY = 1.5 + Math.sin(a.progress * Math.PI * 20 + time * 10) * 0.3;
+                        const filterZ = (a.lane - 2) * 2;
+
+                        a.obj.position.set(filterX, filterY, filterZ);
+
+                        let filterIntensity = 0.8;
+                        if (filterX > -10 && filterX < 10) {
+                            filterIntensity = 0.4 + Math.sin(a.progress * Math.PI * 40) * 0.4;
+                        }
+                        a.obj.material.opacity = filterIntensity;
+                        break;
+                }
+            }
+
+            renderer.render(scene, camera);
+        }
+
+        // Initialize scene
+        init();
+    </script>
+</body>
+
+</html>

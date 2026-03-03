@@ -1,0 +1,1183 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quantum Computer Graphics</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: #000a20;
+            overflow: hidden;
+            width: 100vw;
+            height: 100vh;
+        }
+
+        #canvas-container {
+            width: 100vw;
+            height: 100vh;
+            position: relative;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="canvas-container"></div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script>
+        let scene, camera, renderer, qc;
+        let rotating = true;
+        let componentCount = 0;
+        let cableCount = 0;
+        const mats = {};
+        let startTime = 0;
+
+        function init() {
+            scene = new THREE.Scene();
+            scene.background = new THREE.Color(0x000a20); // Dark blue background
+
+            const cont = document.getElementById('canvas-container');
+            camera = new THREE.PerspectiveCamera(28, cont.clientWidth / cont.clientHeight, 0.1, 1000);
+            camera.position.set(10, 6, 10);
+            camera.lookAt(0, 1, 0);
+
+            renderer = new THREE.WebGLRenderer({ antialias: true });
+            renderer.setSize(cont.clientWidth, cont.clientHeight);
+            renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+            renderer.outputEncoding = THREE.sRGBEncoding;
+            renderer.shadowMap.enabled = true;
+            renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+            cont.appendChild(renderer.domElement);
+
+            createMaterials();
+            setupLights();
+
+            qc = new THREE.Group();
+            buildFullDetailSycamore();
+            scene.add(qc);
+
+            setupControls();
+            animate();
+            window.addEventListener('resize', onResize);
+        }
+
+        function createMaterials() {
+            mats.gold = new THREE.MeshStandardMaterial({
+                color: 0xFFD700, metalness: 1.0, roughness: 0.06
+            });
+            mats.warmGold = new THREE.MeshStandardMaterial({
+                color: 0xE8B923, metalness: 1.0, roughness: 0.1
+            });
+            mats.darkGold = new THREE.MeshStandardMaterial({
+                color: 0xC9A227, metalness: 1.0, roughness: 0.12
+            });
+            mats.orangeGold = new THREE.MeshStandardMaterial({
+                color: 0xDFA125, metalness: 1.0, roughness: 0.1
+            });
+            mats.steel = new THREE.MeshStandardMaterial({
+                color: 0xD0D0D0, metalness: 1.0, roughness: 0.05
+            });
+            mats.brushedSteel = new THREE.MeshStandardMaterial({
+                color: 0xB8B8B8, metalness: 0.95, roughness: 0.12
+            });
+            mats.copper = new THREE.MeshStandardMaterial({
+                color: 0xB87333, metalness: 1.0, roughness: 0.18
+            });
+            mats.roseCu = new THREE.MeshStandardMaterial({
+                color: 0xCC8866, metalness: 0.95, roughness: 0.22
+            });
+            mats.brightCu = new THREE.MeshStandardMaterial({
+                color: 0xDA8A67, metalness: 1.0, roughness: 0.15
+            });
+            mats.darkCoax = new THREE.MeshStandardMaterial({
+                color: 0x151515, metalness: 0.35, roughness: 0.65
+            });
+            mats.grayCoax = new THREE.MeshStandardMaterial({
+                color: 0x252525, metalness: 0.3, roughness: 0.6
+            });
+            mats.brownCoax = new THREE.MeshStandardMaterial({
+                color: 0x3D2B1F, metalness: 0.3, roughness: 0.55
+            });
+            mats.whiteCoax = new THREE.MeshStandardMaterial({
+                color: 0xFAFAF0, metalness: 0.2, roughness: 0.4
+            });
+            mats.tanCoax = new THREE.MeshStandardMaterial({
+                color: 0xE8DCC8, metalness: 0.25, roughness: 0.45
+            });
+            mats.filterBody = new THREE.MeshStandardMaterial({
+                color: 0xEAEAEA, metalness: 0.93, roughness: 0.08
+            });
+            mats.sma = new THREE.MeshStandardMaterial({
+                color: 0xFFD700, metalness: 1.0, roughness: 0.04
+            });
+            mats.chrome = new THREE.MeshStandardMaterial({
+                color: 0xF5F5F5, metalness: 1.0, roughness: 0.02
+            });
+            mats.black = new THREE.MeshStandardMaterial({
+                color: 0x0A0A0A, metalness: 0.25, roughness: 0.5
+            });
+            mats.darkGray = new THREE.MeshStandardMaterial({
+                color: 0x2A2A2A, metalness: 0.4, roughness: 0.45
+            });
+            mats.blue = new THREE.MeshStandardMaterial({
+                color: 0x1E3A5F, metalness: 0.6, roughness: 0.3
+            });
+            mats.pcb = new THREE.MeshStandardMaterial({
+                color: 0x1D4D2C, metalness: 0.3, roughness: 0.6
+            });
+        }
+
+        function setupLights() {
+            scene.add(new THREE.AmbientLight(0xFFFAF0, 0.55));
+
+            const key = new THREE.DirectionalLight(0xFFFFFF, 2.0);
+            key.position.set(10, 18, 10);
+            key.castShadow = true;
+            key.shadow.mapSize.width = 2048;
+            key.shadow.mapSize.height = 2048;
+            scene.add(key);
+
+            const fill = new THREE.DirectionalLight(0xFFF5E0, 0.7);
+            fill.position.set(-8, 10, -8);
+            scene.add(fill);
+
+            const rim1 = new THREE.DirectionalLight(0xFFEED0, 0.4);
+            rim1.position.set(0, -8, 12);
+            scene.add(rim1);
+
+            const rim2 = new THREE.DirectionalLight(0xFFE8C0, 0.3);
+            rim2.position.set(12, 0, -8);
+            scene.add(rim2);
+
+            const glow1 = new THREE.PointLight(0xFFAA00, 3.0, 20);
+            glow1.position.set(0, 2, 0);
+            scene.add(glow1);
+
+            const glow2 = new THREE.PointLight(0xFFBB33, 1.5, 14);
+            glow2.position.set(4, 1, 4);
+            scene.add(glow2);
+
+            const glow3 = new THREE.PointLight(0xFFCC44, 1.2, 12);
+            glow3.position.set(-3, 0, -3);
+            scene.add(glow3);
+
+            const glow4 = new THREE.PointLight(0xFFDD55, 0.8, 10);
+            glow4.position.set(0, 4, 0);
+            scene.add(glow4);
+        }
+
+        function buildFullDetailSycamore() {
+            const plates = [
+                { y: 5.5, r: 2.25, t: 0.15, m: mats.steel, type: 'top' },
+                { y: 4.6, r: 2.15, t: 0.12, m: mats.brushedSteel, type: 'silver' },
+                { y: 3.75, r: 2.05, t: 0.11, m: mats.brushedSteel, type: 'silver' },
+                { y: 2.95, r: 1.95, t: 0.11, m: mats.gold, type: 'gold' },
+                { y: 2.2, r: 1.85, t: 0.1, m: mats.warmGold, type: 'gold' },
+                { y: 1.5, r: 1.75, t: 0.1, m: mats.orangeGold, type: 'gold' },
+                { y: 0.8, r: 1.6, t: 0.1, m: mats.gold, type: 'filter' },
+                { y: 0.15, r: 1.45, t: 0.1, m: mats.darkGold, type: 'filter' },
+                { y: -0.45, r: 1.28, t: 0.1, m: mats.warmGold, type: 'lower' },
+                { y: -1.0, r: 1.1, t: 0.12, m: mats.roseCu, type: 'bottom' }
+            ];
+
+            plates.forEach((p, i) => createFullDetailPlate(p, i, plates.length));
+            createDetailedColdHeads(plates[0]);
+            for (let i = 0; i < plates.length - 1; i++) {
+                createDenseCableBundles(plates[i], plates[i + 1], i);
+            }
+            createInternalCableRouting(plates);
+            createExtensiveFilterBanks(plates[6], 0);
+            createExtensiveFilterBanks(plates[7], 1);
+            createExtensiveFilterBanks(plates[8], 2);
+            plates.slice(3, 8).forEach((p, i) => createAttenuatorArray(p, i));
+            createCirculators(plates[6]);
+            createCirculators(plates[7]);
+            createHEMTAmplifiers(plates[3]);
+            createDCBlocks(plates[4]);
+            createDCBlocks(plates[5]);
+            createDirectionalCouplers(plates[5]);
+            createFullSupportStructure();
+            createDetailedCentralColumn();
+            createHeliumPipes();
+            createFullMixingChamber();
+            createDetailedQPU();
+            createDenseWhiteCableWaterfall();
+            createThermalBraids(plates);
+            createRFShielding(plates);
+            createFluxBiasLines(plates);
+            createThermometers(plates);
+            createWiringLooms(plates);
+        }
+
+        function createFullDetailPlate(p, idx, total) {
+            const g = new THREE.Group();
+            g.position.y = p.y;
+
+            const plate = new THREE.Mesh(
+                new THREE.CylinderGeometry(p.r, p.r, p.t, 80),
+                p.m
+            );
+            plate.castShadow = true;
+            plate.receiveShadow = true;
+            g.add(plate);
+            componentCount++;
+
+            const outerRim = new THREE.Mesh(
+                new THREE.TorusGeometry(p.r, 0.02, 16, 80),
+                idx < 3 ? mats.chrome : mats.darkGold
+            );
+            outerRim.rotation.x = Math.PI / 2;
+            outerRim.position.y = p.t / 2;
+            g.add(outerRim);
+
+            const bottomRim = new THREE.Mesh(
+                new THREE.TorusGeometry(p.r, 0.015, 14, 80),
+                idx < 3 ? mats.chrome : mats.darkGold
+            );
+            bottomRim.rotation.x = Math.PI / 2;
+            bottomRim.position.y = -p.t / 2;
+            g.add(bottomRim);
+
+            if (idx > 0) {
+                [0.75, 0.55, 0.35].forEach((rFactor, ri) => {
+                    const ring = new THREE.Mesh(
+                        new THREE.TorusGeometry(p.r * rFactor, 0.008 + ri * 0.002, 8, 60),
+                        ri % 2 === 0 ? mats.copper : mats.darkGold
+                    );
+                    ring.rotation.x = Math.PI / 2;
+                    ring.position.y = p.t / 2 + 0.005 + ri * 0.003;
+                    g.add(ring);
+                });
+            }
+
+            const boltCount = 32 + idx * 2;
+            for (let i = 0; i < boltCount; i++) {
+                const angle = (i / boltCount) * Math.PI * 2;
+                const bolt = new THREE.Mesh(
+                    new THREE.CylinderGeometry(0.012, 0.012, 0.022, 6),
+                    mats.chrome
+                );
+                bolt.position.set(
+                    Math.cos(angle) * (p.r * 0.95),
+                    p.t / 2 + 0.011,
+                    Math.sin(angle) * (p.r * 0.95)
+                );
+                g.add(bolt);
+                componentCount++;
+            }
+
+            if (idx < total - 1) {
+                for (let i = 0; i < 12; i++) {
+                    const angle = (i / 12) * Math.PI * 2;
+                    const holeR = p.r * 0.8;
+                    const collar = new THREE.Mesh(
+                        new THREE.TorusGeometry(0.065, 0.012, 8, 16),
+                        mats.copper
+                    );
+                    collar.rotation.x = Math.PI / 2;
+                    collar.position.set(
+                        Math.cos(angle) * holeR,
+                        p.t / 2 + 0.008,
+                        Math.sin(angle) * holeR
+                    );
+                    g.add(collar);
+                    componentCount++;
+                }
+            }
+
+            qc.add(g);
+        }
+
+        function createDetailedColdHeads(topPlate) {
+            const numClusters = 10;
+            const headsPerCluster = 5;
+
+            for (let c = 0; c < numClusters; c++) {
+                const clusterAngle = (c / numClusters) * Math.PI * 2;
+                const clusterR = topPlate.r * 0.55;
+
+                for (let h = 0; h < headsPerCluster; h++) {
+                    const headAngle = clusterAngle + (h - 2) * 0.1;
+                    const headR = clusterR + (h % 3 - 1) * 0.1;
+
+                    const g = new THREE.Group();
+
+                    const body = new THREE.Mesh(
+                        new THREE.CylinderGeometry(0.07, 0.09, 0.2, 20),
+                        mats.copper
+                    );
+                    g.add(body);
+                    componentCount++;
+
+                    for (let f = 0; f < 10; f++) {
+                        const fin = new THREE.Mesh(
+                            new THREE.TorusGeometry(0.08 + f * 0.001, 0.008, 6, 20),
+                            mats.brightCu
+                        );
+                        fin.rotation.x = Math.PI / 2;
+                        fin.position.y = -0.08 + f * 0.018;
+                        g.add(fin);
+                    }
+
+                    const topConn = new THREE.Mesh(
+                        new THREE.CylinderGeometry(0.04, 0.05, 0.04, 12),
+                        mats.copper
+                    );
+                    topConn.position.y = 0.12;
+                    g.add(topConn);
+
+                    g.position.set(
+                        Math.cos(headAngle) * headR,
+                        topPlate.y + 0.16,
+                        Math.sin(headAngle) * headR
+                    );
+                    qc.add(g);
+                }
+            }
+        }
+
+        function createDenseCableBundles(topPlate, bottomPlate, stageIdx) {
+            const numBundles = 24;
+            const cablesPerBundle = 18;
+            const gapHeight = topPlate.y - bottomPlate.y;
+
+            for (let b = 0; b < numBundles; b++) {
+                const bundleAngle = (b / numBundles) * Math.PI * 2;
+
+                for (let c = 0; c < cablesPerBundle; c++) {
+                    const cableAngle = bundleAngle + (c - cablesPerBundle / 2) * 0.012;
+                    const avgR = (topPlate.r + bottomPlate.r) / 2 * 0.75;
+                    const cableR = avgR + (c - cablesPerBundle / 2) * 0.008;
+                    const loopVariant = c % 4;
+                    const colorVariant = (b + c) % 5;
+
+                    createULoopCable(
+                        cableAngle, cableR,
+                        topPlate.y - topPlate.t / 2 - 0.015,
+                        bottomPlate.y + bottomPlate.t / 2 + 0.015,
+                        gapHeight, loopVariant, colorVariant
+                    );
+                    cableCount++;
+                }
+            }
+        }
+
+        function createULoopCable(angle, radius, topY, bottomY, gapHeight, loopVariant, colorVariant) {
+            const points = [];
+            const numPoints = 50;
+            const loopDepths = [0.08, 0.12, 0.16, 0.1];
+            const loopPositions = [0.35, 0.45, 0.55, 0.4];
+            const loopDepth = loopDepths[loopVariant];
+            const loopPosition = loopPositions[loopVariant];
+            const centerX = Math.cos(angle) * radius;
+            const centerZ = Math.sin(angle) * radius;
+
+            for (let i = 0; i <= numPoints; i++) {
+                const t = i / numPoints;
+                const y = topY - t * (topY - bottomY);
+                let loopOffset = 0;
+                const loopStart = loopPosition - 0.2;
+                const loopEnd = loopPosition + 0.2;
+                if (t > loopStart && t < loopEnd) {
+                    const loopT = (t - loopStart) / (loopEnd - loopStart);
+                    loopOffset = Math.sin(loopT * Math.PI) * loopDepth;
+                }
+                const noise = Math.sin(t * 25 + angle * 7) * 0.002;
+                points.push(new THREE.Vector3(
+                    centerX + Math.cos(angle) * (loopOffset + noise),
+                    y,
+                    centerZ + Math.sin(angle) * (loopOffset + noise)
+                ));
+            }
+
+            const curve = new THREE.CatmullRomCurve3(points);
+            const tubeGeo = new THREE.TubeGeometry(curve, 40, 0.005, 5, false);
+            const cableMats = [mats.darkCoax, mats.grayCoax, mats.brownCoax, mats.darkCoax, mats.grayCoax];
+            const cable = new THREE.Mesh(tubeGeo, cableMats[colorVariant]);
+            qc.add(cable);
+        }
+
+        function createInternalCableRouting(plates) {
+            for (let p = 0; p < plates.length - 2; p++) {
+                const topP = plates[p];
+                const botP = plates[p + 1];
+                for (let i = 0; i < 8; i++) {
+                    const angle = (i / 8) * Math.PI * 2 + Math.PI / 16;
+                    for (let c = 0; c < 6; c++) {
+                        const pts = [];
+                        const cAngle = angle + (c - 2.5) * 0.02;
+                        const r = topP.r * 0.4 + c * 0.015;
+                        for (let j = 0; j <= 30; j++) {
+                            const t = j / 30;
+                            const y = topP.y - 0.1 - t * (topP.y - botP.y - 0.2);
+                            const loopOffset = Math.sin(t * Math.PI) * 0.06;
+                            pts.push(new THREE.Vector3(
+                                Math.cos(cAngle) * (r + loopOffset),
+                                y,
+                                Math.sin(cAngle) * (r + loopOffset)
+                            ));
+                        }
+                        const curve = new THREE.CatmullRomCurve3(pts);
+                        const cable = new THREE.Mesh(
+                            new THREE.TubeGeometry(curve, 25, 0.004, 5, false),
+                            c % 2 === 0 ? mats.darkCoax : mats.brownCoax
+                        );
+                        qc.add(cable);
+                        cableCount++;
+                    }
+                }
+            }
+        }
+
+        function createExtensiveFilterBanks(plate, level) {
+            const rows = [
+                { rFactor: 0.94, count: 56, size: 0.024 },
+                { rFactor: 0.82, count: 48, size: 0.022 },
+                { rFactor: 0.70, count: 40, size: 0.02 },
+                { rFactor: 0.58, count: 32, size: 0.018 }
+            ];
+            rows.forEach((row, rowIdx) => {
+                for (let i = 0; i < row.count; i++) {
+                    const a = (i / row.count) * Math.PI * 2 + rowIdx * 0.05;
+                    createFilter(
+                        Math.cos(a) * (plate.r * row.rFactor),
+                        plate.y - 0.12 - rowIdx * 0.08 - level * 0.04,
+                        Math.sin(a) * (plate.r * row.rFactor),
+                        row.size, row.size * 3.5
+                    );
+                }
+            });
+        }
+
+        function createFilter(x, y, z, radius, height) {
+            const g = new THREE.Group();
+            const body = new THREE.Mesh(
+                new THREE.CylinderGeometry(radius, radius, height, 10), mats.filterBody
+            );
+            g.add(body);
+            componentCount++;
+
+            const band = new THREE.Mesh(
+                new THREE.CylinderGeometry(radius + 0.001, radius + 0.001, height * 0.25, 10), mats.black
+            );
+            band.position.y = height * 0.1;
+            g.add(band);
+
+            const topBase = new THREE.Mesh(
+                new THREE.CylinderGeometry(radius * 0.65, radius * 0.8, height * 0.12, 8), mats.sma
+            );
+            topBase.position.y = height / 2 + height * 0.06;
+            g.add(topBase);
+
+            const topPin = new THREE.Mesh(
+                new THREE.CylinderGeometry(radius * 0.2, radius * 0.2, height * 0.15, 6), mats.sma
+            );
+            topPin.position.y = height / 2 + height * 0.18;
+            g.add(topPin);
+
+            const botBase = new THREE.Mesh(
+                new THREE.CylinderGeometry(radius * 0.65, radius * 0.8, height * 0.12, 8), mats.sma
+            );
+            botBase.position.y = -height / 2 - height * 0.06;
+            g.add(botBase);
+
+            const botPin = new THREE.Mesh(
+                new THREE.CylinderGeometry(radius * 0.2, radius * 0.2, height * 0.15, 6), mats.sma
+            );
+            botPin.position.y = -height / 2 - height * 0.18;
+            g.add(botPin);
+
+            g.position.set(x, y, z);
+            qc.add(g);
+        }
+
+        function createAttenuatorArray(plate, level) {
+            const count = 28 + level * 4;
+            for (let i = 0; i < count; i++) {
+                const a = (i / count) * Math.PI * 2;
+                const r = plate.r * (0.55 + (level % 2) * 0.1);
+                const g = new THREE.Group();
+
+                const body = new THREE.Mesh(
+                    new THREE.CylinderGeometry(0.018, 0.018, 0.055, 8), mats.black
+                );
+                g.add(body);
+                componentCount++;
+
+                const top = new THREE.Mesh(
+                    new THREE.CylinderGeometry(0.014, 0.018, 0.012, 6), mats.sma
+                );
+                top.position.y = 0.033;
+                g.add(top);
+
+                const bot = new THREE.Mesh(
+                    new THREE.CylinderGeometry(0.014, 0.018, 0.012, 6), mats.sma
+                );
+                bot.position.y = -0.033;
+                g.add(bot);
+
+                g.position.set(Math.cos(a) * r, plate.y - 0.06, Math.sin(a) * r);
+                qc.add(g);
+            }
+        }
+
+        function createCirculators(plate) {
+            const count = 12;
+            for (let i = 0; i < count; i++) {
+                const a = (i / count) * Math.PI * 2;
+                const r = plate.r * 0.48;
+                const g = new THREE.Group();
+
+                const body = new THREE.Mesh(
+                    new THREE.CylinderGeometry(0.04, 0.04, 0.05, 16), mats.blue
+                );
+                g.add(body);
+                componentCount++;
+
+                const ring = new THREE.Mesh(
+                    new THREE.TorusGeometry(0.04, 0.006, 8, 16), mats.sma
+                );
+                ring.rotation.x = Math.PI / 2;
+                ring.position.y = 0.025;
+                g.add(ring);
+
+                for (let p = 0; p < 3; p++) {
+                    const portAngle = (p / 3) * Math.PI * 2;
+                    const port = new THREE.Mesh(
+                        new THREE.CylinderGeometry(0.012, 0.012, 0.025, 8), mats.sma
+                    );
+                    port.position.set(
+                        Math.cos(portAngle) * 0.035, 0,
+                        Math.sin(portAngle) * 0.035
+                    );
+                    port.rotation.x = Math.PI / 2;
+                    port.rotation.z = portAngle;
+                    g.add(port);
+                }
+
+                g.position.set(Math.cos(a) * r, plate.y - 0.1, Math.sin(a) * r);
+                qc.add(g);
+            }
+        }
+
+        function createHEMTAmplifiers(plate) {
+            const count = 8;
+            for (let i = 0; i < count; i++) {
+                const a = (i / count) * Math.PI * 2;
+                const r = plate.r * 0.6;
+                const g = new THREE.Group();
+
+                const body = new THREE.Mesh(
+                    new THREE.BoxGeometry(0.06, 0.04, 0.03), mats.darkGray
+                );
+                g.add(body);
+                componentCount++;
+
+                for (let c = 0; c < 2; c++) {
+                    const contact = new THREE.Mesh(
+                        new THREE.CylinderGeometry(0.008, 0.008, 0.015, 6), mats.sma
+                    );
+                    contact.position.set((c - 0.5) * 0.04, 0.025, 0);
+                    g.add(contact);
+                }
+
+                for (let f = 0; f < 4; f++) {
+                    const fin = new THREE.Mesh(
+                        new THREE.BoxGeometry(0.002, 0.04, 0.025), mats.copper
+                    );
+                    fin.position.set(-0.025 + f * 0.015, 0, 0);
+                    g.add(fin);
+                }
+
+                g.position.set(Math.cos(a) * r, plate.y - 0.08, Math.sin(a) * r);
+                g.rotation.y = a;
+                qc.add(g);
+            }
+        }
+
+        function createDCBlocks(plate) {
+            const count = 16;
+            for (let i = 0; i < count; i++) {
+                const a = (i / count) * Math.PI * 2;
+                const r = plate.r * 0.65;
+                const g = new THREE.Group();
+
+                const body = new THREE.Mesh(
+                    new THREE.CylinderGeometry(0.015, 0.015, 0.04, 8), mats.chrome
+                );
+                g.add(body);
+                componentCount++;
+
+                const top = new THREE.Mesh(
+                    new THREE.CylinderGeometry(0.012, 0.015, 0.01, 6), mats.sma
+                );
+                top.position.y = 0.025;
+                g.add(top);
+
+                const bot = new THREE.Mesh(
+                    new THREE.CylinderGeometry(0.012, 0.015, 0.01, 6), mats.sma
+                );
+                bot.position.y = -0.025;
+                g.add(bot);
+
+                g.position.set(Math.cos(a) * r, plate.y - 0.05, Math.sin(a) * r);
+                qc.add(g);
+            }
+        }
+
+        function createDirectionalCouplers(plate) {
+            const count = 8;
+            for (let i = 0; i < count; i++) {
+                const a = (i / count) * Math.PI * 2 + Math.PI / 16;
+                const r = plate.r * 0.5;
+                const g = new THREE.Group();
+
+                const body = new THREE.Mesh(
+                    new THREE.BoxGeometry(0.05, 0.025, 0.025), mats.filterBody
+                );
+                g.add(body);
+                componentCount++;
+
+                for (let p = 0; p < 4; p++) {
+                    const port = new THREE.Mesh(
+                        new THREE.CylinderGeometry(0.008, 0.008, 0.015, 6), mats.sma
+                    );
+                    if (p < 2) {
+                        port.position.set((p - 0.5) * 0.03, 0, 0.02);
+                    } else {
+                        port.position.set((p - 2.5) * 0.03, 0, -0.02);
+                    }
+                    port.rotation.x = Math.PI / 2;
+                    g.add(port);
+                }
+
+                g.position.set(Math.cos(a) * r, plate.y - 0.07, Math.sin(a) * r);
+                g.rotation.y = a;
+                qc.add(g);
+            }
+        }
+
+        function createFullSupportStructure() {
+            for (let i = 0; i < 4; i++) {
+                const a = (i / 4) * Math.PI * 2;
+                const rod = new THREE.Mesh(
+                    new THREE.CylinderGeometry(0.04, 0.04, 7.5, 20), mats.chrome
+                );
+                rod.position.set(Math.cos(a) * 2.1, 1.7, Math.sin(a) * 2.1);
+                rod.castShadow = true;
+                qc.add(rod);
+                componentCount++;
+
+                const topCap = new THREE.Mesh(
+                    new THREE.SphereGeometry(0.055, 14, 14), mats.chrome
+                );
+                topCap.position.set(Math.cos(a) * 2.1, 5.45, Math.sin(a) * 2.1);
+                qc.add(topCap);
+
+                const botCap = new THREE.Mesh(
+                    new THREE.SphereGeometry(0.055, 14, 14), mats.chrome
+                );
+                botCap.position.set(Math.cos(a) * 2.1, -2.05, Math.sin(a) * 2.1);
+                qc.add(botCap);
+            }
+
+            for (let i = 0; i < 4; i++) {
+                const a = (i / 4) * Math.PI * 2 + Math.PI / 4;
+                const rod = new THREE.Mesh(
+                    new THREE.CylinderGeometry(0.028, 0.028, 7, 16), mats.chrome
+                );
+                rod.position.set(Math.cos(a) * 1.35, 1.6, Math.sin(a) * 1.35);
+                qc.add(rod);
+                componentCount++;
+            }
+
+            for (let i = 0; i < 8; i++) {
+                const a = (i / 8) * Math.PI * 2 + Math.PI / 8;
+                const rod = new THREE.Mesh(
+                    new THREE.CylinderGeometry(0.018, 0.018, 6.5, 12), mats.chrome
+                );
+                rod.position.set(Math.cos(a) * 1.9, 1.8, Math.sin(a) * 1.9);
+                qc.add(rod);
+                componentCount++;
+            }
+        }
+
+        function createDetailedCentralColumn() {
+            const mainTube = new THREE.Mesh(
+                new THREE.CylinderGeometry(0.09, 0.09, 7, 28), mats.chrome
+            );
+            mainTube.position.y = 1.9;
+            qc.add(mainTube);
+            componentCount++;
+
+            for (let i = 0; i < 8; i++) {
+                const y = 5.0 - i * 0.85;
+                const exchanger = new THREE.Mesh(
+                    new THREE.TorusGeometry(0.14, 0.02, 12, 28), mats.copper
+                );
+                exchanger.rotation.x = Math.PI / 2;
+                exchanger.position.y = y;
+                qc.add(exchanger);
+                componentCount++;
+
+                const spiralPts = [];
+                for (let s = 0; s <= 30; s++) {
+                    const t = s / 30;
+                    const spiralAngle = t * Math.PI * 4;
+                    spiralPts.push(new THREE.Vector3(
+                        Math.cos(spiralAngle) * 0.11,
+                        y - 0.15 + t * 0.3,
+                        Math.sin(spiralAngle) * 0.11
+                    ));
+                }
+                const spiralCurve = new THREE.CatmullRomCurve3(spiralPts);
+                const spiral = new THREE.Mesh(
+                    new THREE.TubeGeometry(spiralCurve, 30, 0.008, 6, false), mats.copper
+                );
+                qc.add(spiral);
+            }
+
+            for (let i = 0; i < 6; i++) {
+                const a = (i / 6) * Math.PI * 2;
+                const tube = new THREE.Mesh(
+                    new THREE.CylinderGeometry(0.022, 0.022, 6, 12), mats.chrome
+                );
+                tube.position.set(Math.cos(a) * 0.18, 2.0, Math.sin(a) * 0.18);
+                qc.add(tube);
+                componentCount++;
+            }
+        }
+
+        function createHeliumPipes() {
+            for (let i = 0; i < 4; i++) {
+                const a = (i / 4) * Math.PI * 2 + Math.PI / 8;
+                const vertical = new THREE.Mesh(
+                    new THREE.CylinderGeometry(0.035, 0.035, 4, 16), mats.chrome
+                );
+                vertical.position.set(Math.cos(a) * 0.35, 3, Math.sin(a) * 0.35);
+                qc.add(vertical);
+                componentCount++;
+
+                const conn = new THREE.Mesh(
+                    new THREE.TorusGeometry(0.035, 0.012, 8, 16), mats.copper
+                );
+                conn.rotation.x = Math.PI / 2;
+                conn.position.set(Math.cos(a) * 0.35, 5, Math.sin(a) * 0.35);
+                qc.add(conn);
+            }
+        }
+
+        function createFullMixingChamber() {
+            const g = new THREE.Group();
+            g.position.y = -1.35;
+
+            const chamber = new THREE.Mesh(
+                new THREE.CylinderGeometry(0.2, 0.16, 0.4, 28), mats.copper
+            );
+            g.add(chamber);
+            componentCount++;
+
+            const topFlange = new THREE.Mesh(
+                new THREE.CylinderGeometry(0.25, 0.25, 0.04, 28), mats.copper
+            );
+            topFlange.position.y = 0.22;
+            g.add(topFlange);
+
+            const botFlange = new THREE.Mesh(
+                new THREE.CylinderGeometry(0.18, 0.18, 0.03, 28), mats.copper
+            );
+            botFlange.position.y = -0.22;
+            g.add(botFlange);
+
+            for (let i = 0; i < 4; i++) {
+                const a = (i / 4) * Math.PI * 2;
+                const tube = new THREE.Mesh(
+                    new THREE.CylinderGeometry(0.025, 0.025, 0.12, 12), mats.chrome
+                );
+                tube.position.set(Math.cos(a) * 0.18, 0.28, Math.sin(a) * 0.18);
+                g.add(tube);
+            }
+
+            for (let i = 0; i < 8; i++) {
+                const a = (i / 8) * Math.PI * 2;
+                const link = new THREE.Mesh(
+                    new THREE.BoxGeometry(0.015, 0.3, 0.04), mats.copper
+                );
+                link.position.set(Math.cos(a) * 0.22, 0.1, Math.sin(a) * 0.22);
+                link.rotation.y = a;
+                g.add(link);
+            }
+
+            qc.add(g);
+        }
+
+        function createDetailedQPU() {
+            const g = new THREE.Group();
+            g.position.y = -1.75;
+
+            const package1 = new THREE.Mesh(
+                new THREE.BoxGeometry(0.4, 0.12, 0.4), mats.roseCu
+            );
+            g.add(package1);
+            componentCount++;
+
+            const frame1 = new THREE.Mesh(
+                new THREE.BoxGeometry(0.42, 0.02, 0.42), mats.sma
+            );
+            frame1.position.y = 0.07;
+            g.add(frame1);
+
+            const frame2 = new THREE.Mesh(
+                new THREE.BoxGeometry(0.32, 0.025, 0.32), mats.darkGold
+            );
+            frame2.position.y = 0.082;
+            g.add(frame2);
+
+            const chipMat = new THREE.MeshStandardMaterial({
+                color: 0x0D1B2A, metalness: 0.9, roughness: 0.1,
+                emissive: 0x1B263B, emissiveIntensity: 0.05
+            });
+            const chip = new THREE.Mesh(
+                new THREE.BoxGeometry(0.25, 0.015, 0.25), chipMat
+            );
+            chip.position.y = 0.098;
+            g.add(chip);
+
+            for (let x = -3; x <= 3; x++) {
+                for (let z = -3; z <= 3; z++) {
+                    if (Math.abs(x) + Math.abs(z) <= 5) {
+                        const qubit = new THREE.Mesh(
+                            new THREE.BoxGeometry(0.012, 0.004, 0.012),
+                            new THREE.MeshStandardMaterial({
+                                color: 0x4FC3F7, emissive: 0x29B6F6,
+                                emissiveIntensity: 0.3, metalness: 0.8, roughness: 0.2
+                            })
+                        );
+                        qubit.position.set(x * 0.03, 0.108, z * 0.03);
+                        g.add(qubit);
+                    }
+                }
+            }
+
+            for (let i = 0; i < 36; i++) {
+                const a = (i / 36) * Math.PI * 2;
+                const pts = [
+                    new THREE.Vector3(Math.cos(a) * 0.1, 0.1, Math.sin(a) * 0.1),
+                    new THREE.Vector3(Math.cos(a) * 0.125, 0.14, Math.sin(a) * 0.125),
+                    new THREE.Vector3(Math.cos(a) * 0.16, 0.06, Math.sin(a) * 0.16)
+                ];
+                const curve = new THREE.CatmullRomCurve3(pts);
+                const bond = new THREE.Mesh(
+                    new THREE.TubeGeometry(curve, 12, 0.0015, 5, false), mats.sma
+                );
+                g.add(bond);
+            }
+
+            for (let side = 0; side < 4; side++) {
+                for (let i = 0; i < 10; i++) {
+                    const offset = (i - 4.5) * 0.035;
+                    const connG = new THREE.Group();
+                    const conn = new THREE.Mesh(
+                        new THREE.CylinderGeometry(0.01, 0.01, 0.06, 8), mats.sma
+                    );
+                    conn.rotation.x = Math.PI / 2;
+                    connG.add(conn);
+
+                    if (side === 0) connG.position.set(offset, 0, 0.24);
+                    else if (side === 1) connG.position.set(offset, 0, -0.24);
+                    else if (side === 2) { connG.position.set(0.24, 0, offset); connG.rotation.y = Math.PI / 2; }
+                    else { connG.position.set(-0.24, 0, offset); connG.rotation.y = Math.PI / 2; }
+
+                    g.add(connG);
+                    componentCount++;
+                }
+            }
+
+            const shield = new THREE.Mesh(
+                new THREE.CylinderGeometry(0.28, 0.28, 0.18, 32, 1, true),
+                new THREE.MeshStandardMaterial({
+                    color: 0x2D2D2D, metalness: 0.7, roughness: 0.4, side: THREE.DoubleSide
+                })
+            );
+            shield.position.y = 0.03;
+            g.add(shield);
+
+            qc.add(g);
+        }
+
+        function createDenseWhiteCableWaterfall() {
+            const numCables = 150;
+            for (let i = 0; i < numCables; i++) {
+                const angle = (i / numCables) * Math.PI * 2;
+                const startR = 0.3 + Math.random() * 0.4;
+                const pts = [];
+                const segments = 22;
+
+                for (let j = 0; j <= segments; j++) {
+                    const t = j / segments;
+                    const y = -1.3 - t * 1.8;
+                    const spread = t * t * 0.7;
+                    const sway = Math.sin(t * Math.PI * 0.7 + i * 0.35) * 0.1 * t;
+                    pts.push(new THREE.Vector3(
+                        Math.cos(angle + sway) * (startR + spread),
+                        y,
+                        Math.sin(angle + sway) * (startR + spread)
+                    ));
+                }
+
+                const curve = new THREE.CatmullRomCurve3(pts);
+                const matChoice = i % 12;
+                let mat = mats.whiteCoax;
+                if (matChoice === 0) mat = mats.sma;
+                else if (matChoice < 3) mat = mats.tanCoax;
+
+                const cable = new THREE.Mesh(
+                    new THREE.TubeGeometry(curve, 25, 0.003 + Math.random() * 0.003, 5, false), mat
+                );
+                qc.add(cable);
+                cableCount++;
+            }
+        }
+
+        function createThermalBraids(plates) {
+            for (let p = 1; p < 7; p++) {
+                const plate = plates[p];
+                for (let i = 0; i < 8; i++) {
+                    const a = (i / 8) * Math.PI * 2 + (p % 2) * Math.PI / 8;
+                    const braid = new THREE.Mesh(
+                        new THREE.BoxGeometry(0.012, 0.45, 0.06), mats.copper
+                    );
+                    braid.position.set(
+                        Math.cos(a) * (plate.r * 0.88),
+                        plate.y - 0.28,
+                        Math.sin(a) * (plate.r * 0.88)
+                    );
+                    braid.rotation.y = a;
+                    qc.add(braid);
+                    componentCount++;
+                }
+            }
+        }
+
+        function createRFShielding(plates) {
+            for (let p = 5; p < 8; p++) {
+                const plate = plates[p];
+                for (let i = 0; i < 4; i++) {
+                    const a = (i / 4) * Math.PI * 2 + Math.PI / 4;
+                    const r = plate.r * 0.35;
+                    const shield = new THREE.Mesh(
+                        new THREE.CylinderGeometry(0.08, 0.08, 0.15, 20, 1, true),
+                        new THREE.MeshStandardMaterial({
+                            color: 0x404040, metalness: 0.8, roughness: 0.3, side: THREE.DoubleSide
+                        })
+                    );
+                    shield.position.set(Math.cos(a) * r, plate.y - 0.12, Math.sin(a) * r);
+                    qc.add(shield);
+                    componentCount++;
+                }
+            }
+        }
+
+        function createFluxBiasLines(plates) {
+            for (let p = 3; p < 9; p++) {
+                const plate = plates[p];
+                for (let i = 0; i < 16; i++) {
+                    const a = (i / 16) * Math.PI * 2;
+                    const r = plate.r * 0.45;
+                    const wire = new THREE.Mesh(
+                        new THREE.CylinderGeometry(0.003, 0.003, 0.6, 6), mats.copper
+                    );
+                    wire.position.set(Math.cos(a) * r, plate.y - 0.35, Math.sin(a) * r);
+                    qc.add(wire);
+                    cableCount++;
+                }
+            }
+        }
+
+        function createThermometers(plates) {
+            for (let p = 1; p < plates.length - 1; p += 2) {
+                const plate = plates[p];
+                for (let i = 0; i < 2; i++) {
+                    const a = (i / 2) * Math.PI + p * 0.3;
+                    const g = new THREE.Group();
+
+                    const sensor = new THREE.Mesh(
+                        new THREE.BoxGeometry(0.025, 0.015, 0.015), mats.pcb
+                    );
+                    g.add(sensor);
+                    componentCount++;
+
+                    const wires = new THREE.Mesh(
+                        new THREE.CylinderGeometry(0.002, 0.002, 0.08, 4), mats.copper
+                    );
+                    wires.position.y = 0.045;
+                    g.add(wires);
+
+                    g.position.set(
+                        Math.cos(a) * (plate.r * 0.92),
+                        plate.y + plate.t / 2 + 0.01,
+                        Math.sin(a) * (plate.r * 0.92)
+                    );
+                    qc.add(g);
+                }
+            }
+        }
+
+        function createWiringLooms(plates) {
+            for (let i = 0; i < 6; i++) {
+                const a = (i / 6) * Math.PI * 2 + Math.PI / 12;
+                const r = 1.7;
+                const pts = [];
+                for (let j = 0; j <= 40; j++) {
+                    const t = j / 40;
+                    const y = 5 - t * 7;
+                    const wobble = Math.sin(t * Math.PI * 3) * 0.03;
+                    pts.push(new THREE.Vector3(
+                        Math.cos(a) * (r + wobble), y,
+                        Math.sin(a) * (r + wobble)
+                    ));
+                }
+
+                const curve = new THREE.CatmullRomCurve3(pts);
+                const loom = new THREE.Mesh(
+                    new THREE.TubeGeometry(curve, 50, 0.025, 8, false), mats.black
+                );
+                qc.add(loom);
+                componentCount++;
+
+                for (let w = 0; w < 6; w++) {
+                    const wireAngle = (w / 6) * Math.PI * 2;
+                    const wirePts = pts.map(p => new THREE.Vector3(
+                        p.x + Math.cos(wireAngle + a) * 0.02,
+                        p.y,
+                        p.z + Math.sin(wireAngle + a) * 0.02
+                    ));
+                    const wireCurve = new THREE.CatmullRomCurve3(wirePts);
+                    const wire = new THREE.Mesh(
+                        new THREE.TubeGeometry(wireCurve, 50, 0.004, 5, false),
+                        w % 3 === 0 ? mats.copper : (w % 3 === 1 ? mats.darkCoax : mats.grayCoax)
+                    );
+                    qc.add(wire);
+                    cableCount++;
+                }
+            }
+        }
+
+        function setupControls() {
+            let dragging = false;
+            let prev = { x: 0, y: 0 };
+            const cv = renderer.domElement;
+
+            cv.addEventListener('mousedown', e => {
+                dragging = true;
+                rotating = false;
+                prev = { x: e.clientX, y: e.clientY };
+            });
+
+            cv.addEventListener('mousemove', e => {
+                if (!dragging) return;
+                const dx = e.clientX - prev.x;
+                const dy = e.clientY - prev.y;
+                qc.rotation.y += dx * 0.006;
+                qc.rotation.x = Math.max(-0.8, Math.min(0.8, qc.rotation.x + dy * 0.003));
+                prev = { x: e.clientX, y: e.clientY };
+            });
+
+            cv.addEventListener('mouseup', () => dragging = false);
+            cv.addEventListener('mouseleave', () => dragging = false);
+
+            cv.addEventListener('wheel', e => {
+                e.preventDefault();
+                camera.position.multiplyScalar(1 + e.deltaY * 0.0006);
+                const d = camera.position.length();
+                if (d < 5) camera.position.setLength(5);
+                if (d > 25) camera.position.setLength(25);
+            });
+
+            cv.addEventListener('touchstart', e => {
+                if (e.touches.length === 1) {
+                    dragging = true;
+                    rotating = false;
+                    prev = { x: e.touches[0].clientX, y: e.touches[0].clientY };
+                }
+            });
+            cv.addEventListener('touchmove', e => {
+                if (!dragging || e.touches.length !== 1) return;
+                const dx = e.touches[0].clientX - prev.x;
+                const dy = e.touches[0].clientY - prev.y;
+                qc.rotation.y += dx * 0.006;
+                qc.rotation.x = Math.max(-0.8, Math.min(0.8, qc.rotation.x + dy * 0.003));
+                prev = { x: e.touches[0].clientX, y: e.touches[0].clientY };
+            });
+            cv.addEventListener('touchend', () => dragging = false);
+        }
+
+        function animate() {
+            requestAnimationFrame(animate);
+
+            if (startTime === 0) startTime = Date.now();
+            const elapsed = (Date.now() - startTime) / 1000;
+
+            const rotationSpeed = 0.0015;
+            qc.rotation.y += rotationSpeed;
+
+            if (elapsed < 5) {
+                const phase1Progress = elapsed / 5;
+                camera.position.set(10, 6, 10);
+                camera.lookAt(0, 1, 0);
+
+            } else if (elapsed < 15) {
+                const phase2Elapsed = elapsed - 5;
+                const transitionDuration = 2;
+
+                if (phase2Elapsed < transitionDuration) {
+                    const t = phase2Elapsed / transitionDuration;
+                    const easeT = t * t * (3 - 2 * t);
+                    camera.position.x = 10 + (14 - 10) * easeT;
+                    camera.position.y = 6 + (1 - 6) * easeT;
+                    camera.position.z = 10 + (0 - 10) * easeT;
+                    camera.lookAt(0, 1 * (1 - easeT) + 1 * easeT, 0);
+                } else {
+                    camera.position.set(14, 1, 0);
+                    camera.lookAt(0, 1, 0);
+                }
+
+            } else {
+                const phase3Elapsed = elapsed - 15;
+                const zoomDuration = 10;
+                const zoomProgress = Math.min(phase3Elapsed / zoomDuration, 1);
+                const easeZoom = zoomProgress * zoomProgress * (3 - 2 * zoomProgress);
+
+                const startX = 14, startY = 1, startZ = 0;
+                const endX = 8, endY = -0.5, endZ = 6;
+
+                camera.position.x = startX + (endX - startX) * easeZoom;
+                camera.position.y = startY + (endY - startY) * easeZoom;
+                camera.position.z = startZ + (endZ - startZ) * easeZoom;
+
+                const lookAtY = 1 + (-1 - 1) * easeZoom;
+                camera.lookAt(0, lookAtY, 0);
+            }
+
+            renderer.render(scene, camera);
+        }
+
+        function onResize() {
+            const c = document.getElementById('canvas-container');
+            camera.aspect = c.clientWidth / c.clientHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(c.clientWidth, c.clientHeight);
+        }
+
+        window.addEventListener('load', init);
+    </script>
+</body>
+
+</html>

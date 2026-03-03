@@ -1292,6 +1292,144 @@ ul { list-style: none; }
   border-color: var(--accent);
 }
 
+/* ==============================
+   RESEARCH CARDS WITH INLINE 3D MODELS
+   ============================== */
+.research-card-3d {
+  display: grid;
+  grid-template-columns: 1fr 400px;
+  gap: 3rem;
+  margin-bottom: 3rem;
+  align-items: center;
+}
+
+.research-card-3d.reverse {
+  grid-template-columns: 400px 1fr;
+}
+
+.research-card-3d.reverse .research-card-content {
+  order: 2;
+}
+
+.research-card-3d.reverse .research-card-model {
+  order: 1;
+}
+
+.research-card-content {
+  padding: 1rem 0;
+}
+
+.research-card-content .research-label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--accent);
+  margin-bottom: 0.75rem;
+  display: block;
+}
+
+.research-card-content h3 {
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: var(--text);
+  margin-bottom: 1rem;
+  line-height: 1.3;
+}
+
+.research-card-content p {
+  font-size: 0.95rem;
+  color: var(--text-secondary);
+  line-height: 1.8;
+  margin-bottom: 1rem;
+}
+
+.research-card-content p strong {
+  color: var(--text);
+  font-weight: 600;
+}
+
+.research-card-content .research-metrics {
+  display: flex;
+  gap: 2rem;
+  padding: 1.25rem 0;
+  border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 1.25rem;
+  flex-wrap: wrap;
+}
+
+.research-card-content .research-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.research-card-content .research-tags span {
+  font-size: 0.7rem;
+  font-weight: 500;
+  color: var(--accent);
+  background: var(--accent-bg);
+  padding: 0.35rem 0.7rem;
+  border-radius: 6px;
+  border: 1px solid var(--accent-border);
+  transition: all 0.2s ease;
+}
+
+.research-card-content .research-tags span:hover {
+  background: var(--accent);
+  color: #fff;
+}
+
+/* 3D Model Container - Transparent background */
+.research-card-model {
+  width: 400px;
+  height: 400px;
+  position: relative;
+  background: transparent;
+  border-radius: 16px;
+  overflow: hidden;
+}
+
+.research-card-model iframe {
+  width: 100%;
+  height: 100%;
+  border: none;
+  background: transparent;
+  pointer-events: auto;
+}
+
+/* Responsive Research Cards 3D */
+@media (max-width: 1024px) {
+  .research-card-3d,
+  .research-card-3d.reverse {
+    grid-template-columns: 1fr;
+    gap: 2rem;
+  }
+  
+  .research-card-3d.reverse .research-card-content,
+  .research-card-3d.reverse .research-card-model {
+    order: unset;
+  }
+  
+  .research-card-model {
+    width: 100%;
+    max-width: 400px;
+    margin: 0 auto;
+    height: 350px;
+  }
+}
+
+@media (max-width: 600px) {
+  .research-card-model {
+    height: 280px;
+  }
+  
+  .research-card-content h3 {
+    font-size: 1.4rem;
+  }
+}
+
 /* Responsive 3D Research */
 @media (max-width: 900px) {
   .research-hero-split {
@@ -2480,11 +2618,11 @@ ul { list-style: none; }
   100% { transform: translateX(-50%); }
 }
 
-/* Photo card — landscape (team, events) */
+/* Photo card — landscape (team, events) - TALLER for vertical photos */
 .photo-card {
   flex-shrink: 0;
   width: 340px;
-  height: 230px;
+  height: 380px;
   border-radius: 16px;
   overflow: hidden;
   position: relative;
@@ -2500,8 +2638,8 @@ ul { list-style: none; }
 
 /* Photo card — square/portrait (technical renders like TAMS) */
 .photo-card-sq {
-  width: 260px;
-  height: 280px;
+  width: 320px;
+  height: 340px;
   background: #0f1117;   /* dark bg so transparent PNGs render cleanly */
 }
 
@@ -2542,8 +2680,8 @@ ul { list-style: none; }
 
 @media (max-width: 768px) {
   .photo-carousel { margin: 0 -1.5rem; }
-  .photo-card { width: 270px; height: 185px; }
-  .photo-card-sq { width: 210px; height: 230px; }
+  .photo-card { width: 280px; height: 320px; }
+  .photo-card-sq { width: 260px; height: 280px; }
 }
 
 /* Smooth Section Transitions (legacy kept) */
