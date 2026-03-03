@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" width="120" height="120">
+  <circle cx="60" cy="60" r="56" fill="#00263A" stroke="#BF9B30" stroke-width="3"/>
+  <text x="60" y="52" text-anchor="middle" font-family="Georgia, serif" font-weight="bold" font-size="40" fill="#BF9B30">S</text>
+  <text x="60" y="80" text-anchor="middle" font-family="Georgia, serif" font-size="11" fill="#fff">SPELMAN</text>
+</svg>

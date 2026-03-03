@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" width="120" height="120">
+  <circle cx="60" cy="60" r="56" fill="#236192" stroke="#FFC425" stroke-width="3"/>
+  <text x="60" y="48" text-anchor="middle" font-family="Georgia, serif" font-weight="bold" font-size="26" fill="#FFC425">UAF</text>
+  <text x="60" y="70" text-anchor="middle" font-family="Georgia, serif" font-size="9" fill="#fff">ALASKA</text>
+  <text x="60" y="84" text-anchor="middle" font-family="Georgia, serif" font-size="9" fill="#fff">FAIRBANKS</text>
+</svg>

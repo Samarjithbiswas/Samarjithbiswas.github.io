@@ -45,7 +45,7 @@
 
             camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
             // Position camera to view the horizontal architecture
-            camera.position.set(0, 15, 160);
+            camera.position.set(80, 60, 120);
 
             renderer = new THREE.WebGLRenderer({
                 canvas: canvas,
@@ -84,7 +84,7 @@
             buildSAWFilterDevice();
 
             // Re-center and adjust the camera to frame the geometry horizontally
-            camera.position.set(0, 15, 160);
+            camera.position.set(80, 60, 120);
             controls.target.set(0, 0, 0);
             controls.update();
 

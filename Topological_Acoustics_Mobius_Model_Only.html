@@ -379,8 +379,8 @@
         // ── Initialize Scene ──
         function init() {
             scene = new THREE.Scene();
-            // NO background — fully transparent
-            scene.background = null;
+            // Dark background matching showcase card
+            scene.background = new THREE.Color(0x0a0a1a);
 
             camera = new THREE.PerspectiveCamera(40, innerWidth / innerHeight, 0.1, 1000);
             camera.position.set(0, 20, 50);
@@ -400,8 +400,17 @@
             renderer.toneMappingExposure = 1.4;
             renderer.outputEncoding = THREE.sRGBEncoding;
 
-            // Skip post-processing to preserve transparency
-            composer = null;
+            // Post-processing with bloom
+            try {
+                composer = new THREE.EffectComposer(renderer);
+                const renderPass = new THREE.RenderPass(scene, camera);
+                renderPass.clear = true;
+                renderPass.clearColor = new THREE.Color(0x0a0a1a);
+                renderPass.clearAlpha = 1;
+                composer.addPass(renderPass);
+                bloomPass = new THREE.UnrealBloomPass(new THREE.Vector2(innerWidth, innerHeight), 0.35, 0.6, 0.85);
+                composer.addPass(bloomPass);
+            } catch (e) { composer = null; }
 
             envMap = createEnvMap();
             scene.environment = envMap;
@@ -532,9 +541,12 @@
 
             if (phononicLattice.visible) updatePhononicLattice(phononicLattice, time);
 
-            // Render with transparent background
-            renderer.setClearColor(0x000000, 0);
-            renderer.render(scene, camera);
+            // Render
+            if (composer) {
+                composer.render();
+            } else {
+                renderer.render(scene, camera);
+            }
         }
 
         init();
