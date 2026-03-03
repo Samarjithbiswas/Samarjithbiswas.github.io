@@ -859,6 +859,26 @@ ul { list-style: none; }
   background: transparent;
 }
 
+/* Spline viewer container — fills its flex cell */
+.visual-3d-spline {
+  position: relative;
+  overflow: hidden;
+}
+.visual-3d-spline spline-viewer {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+/* Hide Spline watermark */
+.visual-3d-spline spline-viewer::part(logo) {
+  display: none !important;
+  opacity: 0 !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
+  height: 0 !important;
+  width: 0 !important;
+}
+
 @media (max-width: 768px) {
   .visual-3d-strip {
     flex-direction: column;

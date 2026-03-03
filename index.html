@@ -867,7 +867,10 @@
 
   <!-- Full-Width 3D Visual Embeds -->
   <div class="visual-3d-strip" id="3d-showcase">
-    <iframe class="visual-3d-embed" src="Interactive_Robot_Widget.html" loading="lazy" allow="accelerometer; autoplay" title="Humanoid Robot - Physical AI"></iframe>
+    <div class="visual-3d-embed visual-3d-spline">
+      <script type="module" src="https://unpkg.com/@splinetool/viewer@1.9.96/build/spline-viewer.js"></script>
+      <spline-viewer url="https://prod.spline.design/kZDDjO5HuC9GJUM2/scene.splinecode" background="transparent" loading-anim-type="none" hint="false"></spline-viewer>
+    </div>
     <iframe class="visual-3d-embed" src="Topological_Acoustics_Mobius_Model_Only.html" loading="lazy" allow="accelerometer; autoplay" title="Topological Mobius Strip"></iframe>
   </div>
 
