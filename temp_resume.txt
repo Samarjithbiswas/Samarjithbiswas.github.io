@@ -1,0 +1,243 @@
+SAMARJITH BISW AS
+Research Scientist III
+AI & Acoustic Systems Innovation Leader
+samarjithbiswas.com |linkedin.com/in/samarjithbiswas |samarjith.biswas@okstate.edu
+Tucson, Arizona, US
+Executive Summary
+Mechanical & Aerospace Engineer and Research Scientist with over 7 years of experience specializing inAI-driven acoustic
+metamaterial design,topological acoustics,thermoacoustic metamaterials,quantum analogies in acoustics,RF
+device engineering,energy harvesting systems, andneural network-optimized acoustic metastructures. Currently
+leading advanced research at University of Arizona’s prestigious New Frontiers of Sound Science & Technology Center with proven
+track record of successful NASA collaborations on Thermoacoustic Metastructures (TAMS). Expert in advanced computational
+modeling using COMSOL Multiphysics, ANSYS, DeltaEC, and AI frameworks including TensorFlow, PyTorch, and
+physics-informed neural networks (PINNs). Demonstrated ability to translate complex AI-acoustic research into practical aerospace,
+semiconductor, telecommunications, and energy applications. Recognized leader in mentoring next-generation engineers and
+fostering innovation through cross-disciplinary collaborations.
+Core Competencies
+Acoustic Engineering:
+•Topological Acoustics & Phononic Crystals
+•Thermoacoustic Systems & Heat Engines
+•Quantum Analogies in Acoustic Systems
+•RF Device Design & Electromagnetic Acoustics
+•Acoustic Metamaterials & Metasurfaces
+•Sound Absorption & Noise Control
+•Vibration Analysis & Modal Testing
+•Non-Destructive Evaluation Techniques
+•Anechoic Chamber Testing
+Advanced Technologies:
+•Energy Harvesting & Transduction
+•MEMS Design & Microfabrication
+•Structural Supercapacitors
+•Phase-Change Materials
+•Additive Manufacturing for Acoustics
+•Thermoelectric Energy Conversion
+•Piezoelectric Transducers
+•Smart Materials & Adaptive Structures
+•Composite Materials Design
+Education
+Doctor of Philosophy (Ph.D.) in Mechanical & Aerospace Engineering2019 – 2024
+Oklahoma State University Stillwater, OK
+• Dissertation:Development and Optimization of Thermoacoustic Metastructures for Energy Harvesting and Noise Mitigation
+• Research Focus:Thermoacoustic systems, acoustic metamaterials, energy harvesting, computational acoustics,
+multiphysics modeling
+Master of Science (M.S.) in Mechanical Engineering2017 – 2019
+Northern Arizona University Flagstaff, AZ
+• Thesis:Development of Structural Supercapacitors for Electric Vehicle Applications
+• Research Focus:Energy storage systems, composite materials, electrochemical characterization
+Bachelor of Science (B.S.) in Mechanical Engineering2011 – 2016
+Rajshahi University of Engineering & Technology (RUET) Bangladesh
+• Senior Project:Design and Development of Micro-Displacement Sensor using LVDT Technology
+Professional Experience
+Research Scientist III – Acoustic EngineeringSeptember 2024 – Present
+University of Arizona, New Frontiers of Sound Science & Technology Center Tucson, AZ
+• Lead cutting-edge experimental and computational acoustics research specializing in topological acoustics, quantum analogies,
+RF device engineering, and non-destructive evaluation modalities for aerospace and telecommunications applications
+• Drive AI-based design optimization of 2D topological phononic crystals using phase-change materials (PCM), achieving∼200
+MHz functional behavior via machine-learning algorithms
+• Develop deep learning models for automated parameter prediction of Borofloat-based metamaterials, reducing design iteration
+time by 75% and enabling real-time optimization
+• Implement neural network frameworks for waveguide geometry prediction and edge-state validation, integrating
+physics-informed neural networks (PINNs) with COMSOL simulations
+• Design and implement sophisticated acoustic metamaterials and metasurfaces with phase-change capabilities for quantum
+computing applications
+• Collaborate with esteemed institutions including City University of New York, Wayne State University, Caltech, UCLA,
+Georgia Tech, Spelman College, University of Alaska-Fairbanks, and University of Colorado-Boulder on multidisciplinary
+breakthrough innovations
+Graduate Research Associate – Thermoacoustic SystemsAugust 2019 – August 2024
+Oklahoma State University, Mechanical & Aerospace Engineering Stillwater, OK
+• Pioneered development of Thermoacoustic Metastructures (TAMS) for simultaneous energy harvesting and noise mitigation
+achieving substantial decibel reduction (15-25 dB) across broad frequency ranges (100-2000 Hz)
+• Engineered innovative acoustic-thermoelectric transduction schemes producing millivolt-level voltage outputs with
+microwatt-scale power generation capabilities suitable for wireless sensor networks and IoT applications
+• Led comprehensive multiphysics simulation studies using COMSOL Multiphysics, ANSYS Fluent, and DeltaEC
+thermoacoustic modeling software to predict TAMS performance and optimize design parameters
+• Managed state-of-the-art acoustic testing facilities including anechoic chambers, reverberation rooms, and advanced
+instrumentation systems using National Instruments Data Acquisition (NI-DAQ) hardware
+• Developed novel thermoacoustic heat engines and refrigeration systems for aerospace thermal management applications with
+focus on high-efficiency energy conversion and waste heat recovery
+• Designed and fabricated modular TAMS configurations for scalable noise barriers with integrated energy capture functionality
+tailored for aerospace applications including aircraft engine noise reduction
+• Optimized critical design parameters including acoustic absorption coefficients vs. thermal gradient relationships, achieving
+25% improvement in multifunctional metamaterial performance
+• Conducted extensive evaluation of additive manufacturing techniques vs. traditional ceramic stack fabrication methods,
+identifying cost-effective strategies reducing manufacturing costs by 40%
+• Collaborated directly with NASA Langley Research Center scientists and engineers on thermoacoustic liner optimization
+projects for next-generation aircraft propulsion systems
+• Developed advanced measurement techniques for characterizing thermoacoustic phenomena including temperature field
+mapping, acoustic intensity measurements, and power output quantification
+• Mentored 5+ undergraduate students and 2 graduate students in thermoacoustic research methodologies, experimental
+techniques, and computational modeling approaches
+• Secured research funding through competitive grant applications and maintained detailed project documentation for
+technology transfer and commercialization activities
+Instructor of Record – Mechanical Engineering TechnologyJanuary 2023 – August 2023
+Oklahoma State University, MET Department Stillwater, OK
+• Served as primary instructor for advanced 4000-level Machine Elements course covering gear design, bearing analysis, shaft
+design, clutches, brakes, and mechanical system integration for 60-80 students across multiple sections
+• Developed comprehensive curriculum materials including lecture presentations, laboratory exercises, design projects, and
+assessment strategies resulting in 30% improvement in student comprehension and retention rates
+• Implemented innovative teaching methodologies incorporating MATLAB simulations, SolidWorks modeling exercises, and
+hands-on laboratory experiences to bridge theoretical concepts with practical applications
+• Led intensive Summer Bridge Program instruction for 30-40 incoming students per section, facilitating successful university
+transition and improving first-year retention by 20%
+Graduate Teaching Associate – Engineering MechanicsAugust 2019 – December 2022
+Oklahoma State University, Mechanical & Aerospace Engineering Stillwater, OK
+• Taught Elementary Dynamics courses in two discussion sections with 25-30 students each, employing interactive
+problem-solving methodologies and collaborative learning approaches
+• Independently led Honors program discussions focusing on advanced dynamics problems, critical thinking development, and
+advanced mathematical modeling techniques
+• Developed supplementary learning materials including solved example problems, practice examinations, and tutorial videos to
+support diverse learning preferences
+Graduate Research Assistant – Energy Storage SystemsAugust 2017 – July 2019
+Northern Arizona University, Mechanical Engineering Department Flagstaff, AZ
+• Led innovative development and optimization of structural supercapacitors (SSCs) for electric vehicle applications integrating
+electrical energy storage functionality with load-bearing structural capabilities
+• Achieved exceptional power density of 32.06 W/kg and energy density of 53.58 mWh/kg at 2V operating voltage through
+advanced electrode functionalization techniques and nanomaterial integration
+• Optimized SSC component materials and configurations yielding specific capacitance of 57.82 mF/g with enhanced operating
+voltage capability of 2.4V suitable for automotive and aerospace applications
+• Developed advanced carbon fiber electrode functionalization processes using chemical vapor deposition (CVD) and plasma
+treatment techniques
+• Conducted comprehensive electrochemical characterization including cyclic voltammetry, electrochemical impedance
+spectroscopy, and galvanostatic charge-discharge testing protocols
+• Performed mechanical testing of composite structures including tensile testing, flexural testing, and fatigue analysis to
+validate structural integrity under combined electrical and mechanical loading
+Graduate Teaching Assistant – Thermodynamics & Heat TransferAugust 2017 – July 2019
+Northern Arizona University, Mechanical Engineering Department Flagstaff, AZ
+• Assisted in design and implementation of advanced laboratory experiments bridging theoretical thermodynamics concepts
+with practical engineering applications
+• Collaborated with faculty members on comprehensive thermodynamics curriculum updates ensuring alignment with ABET
+accreditation requirements
+• Supervised student laboratory sessions covering calorimetry, heat conduction experiments, convection heat transfer
+measurements, and thermal radiation characterization
+Research & Development EngineerApril 2017 – August 2017
+B-Trac Engineering Ltd Dhaka, Bangladesh
+• Led critical infrastructure projects including design and development of mobile surveillance watch tower systems for
+Bangladesh Police enhancing field visibility and tactical deployment capabilities
+• Supervised and mentored multidisciplinary teams of 8+ technicians, engineers, and project professionals ensuring adherence
+to project timelines, quality standards, and safety protocols
+• Determined optimal and economical electrical installation layouts while ensuring maximum productivity and
+cost-effectiveness in assigned engineering projects
+• Championed data-driven decision-making methodologies by analyzing performance metrics and customer feedback resulting
+in 15% improvement in overall project efficiency
+Technical Skills
+Simulation & Modeling:COMSOL Multiphysics, ANSYS Workbench/Mechanical/Fluent, DeltaEC, Fluid-Structure Interaction
+(FSI), Thermal-Structural Coupling, Modal Analysis, Nonlinear Material Modeling
+Programming & AI:Python (TensorFlow, PyTorch), MATLAB, C/C++, LabVIEW, R, FORTRAN, Physics-Informed Neural
+Networks (PINNs), Machine Learning, Deep Learning
+CAD/CAM:SolidWorks, AutoCAD, G-code Programming, CNC Machining
+Instrumentation:NI-DAQ Systems, Anechoic/Reverberation Rooms, UTM/DMA, DSC/TGA/IR, Electrochemical Impedance
+Spectroscopy (EIS), Potentiostats, FDM/SLA 3D Printers
+Specialized Analysis:Acoustic Signal Processing, Thermoacoustic Flow Modeling, Heat Transfer Analysis, Materials
+Characterization, Statistical Analysis
+Selected Research Projects
+NASA Collaborative Research: Thermoacoustic Liner Optimization for Aircraft2023
+• Collaborated directly with NASA Langley Research Center scientists on advanced thermoacoustic liner design optimization
+for next-generation aircraft propulsion systems
+• Utilized specialized Normal Incidence Tube (NIT) testing protocols and advanced DeltaEC thermoacoustic simulation
+software to characterize acoustic absorption and thermal performance
+• Successfully achieved 9.5°C thermal gradient at optimized frequency of 790 Hz while maintaining superior acoustic absorption
+coefficients exceeding 0.8 across broad frequency ranges
+TAMS Component Optimization for Enhanced Energy Harvesting Performance2022
+• Led comprehensive parametric optimization studies investigating stack length variations, pore size distributions, and
+resonator geometry configurations to maximize thermoacoustic metastructure efficiency
+• Demonstrated simultaneous noise reduction capabilities (15-25 dB) and energy generation performance (microwatt-scale
+power output) suitable for autonomous sensor networks and IoT applications
+• Validated theoretical predictions through extensive experimental characterization including acoustic intensity measurements,
+temperature field mapping, and electrical power output quantification
+Additive Manufacturing for Advanced Thermoacoustic Devices2021
+• Conducted comprehensive benchmarking studies comparing 3D-printed thermoacoustic stacks with traditional ceramic
+honeycomb structures using DeltaEC simulation and experimental validation
+• Identified cost-effective additive manufacturing approaches reducing production costs by 40% while maintaining comparable
+or superior thermoacoustic performance
+• Developed design guidelines for additively manufactured thermoacoustic components including material selection criteria,
+geometric optimization parameters, and post-processing requirements
+Structural Supercapacitors for Electric Vehicle Applications2019
+• Designed and developed innovative energy-storing composite materials achieving energy density of 53.58 mWh/kg and
+exceptional mechanical modulus of 6.9 GPa for dual-function EV structural applications
+• Implemented advanced electrode functionalization techniques using carbon nanotube integration and conductive polymer
+coatings to enhance electrochemical performance
+• Developed scalable manufacturing processes suitable for automotive production including automated fiber placement, resin
+transfer molding, and integrated electrode fabrication techniques
+Mobile Surveillance Watchtower for Law Enforcement Applications2017
+• Engineered complete mobile surveillance system including structural design, electrical systems integration, and tactical
+deployment mechanisms for Bangladesh Police field operations
+• Performed comprehensive structural analysis including wind load calculations, seismic considerations, and stability analysis
+ensuring safe operation under adverse environmental conditions
+• Led project from conceptual design through prototype development and field testing resulting in successful technology
+transfer to law enforcement agencies
+Precision Micro-Displacement Sensor Development using LVDT Technology2017
+• Developed cost-effective surface roughness analyzer integrating Linear Variable Differential Transformer (LVDT) technology
+with advanced microelectronics and signal processing capabilities
+• Achieved measurement precision of±0.1 micrometers suitable for industrial quality control applications in manufacturing and
+precision machining operations
+• Designed custom signal conditioning circuitry, data acquisition systems, and user interface software enabling real-time surface
+characterization and automated analysis
+Publications & Intellectual Property
+Patent:
+•J. Manimala,S. Biswas.Thermoacoustic Meta-Structure. US Patent 2025/128,348 (2025)
+Selected Journal Publications:
+•Biswas, S., Krawczyk, Z., & Manimala, J.M. Multifunctional Characterization of a Thermoacoustic Meta-Structure.Progress in
+Engineering Science(2025)
+•Biswas, S., Kresl, W., & Manimala, J.M. On the relationship between acoustic absorption and temperature gradient in a
+thermoacoustic liner.International Journal of Aeroacoustics, 24(1-2), 42-67 (2025)
+Selected Conference Publications:
+•Biswas, S., & Santana, R. Investigation of Meta-Stacks for Thermoacoustic Applications.188th Meeting of the Acoustical Society
+of America, New Orleans, LA (2025)
+•Biswas, S., & Manimala, J.M. Quiet power: Exploring the feasibility of a noise-mitigating, thermoacoustic energy harvester.
+Journal of the Acoustical Society of America, 151(4) (2022)
+•Biswas, S., Krawczyk, Z., & Manimala, J.M. Evaluation of additively manufactured stacks for thermo-acoustic devices.
+INTER-NOISE Congress, 263(2), 4376-4387 (2021)
+Presentations & Conference Participation
+•4th Annual MAE Graduate Research Symposium, Oklahoma State University, Stillwater, OK, 2022 (Best Oral Presentation
+Award)
+•182nd Meeting of the Acoustical Society of America, Denver, CO, May 2022
+•50th International Congress and Exposition on Noise Control Engineering (INTER-NOISE 2021), Washington, D.C., August 2021
+•40th ASME/AIAA Regional Student Symposium, Stillwater, OK, April 2021
+A w ards & Honors
+•Best Oral Presentation Award – OSU MAE Graduate Research Symposium (2022)
+•International Excellence Award – Northern Arizona University (2018-2019)
+•Graduate Research Assistantship – Oklahoma State University (2019-2024)
+•Graduate Teaching Assistantship – Northern Arizona University (2017-2019)
+•Finalist – 3 Minute Teach Competition (2023)
+•Finalist – Riata Center Business Plan Competition (2022)
+•Dean’s List – Rajshahi University of Engineering & Technology (2014-2016)
+Professional Certifications
+•Six Sigma Green Belt Certification– Coursera-Kennesaw State University (June 2023)
+•Engineering Project Management Specialization– Coursera-Rice University (June 2023)
+•Professional Development Certificates (edX):Underactuated Robotics (MIT), Solar Energy Engineering (TU Delft),
+Autonomous Navigation for Flying Robots (TUM), Robot Mechanics and Control (SNU), Cyber-Physical Systems (UC Berkeley),
+Future Cities (ETH), Learning from Data (CIT)
+Leadership & Professional Ser vice
+•Judge – OSU MAE Graduate Research Symposium (2024), Oklahoma State Science and Engineering Fair (2023), 27th Annual
+OK-LSAMP Research Symposium (2023)
+•Peer Reviewer –International Journal of Mechanical Sciences(2023–Present),Journal of Sound and Vibration(2022–Present)
+•Laboratory Manager – Solid & Structural Dynamics Lab, Oklahoma State University (2021–2024)
+•OK Catalyst Roadmap Spring Cohort (2023)
+•Student A/V Room Monitor – ASA 182nd Meeting (2022)
+Professional Memberships
+Acoustical Society of America (ASA)– Student Member (August 2021 – Present)
+Active leadership in Engineering Acoustics and Structural Acoustics committees. Regular contributor to biannual meetings with
+research presentations and technical discussions. Volunteer coordinator for student professional development initiatives.
+Languages
+English (Fluent), Bengali (Native), Hindi (Conversational)
+Technical writing|Grant proposals|Conference presentations|Patents|Cross-cultural collaboration|Team leadership

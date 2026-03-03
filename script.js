@@ -2,12 +2,13 @@
 // PARTICLE CANVAS
 // ==============================
 const canvas = document.getElementById('particleCanvas');
-const ctx = canvas.getContext('2d');
+const ctx = canvas ? canvas.getContext('2d') : null;
 
 let particles = [];
 let mouse = { x: null, y: null };
 
 function resizeCanvas() {
+  if (!canvas) return;
   canvas.width = window.innerWidth;
   canvas.height = window.innerHeight;
 }
@@ -85,6 +86,7 @@ class Particle {
 }
 
 function initParticles() {
+  if (!canvas) return;
   particles = [];
   const count = Math.min(60, Math.floor((canvas.width * canvas.height) / 20000));
   for (let i = 0; i < count; i++) {
@@ -93,6 +95,7 @@ function initParticles() {
 }
 
 function connectParticles() {
+  if (!ctx) return;
   for (let i = 0; i < particles.length; i++) {
     for (let j = i + 1; j < particles.length; j++) {
       const dx = particles[i].x - particles[j].x;
@@ -112,6 +115,7 @@ function connectParticles() {
 }
 
 function animateParticles() {
+  if (!ctx || !canvas) return;
   ctx.clearRect(0, 0, canvas.width, canvas.height);
   particles.forEach(p => {
     p.update();
@@ -121,19 +125,21 @@ function animateParticles() {
   requestAnimationFrame(animateParticles);
 }
 
-canvas.addEventListener('mousemove', (e) => {
-  mouse.x = e.x;
-  mouse.y = e.y;
-});
+if (canvas) {
+  canvas.addEventListener('mousemove', (e) => {
+    mouse.x = e.x;
+    mouse.y = e.y;
+  });
 
-canvas.addEventListener('mouseleave', () => {
-  mouse.x = null;
-  mouse.y = null;
-});
+  canvas.addEventListener('mouseleave', () => {
+    mouse.x = null;
+    mouse.y = null;
+  });
 
-initParticles();
-animateParticles();
-window.addEventListener('resize', initParticles);
+  initParticles();
+  animateParticles();
+  window.addEventListener('resize', initParticles);
+}
 
 // ==============================
 // MOUSE PARALLAX FOR BACKGROUND
@@ -263,7 +269,10 @@ const heroObserver = new IntersectionObserver((entries) => {
   });
 }, { threshold: 0.5 });
 
-heroObserver.observe(document.querySelector('.hero-stats'));
+const heroStats = document.querySelector('.hero-stats');
+if (heroStats) {
+  heroObserver.observe(heroStats);
+}
 
 // ==============================
 // SCROLL ANIMATIONS
@@ -683,16 +692,19 @@ if (document.readyState === 'loading') {
 // ==============================
 // CONTACT FORM
 // ==============================
-document.getElementById('contactForm').addEventListener('submit', (e) => {
-  e.preventDefault();
-  const btn = e.target.querySelector('button[type="submit"]');
-  const originalHTML = btn.innerHTML;
-  btn.innerHTML = '<span>Message Sent!</span>';
-  btn.style.background = 'var(--accent)';
+const contactForm = document.getElementById('contactForm');
+if (contactForm) {
+  contactForm.addEventListener('submit', (e) => {
+    e.preventDefault();
+    const btn = e.target.querySelector('button[type="submit"]');
+    const originalHTML = btn.innerHTML;
+    btn.innerHTML = '<span>Message Sent!</span>';
+    btn.style.background = 'var(--accent)';
 
-  setTimeout(() => {
-    btn.innerHTML = originalHTML;
-    btn.style.background = '';
-    e.target.reset();
-  }, 3000);
-});
+    setTimeout(() => {
+      btn.innerHTML = originalHTML;
+      btn.style.background = '';
+      e.target.reset();
+    }, 3000);
+  });
+}
