@@ -1964,6 +1964,45 @@ ul { list-style: none; }
 }
 
 /* ==============================
+   PAGE HERO (sub-pages)
+   ============================== */
+.page-hero {
+  padding: 7rem 1.5rem 4rem;
+  text-align: center;
+  background: linear-gradient(180deg, var(--bg-alt) 0%, var(--bg) 100%);
+  border-bottom: 1px solid var(--border);
+}
+.page-hero .section-tag {
+  margin-bottom: 1rem;
+}
+.page-hero h1 {
+  font-size: clamp(2.4rem, 5vw, 3.8rem);
+  font-weight: 800;
+  line-height: 1.1;
+  color: var(--text);
+  margin-bottom: 1rem;
+}
+.page-hero h1 .accent {
+  background: linear-gradient(135deg, var(--accent), var(--accent-secondary));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+.page-hero-sub {
+  font-size: 1.1rem;
+  color: var(--text-muted);
+  max-width: 580px;
+  margin: 0 auto;
+  line-height: 1.65;
+}
+
+/* nav active link */
+.nav-links a.active {
+  color: var(--accent);
+  font-weight: 600;
+}
+
+/* ==============================
    PULSEFIT-STYLE PHOTO CAROUSEL
    ============================== */
 
@@ -2040,6 +2079,7 @@ ul { list-style: none; }
 .photo-card-sq {
   width: 260px;
   height: 280px;
+  background: #0f1117;   /* dark bg so transparent PNGs render cleanly */
 }
 
 .photo-card img {

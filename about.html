@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>About — Samarjith Biswas</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="style.css"/>
+</head>
+<body>
+
+  <!-- Background Decoration -->
+  <div class="bg-decoration">
+    <svg class="bg-hexagons" viewBox="0 0 600 400" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <pattern id="hexPattern" x="0" y="0" width="60" height="52" patternUnits="userSpaceOnUse">
+          <polygon points="30,0 60,15 60,45 30,60 0,45 0,15" fill="none" stroke="#6366f1" stroke-width="0.5" opacity="0.06"/>
+        </pattern>
+      </defs>
+      <rect width="100%" height="100%" fill="url(#hexPattern)"/>
+    </svg>
+    <svg class="bg-soundwaves" viewBox="0 0 1440 200" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none">
+      <path class="waveform-path waveform-1" d="M0,100 Q60,50 120,100 T240,100 T360,100 T480,100 T600,100 T720,100 T840,100 T960,100 T1080,100 T1200,100 T1320,100 T1440,100"/>
+      <path class="waveform-path waveform-2" d="M0,100 Q90,30 180,100 T360,100 T540,100 T720,100 T900,100 T1080,100 T1260,100 T1440,100"/>
+    </svg>
+  </div>
+
+  <!-- Navigation -->
+  <nav class="navbar" id="navbar">
+    <div class="nav-container">
+      <a href="index.html" class="nav-logo">Samarjith Biswas</a>
+      <button class="nav-toggle" id="navToggle" aria-label="Toggle menu">
+        <span></span><span></span><span></span>
+      </button>
+      <ul class="nav-links" id="navLinks">
+        <li><a href="about.html" class="active">About</a></li>
+        <li><a href="index.html#research">Research</a></li>
+        <li><a href="projects.html">Projects</a></li>
+        <li><a href="experience.html">Experience</a></li>
+        <li><a href="publications.html">Publications</a></li>
+        <li><a href="documentaries.html">Media</a></li>
+        <li><a href="index.html#contact">Contact</a></li>
+      </ul>
+      <div class="nav-actions">
+        <a href="https://samarjithbiswas.com/wp-content/uploads/2025/02/samarjith_biswas_cv_updated_january_2025.pdf" target="_blank" class="btn btn-sm">Download CV</a>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Page Hero -->
+  <section class="page-hero">
+    <div class="container">
+      <span class="section-tag">About Me</span>
+      <h1>Engineering the<br><span class="accent">Future of Sound</span></h1>
+      <p class="page-hero-sub">Research Scientist III &middot; University of Arizona &middot; NewFoS Science &amp; Technology Center</p>
+    </div>
+  </section>
+
+  <!-- About Section -->
+  <section class="section" id="about">
+    <div class="container">
+      <div class="about-grid">
+        <div class="about-text">
+          <p>I am a Research Scientist at the University of Arizona's <strong>New Frontiers of Sound (NewFoS)</strong> Science &amp; Technology Center, an NSF-funded multi-institutional research hub. My work sits at the intersection of topological acoustics, quantum-inspired systems, and AI-driven computational simulation.</p>
+          <p>I hold a PhD in Mechanical &amp; Aerospace Engineering from Oklahoma State University with a proven track record of successful <strong>NASA collaborations</strong> on Thermoacoustic Metastructures (TAMS). Expert in advanced computational modeling using <strong>COMSOL Multiphysics, ANSYS, DeltaEC</strong>, and AI frameworks including <strong>TensorFlow, PyTorch</strong>, and physics-informed neural networks (PINNs).</p>
+          <p>My research demonstrates the ability to translate complex AI-acoustic research into practical aerospace, semiconductor, telecommunications, and energy applications. I collaborate with leading institutions including <strong>Caltech, UCLA, Georgia Tech, UC Boulder, CUNY, Wayne State, Spelman College</strong>, and <strong>University of Alaska-Fairbanks</strong>.</p>
+          <p>Recognized leader in mentoring next-generation engineers (7+ researchers mentored) and fostering innovation through cross-disciplinary collaborations spanning mechanical engineering, aerospace engineering, and artificial intelligence domains.</p>
+          <div class="about-quote">
+            <blockquote>"The only way to discover the limits of the possible is to go beyond them into the impossible."</blockquote>
+            <cite>&mdash; Arthur C. Clarke</cite>
+          </div>
+        </div>
+        <div class="about-sidebar">
+          <div class="impact-grid">
+            <div class="impact-card">
+              <span class="impact-num">75%</span>
+              <span class="impact-label">Design Iteration Time Reduction</span>
+            </div>
+            <div class="impact-card">
+              <span class="impact-num">40%</span>
+              <span class="impact-label">Manufacturing Cost Reduction</span>
+            </div>
+            <div class="impact-card">
+              <span class="impact-num">25%</span>
+              <span class="impact-label">Performance Improvement</span>
+            </div>
+            <div class="impact-card">
+              <span class="impact-num">$300K+</span>
+              <span class="impact-label">Facility Management</span>
+            </div>
+          </div>
+          <div class="about-location">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
+            Tucson, AZ &middot; Available for domestic &amp; international relocation
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Education -->
+  <section class="section section-alt" id="education">
+    <svg class="section-decor section-decor-left" style="top: 20%" viewBox="0 0 150 200" xmlns="http://www.w3.org/2000/svg">
+      <ellipse cx="80" cy="100" rx="60" ry="25" fill="none" stroke="#6366f1" stroke-width="0.8" opacity="0.1" transform="rotate(-20 80 100)"/>
+      <ellipse cx="80" cy="100" rx="60" ry="25" fill="none" stroke="#06b6d4" stroke-width="0.6" opacity="0.08" transform="rotate(40 80 100)"/>
+      <circle cx="80" cy="100" r="10" fill="none" stroke="#6366f1" stroke-width="1" opacity="0.15"/>
+    </svg>
+    <div class="container">
+      <div class="section-header">
+        <span class="section-tag">Education</span>
+        <h2>Academic Background</h2>
+      </div>
+      <div class="edu-grid">
+        <div class="edu-card">
+          <div class="edu-degree">Ph.D.</div>
+          <h3>Mechanical &amp; Aerospace Engineering</h3>
+          <h4>Oklahoma State University</h4>
+          <span class="edu-year">2019 &mdash; 2024</span>
+          <p class="edu-detail">Dissertation: "Development and Optimization of Thermoacoustic Metastructures." NASA collaboration, US Patent, 40% cost reduction, 25% performance improvement.</p>
+        </div>
+        <div class="edu-card">
+          <div class="edu-degree">M.S.</div>
+          <h3>Mechanical Engineering</h3>
+          <h4>Northern Arizona University</h4>
+          <span class="edu-year">2017 &mdash; 2019</span>
+          <p class="edu-detail">Thesis: "Structural Supercapacitors for Electric Vehicle Applications." 53.58 mWh/kg energy density, 6.9 GPa mechanical modulus.</p>
+        </div>
+        <div class="edu-card">
+          <div class="edu-degree">B.S.</div>
+          <h3>Mechanical Engineering</h3>
+          <h4>Rajshahi University of Engineering &amp; Technology</h4>
+          <span class="edu-year">2011 &mdash; 2016</span>
+          <p class="edu-detail">Dean's List (2014-2016). Senior Project: LVDT-based Micro-Displacement Sensor (&plusmn;0.1 &mu;m precision).</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Awards & Honors -->
+  <section class="section" id="awards">
+    <div class="container">
+      <div class="section-header">
+        <span class="section-tag">Recognition</span>
+        <h2>Awards &amp; Honors</h2>
+        <p class="section-desc">Recognized for excellence in research, teaching, and innovation across multiple institutions.</p>
+      </div>
+      <div class="awards-certs">
+        <div class="ac-col">
+          <h3>Awards &amp; Honors</h3>
+          <ul>
+            <li><strong>Best Oral Presentation Award</strong> &mdash; OSU MAE Graduate Research Symposium, 2022</li>
+            <li><strong>International Excellence Award</strong> &mdash; Northern Arizona University, 2018-2019</li>
+            <li><strong>Graduate Research Assistantship</strong> &mdash; OSU, 2019-2024</li>
+            <li><strong>Graduate Teaching Assistantship</strong> &mdash; NAU, 2017-2019</li>
+            <li><strong>Finalist, 3 Minute Teach Competition</strong> &mdash; 2023</li>
+            <li><strong>Finalist, Riata Center Business Plan Competition</strong> &mdash; 2022</li>
+            <li><strong>Dean's List</strong> &mdash; RUET 2014-2016</li>
+          </ul>
+        </div>
+        <div class="ac-col">
+          <h3>Certifications &amp; Professional Development</h3>
+          <ul>
+            <li><strong>Six Sigma Green Belt</strong> &mdash; Coursera-Kennesaw State University, June 2023</li>
+            <li><strong>Engineering Project Management</strong> &mdash; Coursera-Rice University, June 2023</li>
+            <li><strong>Underactuated Robotics</strong> &mdash; MIT (edX)</li>
+            <li><strong>Solar Energy Engineering</strong> &mdash; TU Delft (edX)</li>
+            <li><strong>Autonomous Navigation for Flying Robots</strong> &mdash; TUM (edX)</li>
+            <li><strong>Cyber-Physical Systems</strong> &mdash; UC Berkeley (edX)</li>
+            <li><strong>COMSOL Multiphysics Certified</strong></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA -->
+  <section class="section section-alt" style="padding:3rem 0;">
+    <div class="container" style="text-align:center;">
+      <h3 style="margin-bottom:1rem;font-size:1.6rem;">Ready to Collaborate?</h3>
+      <p style="color:var(--text-muted);margin-bottom:1.5rem;">Open to research partnerships, industry collaborations, and speaking engagements.</p>
+      <div style="display:flex;gap:1rem;justify-content:center;flex-wrap:wrap;">
+        <a href="index.html#contact" class="btn btn-primary">Get in Touch</a>
+        <a href="experience.html" class="btn btn-outline">View Experience &rarr;</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-inner">
+        <div class="footer-left">
+          <span class="footer-name">Samarjith Biswas</span>
+          <p>Research Scientist III &middot; University of Arizona</p>
+        </div>
+        <div class="footer-center">
+          <p>Member, Acoustical Society of America (2021&ndash;Present)</p>
+          <p>Peer Reviewer: Int. Journal of Mechanical Sciences, Journal of Sound and Vibration</p>
+          <p>&copy; 2026 Samarjith Biswas. All rights reserved.</p>
+        </div>
+        <div class="footer-right">
+          <a href="https://samarjithbiswas.com/wp-content/uploads/2025/02/samarjith_biswas_cv_updated_january_2025.pdf" target="_blank" class="btn btn-sm">Download CV</a>
+          <a href="https://samarjithbiswas.com/wp-content/uploads/2024/01/samarjith-biswas-resume_phd_osu_-2024-1.pdf" target="_blank" class="btn btn-sm btn-outline-sm">Download Resume</a>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <script src="script.js"></script>
+</body>
+</html>

@@ -631,28 +631,42 @@ function buildCarousel(trackId, items, cardClass = '') {
   `).join('');
 }
 
-// Team & Collaborations carousel
-buildCarousel('teamTrack', [
-  { src: '1.jpg',                                                                                            label: 'Presentation' },
-  { src: '2.jpg',                                                                                            label: 'Presentation' },
-  { src: '3.jpg',                                                                                            label: 'Team Meeting' },
-  { src: 'https://samarjithbiswas.com/wp-content/uploads/2024/01/305_roadmap_040822-edited.jpg?w=1024',     label: 'NewFoS Research Team' },
-  { src: 'https://samarjithbiswas.com/wp-content/uploads/2024/01/sam01144.jpg?w=1024',                     label: 'Lab Team Meeting' },
-  { src: 'https://samarjithbiswas.com/wp-content/uploads/2024/02/32_roadmap_040822-1.jpg?w=1024',          label: 'Research Presentation' },
-]);
+// ── Carousel data ──────────────────────────────────────────────────────────
+const TEAM_ITEMS = [
+  { src: '1.jpg',  label: 'Presentation' },
+  { src: '2.jpg',  label: 'Presentation' },
+  { src: '3.jpg',  label: 'Team Meeting' },
+  { src: 'https://samarjithbiswas.com/wp-content/uploads/2024/01/305_roadmap_040822-edited.jpg?w=1024', label: 'NewFoS Research Team' },
+  { src: 'https://samarjithbiswas.com/wp-content/uploads/2024/01/sam01144.jpg?w=1024',                  label: 'Lab Team Meeting' },
+  { src: 'https://samarjithbiswas.com/wp-content/uploads/2024/02/32_roadmap_040822-1.jpg?w=1024',       label: 'Research Presentation' },
+];
 
-// TAMS carousel (square/portrait renders)
-buildCarousel('tamsTrack', [
+const TAMS_ITEMS = [
   { src: 'https://samarjithbiswas.com/wp-content/uploads/2024/01/modular-resonator_isometric_blue_sectional_v6.png?w=1024', label: 'Pie Slice Resonator' },
   { src: 'https://samarjithbiswas.com/wp-content/uploads/2024/01/spriralresonator-7.png',                                   label: 'Spiral Resonator' },
   { src: 'https://samarjithbiswas.com/wp-content/uploads/2024/01/spiral-stack_2-turns_blue_-sectionalview_withextra.png?w=750', label: 'Spiral Stack' },
-  { src: 'Themaocosutic Liner_V5.png',                                                                                       label: 'Thermoacoustic Liner' },
-  { src: 'Tams Barriere.png',                                                                                                 label: 'TAMS Barrier' },
-  { src: 'V2HelicalResonator_100_ISSOMERIC_Transparents_Sectional.PNG',                                                      label: 'Helical Resonator' },
-  { src: 'MetaWallAssembly_Isometric_V6_WhiteFebric_V3_Transparent_V2.png',                                                  label: 'Meta Wall Assembly' },
-  { src: 'SpiralStack_2Turns_v4_Slice_ZOOMED.png',                                                                           label: 'Spiral Stack Detail' },
+  { src: 'Themaocosutic%20Liner_V5.png',                                                                                    label: 'Thermoacoustic Liner' },
+  { src: 'Tams%20Barriere.png',                                                                                             label: 'TAMS Barrier' },
+  { src: 'V2HelicalResonator_100_ISSOMERIC_Transparents_Sectional.PNG',                                                     label: 'Helical Resonator' },
+  { src: 'MetaWallAssembly_Isometric_V6_WhiteFebric_V3_Transparent_V2.png',                                                 label: 'Meta Wall Assembly' },
+  { src: 'SpiralStack_2Turns_v4_Slice_ZOOMED.png',                                                                          label: 'Spiral Stack Detail' },
   { src: 'Stack_GeometryComparison_Font.png_Trimetric.png',                                                                  label: 'Stack Geometry' },
-], 'photo-card-sq');
+];
+
+// Build carousels as soon as DOM is ready (safe for both inline and deferred)
+function initCarousels() {
+  buildCarousel('teamTrack',  TEAM_ITEMS);
+  buildCarousel('tamsTrack',  TAMS_ITEMS, 'photo-card-sq');
+  // also build on sub-pages if those tracks exist
+  buildCarousel('teamTrack2', TEAM_ITEMS);
+  buildCarousel('tamsTrack2', TAMS_ITEMS, 'photo-card-sq');
+}
+
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', initCarousels);
+} else {
+  initCarousels();
+}
 
 // ==============================
 // CONTACT FORM
