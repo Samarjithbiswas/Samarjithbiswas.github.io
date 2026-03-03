@@ -1170,6 +1170,80 @@ ul { list-style: none; }
   }
 }
 
+/* Software Logo Strip */
+.software-logos {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.25rem 2rem;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 3rem;
+  padding: 1.5rem 1rem;
+  background: rgba(99,102,241,0.03);
+  border-radius: 12px;
+  border: 1px solid var(--border);
+}
+
+.sw-logo-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.4rem;
+  text-decoration: none;
+  color: var(--text-secondary);
+  padding: 0.5rem 0.75rem;
+  border-radius: 8px;
+  transition: all 0.3s ease;
+  min-width: 70px;
+}
+
+.sw-logo-item:hover {
+  color: var(--accent);
+  transform: translateY(-3px);
+  background: rgba(99,102,241,0.06);
+}
+
+.sw-logo-item img {
+  height: 40px;
+  width: auto;
+  max-width: 80px;
+  object-fit: contain;
+  filter: grayscale(0.4) brightness(1.05);
+  opacity: 0.85;
+  transition: all 0.3s ease;
+}
+
+.sw-logo-item:hover img {
+  filter: none;
+  opacity: 1;
+  transform: scale(1.1);
+}
+
+.sw-logo-item span {
+  font-size: 0.68rem;
+  font-weight: 500;
+  letter-spacing: 0.01em;
+  white-space: nowrap;
+}
+
+@media (max-width: 640px) {
+  .software-logos {
+    gap: 0.75rem 1rem;
+    padding: 1rem 0.5rem;
+  }
+  .sw-logo-item {
+    min-width: 56px;
+    padding: 0.35rem;
+  }
+  .sw-logo-item img {
+    height: 28px;
+    max-width: 60px;
+  }
+  .sw-logo-item span {
+    font-size: 0.6rem;
+  }
+}
+
 /* ==============================
    RESEARCH 3D HERO SPLIT
    ============================== */
@@ -1361,14 +1435,14 @@ ul { list-style: none; }
    ============================== */
 .research-card-3d {
   display: grid;
-  grid-template-columns: 1fr 400px;
+  grid-template-columns: 1fr 500px;
   gap: 3rem;
   margin-bottom: 3rem;
   align-items: center;
 }
 
 .research-card-3d.reverse {
-  grid-template-columns: 400px 1fr;
+  grid-template-columns: 500px 1fr;
 }
 
 .research-card-3d.reverse .research-card-content {
@@ -1447,8 +1521,8 @@ ul { list-style: none; }
 
 /* 3D Model Container - Transparent background */
 .research-card-model {
-  width: 400px;
-  height: 400px;
+  width: 500px;
+  height: 500px;
   position: relative;
   background: transparent;
   border-radius: 0;
@@ -1478,9 +1552,9 @@ ul { list-style: none; }
   
   .research-card-model {
     width: 100%;
-    max-width: 400px;
+    max-width: 500px;
     margin: 0 auto;
-    height: 350px;
+    height: 400px;
   }
 }
 

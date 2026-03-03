@@ -336,6 +336,9 @@
             const time = clock.getElapsedTime();
             controls.update();
 
+            // Continuous rotation around vertical axis
+            if (sawGroup) sawGroup.rotation.y += 0.003;
+
             // Process animations
             for (let i = 0; i < anims.length; i++) {
                 const a = anims[i];
