@@ -400,17 +400,8 @@
             renderer.toneMappingExposure = 1.4;
             renderer.outputEncoding = THREE.sRGBEncoding;
 
-            // Post-processing (bloom still works on transparent)
-            try {
-                composer = new THREE.EffectComposer(renderer);
-                const renderPass = new THREE.RenderPass(scene, camera);
-                renderPass.clear = true;
-                renderPass.clearColor = new THREE.Color(0x000000);
-                renderPass.clearAlpha = 0;
-                composer.addPass(renderPass);
-                bloomPass = new THREE.UnrealBloomPass(new THREE.Vector2(innerWidth, innerHeight), 0.35, 0.6, 0.85);
-                composer.addPass(bloomPass);
-            } catch (e) { composer = null; }
+            // Skip post-processing to preserve transparency
+            composer = null;
 
             envMap = createEnvMap();
             scene.environment = envMap;
@@ -542,12 +533,8 @@
             if (phononicLattice.visible) updatePhononicLattice(phononicLattice, time);
 
             // Render with transparent background
-            if (composer) {
-                renderer.setClearColor(0x000000, 0);
-                composer.render();
-            } else {
-                renderer.render(scene, camera);
-            }
+            renderer.setClearColor(0x000000, 0);
+            renderer.render(scene, camera);
         }
 
         init();

@@ -799,11 +799,11 @@ ul { list-style: none; }
 }
 
 .about-title-model {
-  width: 220px;
-  height: 280px;
+  width: 200px;
+  height: 380px;
   flex-shrink: 0;
   position: relative;
-  overflow: visible;
+  overflow: hidden;
 }
 
 .about-title-model iframe {
@@ -817,7 +817,7 @@ ul { list-style: none; }
 @media (max-width: 1024px) {
   .about-title-model {
     width: 160px;
-    height: 220px;
+    height: 320px;
   }
 }
 
@@ -828,7 +828,7 @@ ul { list-style: none; }
   }
   .about-title-model {
     width: 140px;
-    height: 180px;
+    height: 260px;
   }
   .about-title-model-left { order: -1; }
   .about-title-center { order: 0; }
