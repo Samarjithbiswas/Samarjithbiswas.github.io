@@ -43,9 +43,9 @@
             scene = new THREE.Scene();
             // Transparent background - no scene.background
 
-            camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
-            // Position camera to view the horizontal architecture
-            camera.position.set(80, 60, 120);
+            camera = new THREE.PerspectiveCamera(40, window.innerWidth / window.innerHeight, 0.1, 1000);
+            // Isometric-style view: elevated, equal X-Z for corner perspective
+            camera.position.set(120, 100, 120);
 
             renderer = new THREE.WebGLRenderer({
                 canvas: canvas,
@@ -83,9 +83,9 @@
             // Build architecture
             buildSAWFilterDevice();
 
-            // Re-center and adjust the camera to frame the geometry horizontally
-            camera.position.set(80, 60, 120);
-            controls.target.set(0, 0, 0);
+            // Re-center camera for isometric framing
+            camera.position.set(120, 100, 120);
+            controls.target.set(0, 5, 0);
             controls.update();
 
             window.addEventListener('resize', onWindowResize, false);
@@ -96,7 +96,8 @@
         function buildSAWFilterDevice() {
             sawGroup = new THREE.Group();
             sawGroup.scale.set(1.5, 1.5, 1.5);
-            // No rotation is applied to keep it horizontal as requested
+            // Start rotated ~30° for immediate isometric appearance
+            sawGroup.rotation.y = -Math.PI / 6;
 
             // PIEZOELECTRIC SUBSTRATE (LiNbO3)
             const substrateGeo = new THREE.BoxGeometry(80, 2, 35);

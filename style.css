@@ -841,54 +841,31 @@ ul { list-style: none; }
   }
 }
 
-/* 3D Showcase Row */
-.showcase-3d-row {
+/* Full-Width 3D Visual Embeds */
+.visual-3d-strip {
   display: flex;
-  gap: 2rem;
-  justify-content: center;
-  align-items: flex-start;
-  flex-wrap: wrap;
-}
-
-.showcase-3d-item {
-  flex: 1;
-  max-width: 500px;
-  min-width: 300px;
-  text-align: center;
-}
-
-.showcase-3d-item iframe {
   width: 100%;
-  height: 420px;
+  gap: 0;
+  background: linear-gradient(135deg, #0a0a1a 0%, #111133 50%, #0a0a1a 100%);
+  overflow: hidden;
+}
+
+.visual-3d-embed {
+  flex: 1;
+  width: 50%;
+  height: 500px;
   border: none;
-  border-radius: 16px;
-  background: linear-gradient(135deg, #0a0a1a 0%, #1a1a3a 100%);
-  box-shadow: 0 8px 32px rgba(0,0,0,0.15);
-}
-
-.showcase-3d-item h4 {
-  margin-top: 1rem;
-  font-size: 1.1rem;
-  font-weight: 600;
-  color: var(--heading);
-}
-
-.showcase-3d-item p {
-  font-size: 0.85rem;
-  color: var(--text-light);
-  margin-top: 0.25rem;
+  display: block;
+  background: transparent;
 }
 
 @media (max-width: 768px) {
-  .showcase-3d-row {
+  .visual-3d-strip {
     flex-direction: column;
-    align-items: center;
   }
-  .showcase-3d-item {
-    max-width: 100%;
-  }
-  .showcase-3d-item iframe {
-    height: 320px;
+  .visual-3d-embed {
+    width: 100%;
+    height: 380px;
   }
 }
 
