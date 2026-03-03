@@ -634,29 +634,41 @@ function buildCarousel(trackId, items, cardClass = '') {
 // ── Carousel data ──────────────────────────────────────────────────────────
 const TEAM_ITEMS = [
   { src: '1.jpg',  label: 'Presentation' },
-  { src: '2.jpg',  label: 'Presentation' },
+  { src: '2.jpg',  label: 'Conference Talk' },
   { src: '3.jpg',  label: 'Team Meeting' },
-  { src: 'https://samarjithbiswas.com/wp-content/uploads/2024/01/305_roadmap_040822-edited.jpg?w=1024', label: 'NewFoS Research Team' },
-  { src: 'https://samarjithbiswas.com/wp-content/uploads/2024/01/sam01144.jpg?w=1024',                  label: 'Lab Team Meeting' },
-  { src: 'https://samarjithbiswas.com/wp-content/uploads/2024/02/32_roadmap_040822-1.jpg?w=1024',       label: 'Research Presentation' },
+  { src: 'ThesisSnap.jpg', label: 'PhD Defense' },
+  { src: 'Untitled_Project_12.png', label: 'Research Lab' },
+  { src: 'Untitled_Project_5.png', label: 'Collaboration' },
 ];
 
 const TAMS_ITEMS = [
-  { src: 'https://samarjithbiswas.com/wp-content/uploads/2024/01/modular-resonator_isometric_blue_sectional_v6.png?w=1024', label: 'Pie Slice Resonator' },
-  { src: 'https://samarjithbiswas.com/wp-content/uploads/2024/01/spriralresonator-7.png',                                   label: 'Spiral Resonator' },
-  { src: 'https://samarjithbiswas.com/wp-content/uploads/2024/01/spiral-stack_2-turns_blue_-sectionalview_withextra.png?w=750', label: 'Spiral Stack' },
-  { src: 'Themaocosutic%20Liner_V5.png',                                                                                    label: 'Thermoacoustic Liner' },
-  { src: 'Tams%20Barriere.png',                                                                                             label: 'TAMS Barrier' },
-  { src: 'V2HelicalResonator_100_ISSOMERIC_Transparents_Sectional.PNG',                                                     label: 'Helical Resonator' },
-  { src: 'MetaWallAssembly_Isometric_V6_WhiteFebric_V3_Transparent_V2.png',                                                 label: 'Meta Wall Assembly' },
-  { src: 'SpiralStack_2Turns_v4_Slice_ZOOMED.png',                                                                          label: 'Spiral Stack Detail' },
-  { src: 'Stack_GeometryComparison_Font.png_Trimetric.png',                                                                  label: 'Stack Geometry' },
+  { src: 'Themaocosutic_Liner_V5.png', label: 'Thermoacoustic Liner' },
+  { src: 'Tams_Barriere.png', label: 'TAMS Barrier' },
+  { src: 'Tams_Barrierer_Unit_Cell.png', label: 'TAMS Unit Cell' },
+  { src: 'V2HelicalResonator_100_ISSOMERIC_Transparents_Sectional.PNG', label: 'Helical Resonator' },
+  { src: 'MetaWallAssembly_Isometric_V6_WhiteFebric_V3_Transparent_V2.png', label: 'Meta Wall Assembly' },
+  { src: 'SpiralStack_2Turns_v4_Slice_ZOOMED.png', label: 'Spiral Stack Detail' },
+  { src: 'Stack_GeometryComparison_Font.png_Trimetric.png', label: 'Stack Geometry Comparison' },
+];
+
+// Combined showcase for hero section (mix of TAMS and team)
+const SHOWCASE_ITEMS = [
+  { src: 'Themaocosutic_Liner_V5.png', label: 'Thermoacoustic Liner' },
+  { src: '1.jpg', label: 'Research Presentation' },
+  { src: 'Tams_Barriere.png', label: 'TAMS Barrier' },
+  { src: '2.jpg', label: 'Conference Talk' },
+  { src: 'MetaWallAssembly_Isometric_V6_WhiteFebric_V3_Transparent_V2.png', label: 'Meta Wall Assembly' },
+  { src: '3.jpg', label: 'Team Meeting' },
+  { src: 'V2HelicalResonator_100_ISSOMERIC_Transparents_Sectional.PNG', label: 'Helical Resonator' },
+  { src: 'ThesisSnap.jpg', label: 'PhD Defense' },
+  { src: 'SpiralStack_2Turns_v4_Slice_ZOOMED.png', label: 'Spiral Stack Detail' },
 ];
 
 // Build carousels as soon as DOM is ready (safe for both inline and deferred)
 function initCarousels() {
   buildCarousel('teamTrack',  TEAM_ITEMS);
   buildCarousel('tamsTrack',  TAMS_ITEMS, 'photo-card-sq');
+  buildCarousel('showcaseTrack', SHOWCASE_ITEMS);  // Hero showcase carousel
   // also build on sub-pages if those tracks exist
   buildCarousel('teamTrack2', TEAM_ITEMS);
   buildCarousel('tamsTrack2', TAMS_ITEMS, 'photo-card-sq');
