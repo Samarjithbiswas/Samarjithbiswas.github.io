@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactive Robot</title>
+    <style>
+        /* ── Fully transparent, no UI, no borders, no text ── */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html,
+        body {
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            background: transparent;
+        }
+
+        /* ── Spline viewer fills the entire viewport ── */
+        spline-viewer {
+            display: block;
+            width: 100%;
+            height: 100%;
+            pointer-events: auto;
+            background: transparent;
+        }
+
+        /* ── Hide the Spline logo / watermark completely ── */
+        spline-viewer::part(logo) {
+            display: none !important;
+            opacity: 0 !important;
+            visibility: hidden !important;
+        }
+
+        spline-viewer>canvas+div,
+        spline-viewer #logo,
+        spline-viewer a[href*="spline"] {
+            display: none !important;
+            opacity: 0 !important;
+            visibility: hidden !important;
+            height: 0 !important;
+            width: 0 !important;
+            overflow: hidden !important;
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- The interactive 3D Spline robot from the cover — fully interactive with gestures -->
+    <spline-viewer url="https://prod.spline.design/kZDDjO5HuC9GJUM2/scene.splinecode" loading-anim-type="none"
+        hint="false" background="transparent">
+    </spline-viewer>
+
+    <script type="module" src="https://unpkg.com/@splinetool/viewer@1.9.82/build/spline-viewer.js"></script>
+
+</body>
+
+</html>

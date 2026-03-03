@@ -1,0 +1,557 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Möbius Strip Model</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html,
+        body {
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            background: transparent;
+        }
+
+        canvas#mainCanvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+        }
+    </style>
+</head>
+
+<body>
+
+    <canvas id="mainCanvas"></canvas>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/EffectComposer.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/RenderPass.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/UnrealBloomPass.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/ShaderPass.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/shaders/CopyShader.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/shaders/LuminosityHighPassShader.js"></script>
+    <script>
+        const PI = Math.PI, TAU = 2 * PI;
+
+        let scene, camera, renderer, composer, bloomPass;
+        let mobiusGroup, mobiusMesh, edgeParticles, waveParticles, phononicLattice;
+        let clock = new THREE.Clock();
+        let autoRotate = true;
+        let currentMode = 0;
+        let mouseX = 0, mouseY = 0, targetRotX = 0, targetRotY = 0;
+        let isDragging = false, dragStartX = 0, dragStartY = 0;
+        let camDist = 50, targetCamDist = 50;
+        let envMap;
+
+        // ── Cinematic Environment Map ──
+        function createEnvMap() {
+            const c = document.createElement('canvas'); c.width = 2048; c.height = 1024;
+            const x = c.getContext('2d');
+            const g = x.createLinearGradient(0, 0, 0, 1024);
+            g.addColorStop(0, '#12122a'); g.addColorStop(0.3, '#161638');
+            g.addColorStop(0.5, '#0e0e28'); g.addColorStop(0.8, '#0a0a1a'); g.addColorStop(1, '#080818');
+            x.fillStyle = g; x.fillRect(0, 0, 2048, 1024);
+            const s = x.createRadialGradient(1024, 120, 10, 1024, 120, 600);
+            s.addColorStop(0, 'rgba(88,196,221,0.15)'); s.addColorStop(0.5, 'rgba(88,196,221,0.04)');
+            s.addColorStop(1, 'rgba(0,0,0,0)'); x.fillStyle = s; x.fillRect(0, 0, 2048, 512);
+            const s2 = x.createRadialGradient(400, 350, 5, 400, 350, 400);
+            s2.addColorStop(0, 'rgba(232,196,69,0.08)'); s2.addColorStop(1, 'rgba(0,0,0,0)');
+            x.fillStyle = s2; x.fillRect(0, 0, 1024, 512);
+            const t = new THREE.CanvasTexture(c);
+            t.mapping = THREE.EquirectangularReflectionMapping;
+            return t;
+        }
+
+        // ── Möbius Strip Geometry ──
+        function createMobiusGeometry(R, w, segments, strips) {
+            const geom = new THREE.BufferGeometry();
+            const vertices = [], normals = [], uvs = [], indices = [];
+            for (let i = 0; i <= segments; i++) {
+                const u = (i / segments) * TAU;
+                for (let j = 0; j <= strips; j++) {
+                    const v = (j / strips - 0.5) * w;
+                    const x = (R + v * Math.cos(u / 2)) * Math.cos(u);
+                    const y = (R + v * Math.cos(u / 2)) * Math.sin(u);
+                    const z = v * Math.sin(u / 2);
+                    vertices.push(x, y, z);
+                    const eps = 0.001;
+                    const du_u = u + eps, dv_v = v + eps;
+                    const px1 = (R + v * Math.cos(du_u / 2)) * Math.cos(du_u) - x;
+                    const py1 = (R + v * Math.cos(du_u / 2)) * Math.sin(du_u) - y;
+                    const pz1 = v * Math.sin(du_u / 2) - z;
+                    const px2 = (R + dv_v * Math.cos(u / 2)) * Math.cos(u) - x;
+                    const py2 = (R + dv_v * Math.cos(u / 2)) * Math.sin(u) - y;
+                    const pz2 = dv_v * Math.sin(u / 2) - z;
+                    const nx = py1 * pz2 - pz1 * py2;
+                    const ny = pz1 * px2 - px1 * pz2;
+                    const nz = px1 * py2 - py1 * px2;
+                    const len = Math.sqrt(nx * nx + ny * ny + nz * nz) || 1;
+                    normals.push(nx / len, ny / len, nz / len);
+                    uvs.push(i / segments, j / strips);
+                }
+            }
+            for (let i = 0; i < segments; i++) {
+                for (let j = 0; j < strips; j++) {
+                    const a = i * (strips + 1) + j;
+                    const b = a + strips + 1;
+                    indices.push(a, b, a + 1, b, b + 1, a + 1);
+                }
+            }
+            geom.setAttribute('position', new THREE.Float32BufferAttribute(vertices, 3));
+            geom.setAttribute('normal', new THREE.Float32BufferAttribute(normals, 3));
+            geom.setAttribute('uv', new THREE.Float32BufferAttribute(uvs, 2));
+            geom.setIndex(indices);
+            return geom;
+        }
+
+        // ── Shader Materials ──
+        const mobiusVertexShader = `
+  varying vec2 vUv;
+  varying vec3 vNormal;
+  varying vec3 vPosition;
+  varying vec3 vWorldPos;
+  uniform float time;
+  uniform float waveAmplitude;
+  uniform float waveFrequency;
+  uniform int mode;
+
+  void main() {
+    vUv = uv;
+    vNormal = normalMatrix * normal;
+    vPosition = position;
+
+    vec3 pos = position;
+
+    if (mode == 0) {
+      float wave = sin(uv.x * 6.2832 * 2.0 + time * 1.5) * waveAmplitude * 0.3;
+      pos += normal * wave;
+    } else if (mode == 1) {
+      float edgeFactor = abs(uv.y - 0.5) * 2.0;
+      float wave = sin(uv.x * 6.2832 * 4.0 - time * 3.0) * waveAmplitude * edgeFactor;
+      pos += normal * wave;
+    } else if (mode == 2) {
+      float wave = sin(uv.x * 6.2832 * 8.0 + time * 0.5) * cos(uv.y * 3.14159 * 4.0) * waveAmplitude * 0.5;
+      pos += normal * wave;
+    } else if (mode == 3) {
+      float pulse = exp(-pow((uv.x - fract(time * 0.15)) * 10.0, 2.0)) * waveAmplitude;
+      pos += normal * pulse;
+    } else if (mode == 4) {
+      float freq1 = sin(uv.x * 6.2832 * 3.0 + time * 2.0) * waveAmplitude * 0.4;
+      float freq2 = sin(uv.x * 6.2832 * 7.0 + time * 5.0) * waveAmplitude * 0.15;
+      float gap = smoothstep(0.3, 0.5, uv.y) * smoothstep(0.7, 0.5, uv.y);
+      pos += normal * (freq1 + freq2 * (1.0 - gap));
+    }
+
+    vWorldPos = (modelMatrix * vec4(pos, 1.0)).xyz;
+    gl_Position = projectionMatrix * modelViewMatrix * vec4(pos, 1.0);
+  }
+`;
+
+        const mobiusFragmentShader = `
+  varying vec2 vUv;
+  varying vec3 vNormal;
+  varying vec3 vPosition;
+  varying vec3 vWorldPos;
+  uniform float time;
+  uniform int mode;
+  uniform float chernNumber;
+  uniform vec3 cameraPosition;
+
+  vec3 hsl2rgb(float h, float s, float l) {
+    vec3 rgb = clamp(abs(mod(h * 6.0 + vec3(0.0, 4.0, 2.0), 6.0) - 3.0) - 1.0, 0.0, 1.0);
+    return l + s * (rgb - 0.5) * (1.0 - abs(2.0 * l - 1.0));
+  }
+
+  void main() {
+    vec3 norm = normalize(vNormal);
+    vec3 viewDir = normalize(cameraPosition - vWorldPos);
+
+    float fresnel = pow(1.0 - abs(dot(norm, viewDir)), 3.0);
+
+    vec3 baseColor;
+    float emission = 0.0;
+    float alpha = 0.92;
+
+    if (mode == 0) {
+      float hue = vUv.x + time * 0.05;
+      baseColor = hsl2rgb(hue, 0.7, 0.45);
+      emission = 0.15 + fresnel * 0.3;
+    } else if (mode == 1) {
+      float edgeFactor = abs(vUv.y - 0.5) * 2.0;
+      float edgeGlow = pow(edgeFactor, 2.0);
+      vec3 bulkColor = vec3(0.08, 0.12, 0.28);
+      vec3 edgeColor = vec3(0.34, 0.77, 0.87);
+      float propagation = sin(vUv.x * 6.2832 * 3.0 - time * 4.0) * 0.5 + 0.5;
+      edgeColor = mix(edgeColor, vec3(0.91, 0.77, 0.27), propagation * edgeGlow);
+      baseColor = mix(bulkColor, edgeColor, edgeGlow);
+      emission = edgeGlow * 0.6 + fresnel * 0.2;
+    } else if (mode == 2) {
+      float latticeX = sin(vUv.x * 6.2832 * 12.0) * 0.5 + 0.5;
+      float latticeY = sin(vUv.y * 3.14159 * 12.0) * 0.5 + 0.5;
+      float lattice = latticeX * latticeY;
+      vec3 crystalColor = mix(vec3(0.08, 0.15, 0.3), vec3(0.51, 0.76, 0.4), lattice);
+      float resonance = sin(time * 2.0 + vUv.x * 20.0) * 0.5 + 0.5;
+      baseColor = mix(crystalColor, vec3(0.91, 0.77, 0.27), lattice * resonance * 0.4);
+      emission = lattice * 0.3 + fresnel * 0.15;
+    } else if (mode == 3) {
+      float pulse = exp(-pow((vUv.x - fract(time * 0.15)) * 8.0, 2.0));
+      float channelWidth = smoothstep(0.15, 0.35, vUv.y) * smoothstep(0.85, 0.65, vUv.y);
+      vec3 guideColor = vec3(0.1, 0.1, 0.2);
+      vec3 waveColor = mix(vec3(0.34, 0.77, 0.87), vec3(1.0, 0.84, 0.0), pulse);
+      baseColor = mix(guideColor, waveColor, pulse * channelWidth + channelWidth * 0.15);
+      emission = pulse * channelWidth * 0.8 + fresnel * 0.15;
+    } else {
+      float freq1 = sin(vUv.x * 6.2832 * 3.0 + time * 2.0) * 0.5 + 0.5;
+      float freq2 = sin(vUv.x * 6.2832 * 7.0 + time * 5.0) * 0.5 + 0.5;
+      float gapRegion = smoothstep(0.3, 0.45, vUv.y) * smoothstep(0.7, 0.55, vUv.y);
+      vec3 passColor = mix(vec3(0.34, 0.77, 0.87), vec3(0.51, 0.76, 0.4), freq1);
+      vec3 gapColor = vec3(0.5, 0.1, 0.15);
+      vec3 stopColor = vec3(0.15, 0.05, 0.08);
+      baseColor = mix(passColor * (freq1 * 0.5 + 0.5), mix(gapColor, stopColor, freq2), gapRegion);
+      emission = (1.0 - gapRegion) * freq1 * 0.4 + fresnel * 0.2;
+    }
+
+    vec3 lightDir1 = normalize(vec3(1.0, 1.5, 1.0));
+    vec3 lightDir2 = normalize(vec3(-0.5, 0.8, -0.5));
+    float diff1 = max(dot(norm, lightDir1), 0.0) * 0.7;
+    float diff2 = max(dot(norm, lightDir2), 0.0) * 0.4;
+    float ambient = 0.25;
+
+    vec3 halfDir = normalize(lightDir1 + viewDir);
+    float spec = pow(max(dot(norm, halfDir), 0.0), 64.0) * 0.5;
+
+    vec3 finalColor = baseColor * (ambient + diff1 + diff2) + spec * vec3(1.0) + baseColor * emission;
+    finalColor += fresnel * vec3(0.34, 0.77, 0.87) * 0.25;
+
+    float scanline = sin(vWorldPos.y * 80.0 + time * 2.0) * 0.015;
+    finalColor += scanline;
+
+    gl_FragColor = vec4(finalColor, alpha);
+  }
+`;
+
+        // ── Edge Particle System ──
+        function createEdgeParticles(R, w, count) {
+            const geom = new THREE.BufferGeometry();
+            const positions = new Float32Array(count * 3);
+            const speeds = new Float32Array(count);
+            const sides = new Float32Array(count);
+            const phases = new Float32Array(count);
+
+            for (let i = 0; i < count; i++) {
+                phases[i] = Math.random() * TAU;
+                speeds[i] = 0.3 + Math.random() * 0.7;
+                sides[i] = Math.random() > 0.5 ? 1 : 0;
+                const u = phases[i];
+                const v = (sides[i] === 0 ? -0.5 : 0.5) * w;
+                positions[i * 3] = (R + v * Math.cos(u / 2)) * Math.cos(u);
+                positions[i * 3 + 1] = (R + v * Math.cos(u / 2)) * Math.sin(u);
+                positions[i * 3 + 2] = v * Math.sin(u / 2);
+            }
+
+            geom.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
+            geom.userData = { speeds, sides, phases, R, w };
+
+            const mat = new THREE.PointsMaterial({
+                color: 0x58C4DD, size: 0.4, transparent: true, opacity: 0.8,
+                blending: THREE.AdditiveBlending, sizeAttenuation: true
+            });
+            return new THREE.Points(geom, mat);
+        }
+
+        function updateEdgeParticles(particles, time) {
+            const data = particles.geometry.userData;
+            const pos = particles.geometry.attributes.position.array;
+            const { speeds, sides, phases, R, w } = data;
+            const count = speeds.length;
+
+            for (let i = 0; i < count; i++) {
+                const u = phases[i] + time * speeds[i];
+                phases[i] = u;
+                const v = (sides[i] === 0 ? -0.5 : 0.5) * w;
+                pos[i * 3] = (R + v * Math.cos(u / 2)) * Math.cos(u);
+                pos[i * 3 + 1] = (R + v * Math.cos(u / 2)) * Math.sin(u);
+                pos[i * 3 + 2] = v * Math.sin(u / 2);
+            }
+            particles.geometry.attributes.position.needsUpdate = true;
+        }
+
+        // ── Wave Particles ──
+        function createWaveParticles(R, w, count) {
+            const geom = new THREE.BufferGeometry();
+            const positions = new Float32Array(count * 3);
+            const colors = new Float32Array(count * 3);
+            const meta = [];
+
+            for (let i = 0; i < count; i++) {
+                const u = Math.random() * TAU;
+                const t = (Math.random() - 0.5) * w;
+                meta.push({ u, t, speed: 0.5 + Math.random() * 1.5, phase: Math.random() * TAU });
+                const x = (R + t * Math.cos(u / 2)) * Math.cos(u);
+                const y = (R + t * Math.cos(u / 2)) * Math.sin(u);
+                const z = t * Math.sin(u / 2);
+                positions[i * 3] = x; positions[i * 3 + 1] = y; positions[i * 3 + 2] = z;
+                colors[i * 3] = 0.34; colors[i * 3 + 1] = 0.77; colors[i * 3 + 2] = 0.87;
+            }
+
+            geom.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
+            geom.setAttribute('color', new THREE.Float32BufferAttribute(colors, 3));
+            geom.userData = { meta, R, w };
+
+            const mat = new THREE.PointsMaterial({
+                size: 0.25, transparent: true, opacity: 0.6, vertexColors: true,
+                blending: THREE.AdditiveBlending, sizeAttenuation: true
+            });
+            return new THREE.Points(geom, mat);
+        }
+
+        function updateWaveParticles(particles, time, dt) {
+            const data = particles.geometry.userData;
+            const pos = particles.geometry.attributes.position.array;
+            const col = particles.geometry.attributes.color.array;
+            const { meta, R, w } = data;
+
+            for (let i = 0; i < meta.length; i++) {
+                const m = meta[i];
+                m.u += dt * m.speed;
+                if (m.u > TAU) m.u -= TAU;
+                const x = (R + m.t * Math.cos(m.u / 2)) * Math.cos(m.u);
+                const y = (R + m.t * Math.cos(m.u / 2)) * Math.sin(m.u);
+                const z = m.t * Math.sin(m.u / 2);
+                pos[i * 3] = x; pos[i * 3 + 1] = y; pos[i * 3 + 2] = z;
+
+                const energy = Math.sin(m.u * 3 + time * 2) * 0.5 + 0.5;
+                col[i * 3] = 0.34; col[i * 3 + 1] = 0.77; col[i * 3 + 2] = 0.87;
+            }
+            particles.geometry.attributes.position.needsUpdate = true;
+            particles.geometry.attributes.color.needsUpdate = true;
+        }
+
+        // ── Phononic Lattice Nodes ──
+        function createPhononicLattice(R, w, uCount, vCount) {
+            const group = new THREE.Group();
+            const nodeMat = new THREE.MeshPhysicalMaterial({
+                color: 0x83C167, roughness: 0.2, metalness: 0.8, envMap,
+                emissive: 0x83C167, emissiveIntensity: 0.15, clearcoat: 0.8
+            });
+
+            const nodes = [];
+            for (let i = 0; i < uCount; i++) {
+                for (let j = 0; j < vCount; j++) {
+                    const u = (i / uCount) * TAU;
+                    const v = ((j / (vCount - 1)) - 0.5) * w;
+                    const x = (R + v * Math.cos(u / 2)) * Math.cos(u);
+                    const y = (R + v * Math.cos(u / 2)) * Math.sin(u);
+                    const z = v * Math.sin(u / 2);
+                    const sphere = new THREE.Mesh(new THREE.SphereGeometry(0.35, 8, 6), nodeMat.clone());
+                    sphere.position.set(x, y, z);
+                    sphere.userData = { u, v, baseScale: 0.35, i, j };
+                    group.add(sphere);
+                    nodes.push(sphere);
+                }
+            }
+            group.userData = { nodes, uCount, vCount, R, w };
+            return group;
+        }
+
+        function updatePhononicLattice(lattice, time) {
+            const { nodes } = lattice.userData;
+            for (const node of nodes) {
+                const { u, i, j } = node.userData;
+                const oscillation = Math.sin(u * 4 + time * 3) * 0.3 + 1.0;
+                const resonance = Math.sin(time * 2 + i * 0.5 + j * 0.7) * 0.5 + 0.5;
+                node.scale.setScalar(oscillation);
+                node.material.emissiveIntensity = 0.1 + resonance * 0.4;
+            }
+        }
+
+        // ── Initialize Scene ──
+        function init() {
+            scene = new THREE.Scene();
+            // NO background — fully transparent
+            scene.background = null;
+
+            camera = new THREE.PerspectiveCamera(40, innerWidth / innerHeight, 0.1, 1000);
+            camera.position.set(0, 20, 50);
+            camera.lookAt(0, 0, 0);
+
+            renderer = new THREE.WebGLRenderer({
+                canvas: document.getElementById('mainCanvas'),
+                antialias: true,
+                alpha: true, // transparent background
+                premultipliedAlpha: false,
+                powerPreference: 'high-performance'
+            });
+            renderer.setClearColor(0x000000, 0); // fully transparent
+            renderer.setSize(innerWidth, innerHeight);
+            renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+            renderer.toneMapping = THREE.ACESFilmicToneMapping;
+            renderer.toneMappingExposure = 1.4;
+            renderer.outputEncoding = THREE.sRGBEncoding;
+
+            // Post-processing (bloom still works on transparent)
+            try {
+                composer = new THREE.EffectComposer(renderer);
+                const renderPass = new THREE.RenderPass(scene, camera);
+                renderPass.clear = true;
+                renderPass.clearColor = new THREE.Color(0x000000);
+                renderPass.clearAlpha = 0;
+                composer.addPass(renderPass);
+                bloomPass = new THREE.UnrealBloomPass(new THREE.Vector2(innerWidth, innerHeight), 0.35, 0.6, 0.85);
+                composer.addPass(bloomPass);
+            } catch (e) { composer = null; }
+
+            envMap = createEnvMap();
+            scene.environment = envMap;
+
+            // Lights
+            scene.add(new THREE.AmbientLight(0xc8d8f0, 0.6));
+            const hemi = new THREE.HemisphereLight(0xd8e8ff, 0x1a1a3a, 0.5);
+            scene.add(hemi);
+            const key = new THREE.DirectionalLight(0xf0f4ff, 0.8);
+            key.position.set(40, 80, 60);
+            scene.add(key);
+            const fill = new THREE.DirectionalLight(0xd0e0ff, 0.4);
+            fill.position.set(-30, 40, -30);
+            scene.add(fill);
+            const rim = new THREE.DirectionalLight(0x58C4DD, 0.3);
+            rim.position.set(0, -20, -60);
+            scene.add(rim);
+
+            // Main group
+            mobiusGroup = new THREE.Group();
+            scene.add(mobiusGroup);
+
+            // Möbius strip mesh
+            const R = 16, w = 8;
+            const mobiusGeom = createMobiusGeometry(R, w, 256, 64);
+            const mobiusMat = new THREE.ShaderMaterial({
+                vertexShader: mobiusVertexShader,
+                fragmentShader: mobiusFragmentShader,
+                uniforms: {
+                    time: { value: 0 },
+                    mode: { value: 0 },
+                    waveAmplitude: { value: 0.8 },
+                    waveFrequency: { value: 2.0 },
+                    chernNumber: { value: 1.0 },
+                    cameraPosition: { value: camera.position }
+                },
+                side: THREE.DoubleSide,
+                transparent: true
+            });
+            mobiusMesh = new THREE.Mesh(mobiusGeom, mobiusMat);
+            mobiusGroup.add(mobiusMesh);
+
+            // Wireframe overlay
+            const wireMat = new THREE.MeshBasicMaterial({ color: 0x58C4DD, wireframe: true, transparent: true, opacity: 0.04 });
+            const wireMesh = new THREE.Mesh(mobiusGeom.clone(), wireMat);
+            mobiusGroup.add(wireMesh);
+
+            // Edge particles
+            edgeParticles = createEdgeParticles(R, w, 800);
+            mobiusGroup.add(edgeParticles);
+
+            // Wave particles
+            waveParticles = createWaveParticles(R, w, 1500);
+            mobiusGroup.add(waveParticles);
+
+            // Phononic lattice (hidden by default, only in mode 2)
+            phononicLattice = createPhononicLattice(R, w, 36, 5);
+            phononicLattice.visible = false;
+            mobiusGroup.add(phononicLattice);
+
+            // NO background grid or ambient particles
+
+            // Events
+            window.addEventListener('resize', onResize);
+            document.addEventListener('mousemove', onMouseMove);
+            document.addEventListener('mousedown', onMouseDown);
+            document.addEventListener('mouseup', onMouseUp);
+            document.addEventListener('wheel', onWheel);
+
+            animate();
+        }
+
+        // ── Events ──
+        function onResize() {
+            camera.aspect = innerWidth / innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(innerWidth, innerHeight);
+            if (composer) composer.setSize(innerWidth, innerHeight);
+        }
+
+        function onMouseMove(e) {
+            mouseX = (e.clientX / innerWidth) * 2 - 1;
+            mouseY = (e.clientY / innerHeight) * 2 - 1;
+            if (isDragging) {
+                targetRotY += (e.clientX - dragStartX) * 0.005;
+                targetRotX += (e.clientY - dragStartY) * 0.005;
+                targetRotX = Math.max(-PI / 3, Math.min(PI / 3, targetRotX));
+                dragStartX = e.clientX;
+                dragStartY = e.clientY;
+            }
+        }
+
+        function onMouseDown(e) {
+            isDragging = true; dragStartX = e.clientX; dragStartY = e.clientY;
+            autoRotate = false;
+        }
+        function onMouseUp() { isDragging = false; }
+
+        function onWheel(e) {
+            targetCamDist += e.deltaY * 0.05;
+            targetCamDist = Math.max(25, Math.min(120, targetCamDist));
+        }
+
+        // ── Animation Loop ──
+        function animate() {
+            requestAnimationFrame(animate);
+            const time = clock.getElapsedTime();
+            const dt = clock.getDelta();
+
+            if (autoRotate) targetRotY += 0.003;
+
+            camDist += (targetCamDist - camDist) * 0.05;
+            const rotX = targetRotX + Math.sin(time * 0.15) * 0.05;
+            const rotY = targetRotY;
+            camera.position.x = Math.sin(rotY) * Math.cos(rotX) * camDist;
+            camera.position.y = Math.sin(rotX) * camDist * 0.5 + 8;
+            camera.position.z = Math.cos(rotY) * Math.cos(rotX) * camDist;
+            camera.lookAt(0, 0, 0);
+
+            mobiusGroup.rotation.x = mouseY * 0.03;
+            mobiusGroup.rotation.z = mouseX * 0.02;
+
+            mobiusMesh.material.uniforms.time.value = time;
+            mobiusMesh.material.uniforms.cameraPosition.value.copy(camera.position);
+
+            updateEdgeParticles(edgeParticles, time * 0.3);
+            updateWaveParticles(waveParticles, time, 0.008);
+
+            if (phononicLattice.visible) updatePhononicLattice(phononicLattice, time);
+
+            // Render with transparent background
+            if (composer) {
+                renderer.setClearColor(0x000000, 0);
+                composer.render();
+            } else {
+                renderer.render(scene, camera);
+            }
+        }
+
+        init();
+    </script>
+</body>
+
+</html>
