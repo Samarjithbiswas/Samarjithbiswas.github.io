@@ -1088,22 +1088,86 @@ ul { list-style: none; }
 
 /* Collaborators */
 .research-collaborators {
-  background: linear-gradient(135deg, #fafbff 0%, #f0f4ff 100%);
-  border: 1px solid var(--accent-border);
-  border-radius: 12px;
-  padding: 1.5rem 2rem;
+  background: linear-gradient(135deg, rgba(99,102,241,0.05) 0%, rgba(6,182,212,0.05) 100%);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 2.5rem 2rem;
   text-align: center;
+  margin-top: 3rem;
 }
 
-.research-collaborators p {
-  font-size: 0.95rem;
-  color: var(--text-secondary);
-  line-height: 1.6;
-  margin: 0;
-}
-
-.research-collaborators strong {
+.collab-heading {
+  font-size: 1.1rem;
+  font-weight: 600;
   color: var(--text);
+  margin: 0 0 1.5rem 0;
+  letter-spacing: 0.02em;
+}
+
+.collab-logos {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.5rem 2rem;
+  justify-content: center;
+  align-items: center;
+}
+
+.collab-logo-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  text-decoration: none;
+  color: var(--text-secondary);
+  padding: 0.75rem 1rem;
+  border-radius: 12px;
+  transition: all 0.3s ease;
+  min-width: 90px;
+}
+
+.collab-logo-item:hover {
+  color: var(--accent);
+  transform: translateY(-4px);
+  background: rgba(99,102,241,0.06);
+}
+
+.collab-logo-item img {
+  height: 52px;
+  width: 52px;
+  object-fit: contain;
+  filter: grayscale(0.6) brightness(1.1);
+  opacity: 0.8;
+  transition: all 0.3s ease;
+}
+
+.collab-logo-item:hover img {
+  filter: none;
+  opacity: 1;
+  transform: scale(1.08);
+}
+
+.collab-logo-item span {
+  font-size: 0.72rem;
+  font-weight: 500;
+  letter-spacing: 0.01em;
+  white-space: nowrap;
+}
+
+@media (max-width: 640px) {
+  .collab-logos {
+    gap: 1rem 1.25rem;
+  }
+  .collab-logo-item {
+    min-width: 72px;
+    padding: 0.5rem;
+  }
+  .collab-logo-item img {
+    height: 40px;
+    width: 40px;
+  }
+  .collab-logo-item span {
+    font-size: 0.65rem;
+  }
 }
 
 /* ==============================

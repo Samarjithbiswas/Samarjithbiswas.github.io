@@ -1176,13 +1176,14 @@
                         const bScale = a.baseScale || 5.2;
                         const bY = a.baseY || 15;
                         // Continuous slow zoom in (scale adds up over time)
-                        // Use ELAPSED time t to increase scale
                         const elapsed = (Date.now() - titleStartTime) * 0.001;
                         const zoomFactor = 1 + (elapsed * 0.02); // 2% growth per second
                         a.obj.scale.setScalar(bScale * zoomFactor);
 
-                        // Keep position steady or slightly move to compensate?
-                        // Just floating slightly
+                        // Continuous rotation around vertical axis
+                        a.obj.rotation.y += 0.003;
+
+                        // Gentle floating motion
                         a.obj.position.y = bY + Math.sin(t * 0.1) * 1.0;
                         break;
 
@@ -6616,8 +6617,8 @@
                         break;
 
                     case 'sycamoreRotate':
-                        // Cinematic zoom-in on the quantum computer
-                        a.obj.rotation.y += 0.0005;
+                        // Continuous rotation around vertical axis
+                        a.obj.rotation.y += 0.004;
 
                         // Calculate elapsed time since this stage started
                         const qElapsed = (Date.now() - (window.quantumStageStartTime || Date.now())) / 1000;
