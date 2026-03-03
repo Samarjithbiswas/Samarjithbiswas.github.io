@@ -648,6 +648,9 @@ const TEAM_ITEMS = [
   { src: 'ThesisSnap.jpg', label: 'PhD Defense' },
   { src: 'Untitled_Project_12.png', label: 'Research Lab' },
   { src: 'Untitled_Project_5.png', label: 'Collaboration' },
+  { src: 'ASA_1.jpg', label: 'ASA Presentation' },
+  { src: 'ASA_2.jpg', label: 'ASA Conference' },
+  { src: 'ASA_3.jpg', label: 'ASA Session' },
 ];
 
 const TAMS_ITEMS = [
@@ -658,19 +661,25 @@ const TAMS_ITEMS = [
   { src: 'MetaWallAssembly_Isometric_V6_WhiteFebric_V3_Transparent_V2.png', label: 'Meta Wall Assembly' },
   { src: 'SpiralStack_2Turns_v4_Slice_ZOOMED.png', label: 'Spiral Stack Detail' },
   { src: 'Stack_GeometryComparison_Font.png_Trimetric.png', label: 'Stack Geometry Comparison' },
+  { src: 'Acoustic_Liner_Turbojet.png', label: 'Acoustic Liner in Turbojet' },
+  { src: 'SpiralResonator.png', label: 'Spiral Resonator' },
+  { src: 'SpiralResonator_7.png', label: 'Spiral Resonator Design' },
+  { src: 'Thermopile.png', label: 'Thermopile' },
+  { src: 'Thermoacoustic_Liner.png', label: 'Thermoacoustic Liner V2' },
 ];
 
 // Combined showcase for hero section (mix of TAMS and team)
 const SHOWCASE_ITEMS = [
   { src: 'Themaocosutic_Liner_V5.png', label: 'Thermoacoustic Liner' },
-  { src: '1.jpg', label: 'Research Presentation' },
+  { src: 'ASA_1.jpg', label: 'ASA Presentation' },
   { src: 'Tams_Barriere.png', label: 'TAMS Barrier' },
-  { src: '2.jpg', label: 'Conference Talk' },
+  { src: 'ASA_2.jpg', label: 'ASA Conference' },
   { src: 'MetaWallAssembly_Isometric_V6_WhiteFebric_V3_Transparent_V2.png', label: 'Meta Wall Assembly' },
-  { src: '3.jpg', label: 'Team Meeting' },
+  { src: 'ASA_3.jpg', label: 'ASA Session' },
   { src: 'V2HelicalResonator_100_ISSOMERIC_Transparents_Sectional.PNG', label: 'Helical Resonator' },
   { src: 'ThesisSnap.jpg', label: 'PhD Defense' },
-  { src: 'SpiralStack_2Turns_v4_Slice_ZOOMED.png', label: 'Spiral Stack Detail' },
+  { src: 'SpiralResonator.png', label: 'Spiral Resonator' },
+  { src: 'Acoustic_Liner_Turbojet.png', label: 'Turbojet Acoustic Liner' },
 ];
 
 // Build carousels as soon as DOM is ready (safe for both inline and deferred)
