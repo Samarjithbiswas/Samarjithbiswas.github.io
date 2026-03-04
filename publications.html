@@ -37,14 +37,14 @@
       font-weight: 500;
       background: transparent;
       border: 1px solid var(--border);
-      color: var(--accent-color);
+      color: var(--accent);
       text-decoration: none;
       transition: background 0.2s, border-color 0.2s;
     }
     .pub-link:hover {
-      background: var(--accent-color);
+      background: var(--accent);
       color: #fff;
-      border-color: var(--accent-color);
+      border-color: var(--accent);
     }
     .pub-metrics {
       display: flex;
@@ -61,6 +61,31 @@
     }
     .pub-metric strong {
       color: var(--text);
+    }
+    .pub-under-review {
+      margin-top: 3rem;
+      padding: 1.5rem 2rem;
+      background: var(--bg-alt);
+      border-radius: var(--radius);
+      border-left: 4px solid var(--accent);
+    }
+    .pub-under-review h4 {
+      margin-bottom: 0.75rem;
+      font-size: 1.1rem;
+    }
+    .pub-under-review ul {
+      list-style: disc;
+      padding-left: 1.5rem;
+    }
+    .pub-under-review li {
+      font-size: 0.92rem;
+      color: var(--text-secondary);
+      margin-bottom: 0.5rem;
+      line-height: 1.6;
+    }
+    .pub-cta {
+      margin-top: 2.5rem;
+      text-align: center;
     }
   </style>
 </head>
@@ -104,7 +129,7 @@
     <div class="container">
       <span class="section-tag">Research Output</span>
       <h1>Publications &amp;<br><span class="accent">Scholarly Work</span></h1>
-      <p class="page-hero-sub">USA patents, dissertations, and scholarly contributions spanning topological acoustics, thermoacoustic systems, and AI-driven design.</p>
+      <p class="page-hero-sub">Journal articles, conference proceedings, USA patent, and dissertations spanning topological acoustics, thermoacoustic systems, metamaterials, and AI-driven design.</p>
     </div>
   </section>
 
@@ -114,47 +139,164 @@
       <div class="section-header">
         <span class="section-tag">Publications</span>
         <h2>Research Output</h2>
-        <p class="section-desc">Featured USA patents protecting breakthrough innovations in thermoacoustic metamaterials.</p>
+        <p class="section-desc">Peer-reviewed journal articles, conference proceedings, US patent, and doctoral &amp; master&rsquo;s dissertations.</p>
       </div>
 
       <div class="pub-list">
 
-        <!-- USA Patents -->
+        <!-- ═══════ USA Patent ═══════ -->
         <div class="pub-year-group">
-          <div class="pub-year">Patents</div>
+          <div class="pub-year">USA Patent</div>
           <div class="pub-items">
 
             <div class="pub-item">
-              <div class="pub-type patent">USA Patent</div>
+              <div class="pub-type patent">Patent</div>
               <div class="pub-info">
                 <h4>THERMOACOUSTIC META-STRUCTURE</h4>
-                <p>Manimala, J., &amp; Biswas, S. &mdash; International Patent WO 2025/128,348 A1 (PCT/US National Phase).</p>
+                <p>Manimala, J., &amp; <strong>Biswas, S.</strong> &mdash; International Patent WO 2025/128,348 A1 (PCT/US National Phase). Priority: US Provisional Application, Filed 2023.</p>
                 <div class="pub-metrics">
-                  <span class="pub-metric">📅 Filed 2024, Published 2025</span>
+                  <span class="pub-metric">&#128197; Provisional Filed 2023 &middot; PCT Published 2025</span>
                 </div>
                 <p class="pub-abstract">A novel thermoacoustic meta-structure device that simultaneously achieves broadband noise mitigation and acoustic energy harvesting. The patented design incorporates spiral and helical resonator geometries with thermoacoustic stack elements enabling passive conversion of acoustic energy into thermal gradients and subsequently to electrical power. Validated at DFW Airport with 5+ dB noise reduction.</p>
                 <div class="pub-links">
-                  <a href="https://patents.google.com/patent/WO2025128348A1" target="_blank" rel="noopener" class="pub-link">🔗 View Patent</a>
+                  <a href="https://patents.google.com/patent/WO2025128348A1" target="_blank" rel="noopener" class="pub-link">&#128279; View Patent</a>
                 </div>
-              </div>
-            </div>
-
-            <div class="pub-item">
-              <div class="pub-type patent">USA Patent</div>
-              <div class="pub-info">
-                <h4>THERMOACOUSTIC META-STRUCTURE FOR NOISE MITIGATION AND ENERGY HARVESTING</h4>
-                <p>Manimala, J., &amp; Biswas, S. &mdash; US Provisional Patent Application (Priority Filing).</p>
-                <div class="pub-metrics">
-                  <span class="pub-metric">📅 Filed 2023</span>
-                </div>
-                <p class="pub-abstract">US provisional patent application establishing priority for the TAMS technology. Covers the foundational design of multifunctional acoustic meta-structures integrating thermoacoustic, piezoelectric, and resonant absorption mechanisms. This provisional filing formed the basis for the subsequent PCT international application WO 2025/128,348 A1.</p>
               </div>
             </div>
 
           </div>
         </div>
 
-        <!-- Dissertations -->
+        <!-- ═══════ Journal Articles ═══════ -->
+        <div class="pub-year-group">
+          <div class="pub-year">Journal Articles</div>
+          <div class="pub-items">
+
+            <div class="pub-item">
+              <div class="pub-type journal">Journal</div>
+              <div class="pub-info">
+                <h4>Multifunctional Characterization of a Thermoacoustic Meta-Structure</h4>
+                <p><strong>Biswas, S.</strong>, Krawczyk, Z., &amp; Manimala, J. M. &mdash; <em>International Journal of Thermofluids</em>, 2025.</p>
+                <div class="pub-metrics">
+                  <span class="pub-metric">&#128197; 2025</span>
+                  <span class="pub-metric">&#128218; Int. J. Thermofluids</span>
+                </div>
+                <p class="pub-abstract">Incorporating thermoacoustic elements into resonator cavities within engineered structures creates thermoacoustic metastructures (TAMS), enabling airborne noise mitigation, energy harvesting, and environmental sensing. This work presents a comprehensive multifunctional characterization of TAMS performance across acoustic, thermal, and energy harvesting domains.</p>
+                <div class="pub-links">
+                  <a href="https://www.sciencedirect.com/science/article/abs/pii/S2950425225000994" target="_blank" rel="noopener" class="pub-link">&#128279; View on ScienceDirect</a>
+                </div>
+              </div>
+            </div>
+
+            <div class="pub-item">
+              <div class="pub-type journal">Journal</div>
+              <div class="pub-info">
+                <h4>On the Relationship Between Acoustic Absorption and Temperature Gradient in a Thermoacoustic Liner</h4>
+                <p><strong>Biswas, S.</strong>, Kresl, W., &amp; Manimala, J. M. &mdash; <em>International Journal of Aeroacoustics</em>, 24(1&ndash;2), 42&ndash;67, 2025.</p>
+                <div class="pub-metrics">
+                  <span class="pub-metric">&#128197; 2025</span>
+                  <span class="pub-metric">&#128218; Int. J. Aeroacoustics, Vol. 24</span>
+                  <span class="pub-metric">DOI: 10.1177/1475472X241306317</span>
+                </div>
+                <p class="pub-abstract">Investigates embedding thermoacoustic stacks within acoustic liners for simultaneous acoustic absorption and thermal output optimization. Using Rott&rsquo;s approximation, the stack&rsquo;s pore width and wall thickness are optimized for additively manufactured test articles, achieving a peak steady-state temperature gradient of 9.5 &deg;C at 790 Hz for 140 dB tonal dwells. Results show the temperature gradient correlates directly with acoustic power at the leading stack-face.</p>
+                <div class="pub-links">
+                  <a href="https://journals.sagepub.com/doi/abs/10.1177/1475472X241306317" target="_blank" rel="noopener" class="pub-link">&#128279; View on SAGE Journals</a>
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- ═══════ Conference Proceedings ═══════ -->
+        <div class="pub-year-group">
+          <div class="pub-year">Conference Proceedings</div>
+          <div class="pub-items">
+
+            <div class="pub-item">
+              <div class="pub-type conference">Conference</div>
+              <div class="pub-info">
+                <h4>Exploring the Feasibility of a Thermoacoustic Metastructure for Energy Harvesting and Noise Mitigation</h4>
+                <p><strong>Biswas, S.</strong>, &amp; Manimala, J. M. &mdash; <em>Proceedings of Meetings on Acoustics (POMA)</em>, 46(1), 030003, 2022.</p>
+                <div class="pub-metrics">
+                  <span class="pub-metric">&#128197; 2022</span>
+                  <span class="pub-metric">&#128218; POMA, Vol. 46</span>
+                  <span class="pub-metric">DOI: 10.1121/2.0001670</span>
+                </div>
+                <p class="pub-abstract">Proof-of-concept evaluation of ceramic and polymeric stack designs using a custom-built thermoacoustic test rig, correlating stack parameters (material, length, location, porosity, pore geometry) to DeltaEC simulations. Results show ~5.28 dB reduction in sound pressure level at resonance (117.5 Hz) and a steady-state peak voltage of 33 mV for a ~30 &deg;C temperature difference across the stack.</p>
+                <div class="pub-links">
+                  <a href="https://pubs.aip.org/asa/poma/article/46/1/030003/2842410" target="_blank" rel="noopener" class="pub-link">&#128279; View on AIP Publishing</a>
+                </div>
+              </div>
+            </div>
+
+            <div class="pub-item">
+              <div class="pub-type conference">Conference</div>
+              <div class="pub-info">
+                <h4>Quiet Power: Exploring the Feasibility of a Noise-Mitigating, Thermoacoustic Energy Harvester</h4>
+                <p><strong>Biswas, S.</strong>, &amp; Manimala, J. M. &mdash; <em>The Journal of the Acoustical Society of America</em>, 151(4), A179, 2022. (182nd ASA Meeting, Denver, CO).</p>
+                <div class="pub-metrics">
+                  <span class="pub-metric">&#128197; 2022</span>
+                  <span class="pub-metric">&#128218; J. Acoust. Soc. Am., Vol. 151</span>
+                  <span class="pub-metric">&#127897; ASA Denver 2022</span>
+                </div>
+                <p class="pub-abstract">Presented at the 182nd Meeting of the Acoustical Society of America in Denver, CO. Demonstrates the feasibility of mechanically robust, noise-mitigating energy harvesters based on the thermoacoustic effect, converting environmental noise into usable electrical energy without moving parts.</p>
+              </div>
+            </div>
+
+            <div class="pub-item">
+              <div class="pub-type conference">Conference</div>
+              <div class="pub-info">
+                <h4>Evaluation of Additively Manufactured Stacks for Thermo-Acoustic Devices</h4>
+                <p><strong>Biswas, S.</strong>, Krawczyk, Z., &amp; Manimala, J. M. &mdash; <em>INTER-NOISE and NOISE-CON Congress and Conference Proceedings</em>, 263(5), 4376&ndash;4387, 2021.</p>
+                <div class="pub-metrics">
+                  <span class="pub-metric">&#128197; 2021</span>
+                  <span class="pub-metric">&#128218; INTER-NOISE 2021</span>
+                  <span class="pub-metric">pp. 4376&ndash;4387</span>
+                </div>
+                <p class="pub-abstract">Examines the mechanical and thermal properties as well as geometry of 3D-printed porous stacks for thermoacoustic energy conversion. The study demonstrates how additive manufacturing enables complex stack geometries that are difficult to achieve with traditional fabrication, optimizing performance for energy harvesting applications.</p>
+                <div class="pub-links">
+                  <a href="https://www.researchgate.net/publication/354505036_Evaluation_of_additively_manufactured_stacks_for_thermo-acoustic_devices" target="_blank" rel="noopener" class="pub-link">&#128279; View on ResearchGate</a>
+                </div>
+              </div>
+            </div>
+
+            <div class="pub-item">
+              <div class="pub-type conference">Conference</div>
+              <div class="pub-info">
+                <h4>Assessment of Surface Roughness Using LVDT: A Convenient and Inexpensive Way of Measuring Surface Irregularities</h4>
+                <p>Nasreen, S., Rokunuzzaman, M., &amp; <strong>Biswas, S.</strong> &mdash; <em>International Conference on Mechanical, Industrial and Materials Engineering (ICMIME)</em>, RUET, Rajshahi, Bangladesh, 2017.</p>
+                <div class="pub-metrics">
+                  <span class="pub-metric">&#128197; 2017</span>
+                  <span class="pub-metric">&#127891; ICMIME 2017, RUET</span>
+                </div>
+                <p class="pub-abstract">Develops an efficient and cost-effective approach to surface roughness measurement with Linear Variable Differential Transformer (LVDT), displaying output using LCD with standard deviations based on the Center Line Average (CLA) method. Utilizes microcontroller-based electronics to calibrate sensor data.</p>
+                <div class="pub-links">
+                  <a href="https://www.researchgate.net/publication/325115625" target="_blank" rel="noopener" class="pub-link">&#128279; View on ResearchGate</a>
+                </div>
+              </div>
+            </div>
+
+            <div class="pub-item">
+              <div class="pub-type conference">Conference</div>
+              <div class="pub-info">
+                <h4>Optimization of Truss Structure Using Finite Element Analysis</h4>
+                <p><strong>Biswas, S.</strong>, &amp; Khan, M. I. &mdash; <em>International Conference on Mechanical, Industrial and Materials Engineering (ICMIME)</em>, RUET, Rajshahi, Bangladesh, 2017.</p>
+                <div class="pub-metrics">
+                  <span class="pub-metric">&#128197; 2017</span>
+                  <span class="pub-metric">&#127891; ICMIME 2017, RUET</span>
+                </div>
+                <p class="pub-abstract">Presents a technique for selecting the most effective truss design from available truss structures for a specific purpose and further optimizing it for a given set of constraints using finite element analysis.</p>
+                <div class="pub-links">
+                  <a href="https://www.researchgate.net/publication/325115788" target="_blank" rel="noopener" class="pub-link">&#128279; View on ResearchGate</a>
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- ═══════ Dissertations ═══════ -->
         <div class="pub-year-group">
           <div class="pub-year">Dissertations</div>
           <div class="pub-items">
@@ -163,14 +305,14 @@
               <div class="pub-type thesis">PhD</div>
               <div class="pub-info">
                 <h4>Development of Thermoacoustic Metastructures</h4>
-                <p>Biswas, S. &mdash; Doctoral Dissertation, Oklahoma State University, Stillwater, Oklahoma.</p>
+                <p><strong>Biswas, S.</strong> &mdash; Doctoral Dissertation, Oklahoma State University, Stillwater, Oklahoma.</p>
                 <div class="pub-metrics">
-                  <span class="pub-metric">📅 2024</span>
-                  <span class="pub-metric">🎓 Oklahoma State University</span>
+                  <span class="pub-metric">&#128197; 2024</span>
+                  <span class="pub-metric">&#127891; Oklahoma State University</span>
                 </div>
                 <p class="pub-abstract">Doctoral dissertation presenting the complete development arc of Thermoacoustic Meta-Structures (TAMS): from fundamental phononic crystal theory through experimental validation and NASA Langley collaboration. Encompasses parametric design studies of spiral, helical, and modular resonator geometries; DeltaEC and COMSOL simulation frameworks; anechoic chamber characterization; and the dual-function noise mitigation and power generation platform culminating in Patent WO2025128348A1.</p>
                 <div class="pub-links">
-                  <a href="https://shareok.org/handle/11244/340657" target="_blank" rel="noopener" class="pub-link">🔗 View Dissertation</a>
+                  <a href="https://shareok.org/handle/11244/340657" target="_blank" rel="noopener" class="pub-link">&#128279; View Dissertation</a>
                 </div>
               </div>
             </div>
@@ -179,14 +321,14 @@
               <div class="pub-type thesis">MS</div>
               <div class="pub-info">
                 <h4>Structural Power Storage Composite with Planar &amp; Non-planar Form Factor</h4>
-                <p>Biswas, S. &mdash; Master's Thesis, Northern Arizona University, Flagstaff, Arizona.</p>
+                <p><strong>Biswas, S.</strong> &mdash; Master&rsquo;s Thesis, Northern Arizona University, Flagstaff, Arizona.</p>
                 <div class="pub-metrics">
-                  <span class="pub-metric">📅 2019</span>
-                  <span class="pub-metric">🎓 Northern Arizona University</span>
+                  <span class="pub-metric">&#128197; 2019</span>
+                  <span class="pub-metric">&#127891; Northern Arizona University</span>
                 </div>
-                <p class="pub-abstract">Master's thesis investigating the design and fabrication of structural supercapacitors for electric vehicle applications. Carbon fiber electrodes functionalized via CVD and plasma treatment achieve 53.58 mWh/kg energy density and 32.06 W/kg power density while maintaining 6.9 GPa flexural modulus.</p>
+                <p class="pub-abstract">Master&rsquo;s thesis investigating the design and fabrication of structural supercapacitors for electric vehicle applications. Carbon fiber electrodes functionalized via CVD and plasma treatment achieve 53.58 mWh/kg energy density and 32.06 W/kg power density while maintaining 6.9 GPa flexural modulus.</p>
                 <div class="pub-links">
-                  <a href="https://repository.nau.edu/handle/20.500.12700/855" target="_blank" rel="noopener" class="pub-link">🔗 View Thesis</a>
+                  <a href="https://repository.nau.edu/handle/20.500.12700/855" target="_blank" rel="noopener" class="pub-link">&#128279; View Thesis</a>
                 </div>
               </div>
             </div>
@@ -198,15 +340,14 @@
 
       <!-- Under Review -->
       <div class="pub-under-review">
-        <h4>Under Review</h4>
+        <h4>Under Review / In Preparation</h4>
         <ul>
-          <li>"Parametric Characterization of a Thermoacoustic Liner" &mdash; Biswas, S., et al.</li>
-          <li>"Development of a Multifunctional Thermoacoustic Meta-Structure" &mdash; Biswas, S., &amp; Manimala, J. M.</li>
+          <li>&ldquo;Parametric Characterization of a Thermoacoustic Liner&rdquo; &mdash; <strong>Biswas, S.</strong>, Kresl, W., Manimala, J. M., Nark, D., &amp; Jones, M. G. (with NASA Langley Research Center collaborators).</li>
         </ul>
       </div>
 
       <div class="pub-cta">
-        <a href="https://scholar.google.com/citations?user=Y-yVIc0AAAAJ&hl=en" target="_blank" rel="noopener" class="btn btn-outline">View Google Scholar Profile</a>
+        <a href="https://scholar.google.com/citations?user=EyxF_uoAAAAJ&hl=en" target="_blank" rel="noopener" class="btn btn-outline">View Google Scholar Profile</a>
         <a href="https://orcid.org/0000-0002-8234-9120" target="_blank" rel="noopener" class="btn btn-outline" style="margin-left:1rem;">ORCID Profile</a>
       </div>
 
@@ -223,6 +364,7 @@
         </div>
         <div class="footer-center">
           <p>Member, Acoustical Society of America (2021&ndash;Present)</p>
+          <p>Academic Editor, Advances in Materials Science and Engineering (Hindawi)</p>
           <p>Peer Reviewer: Int. Journal of Mechanical Sciences, Journal of Sound and Vibration</p>
           <p>&copy; 2026 Samarjith Biswas. All rights reserved.</p>
         </div>
